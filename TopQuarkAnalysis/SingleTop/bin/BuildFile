@@ -1,0 +1,10 @@
+<environment>
+ <use name=DataFormats/FWLite>
+ <use name=DataFormats/PatCandidates>
+ <use name=FWCore/FWLite>
+ <use name=FWCore/Framework>
+ <use nameDataFormats/MuonReco>
+ <use name=rootcintex>
+ <use name=root> 
+ <bin file="singletop.cpp"> </bin>
+</environment>
