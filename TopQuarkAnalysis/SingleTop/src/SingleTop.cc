@@ -13,7 +13,7 @@
 //
 // Original Author:  Abideh Jafari
 //         Created:  Thu Jun 19 17:34:54 CEST 2008
-// $Id: SingleTop.cc,v 1.5 2008/06/27 15:44:16 giamman Exp $
+// $Id: SingleTop.cc,v 1.1 2008/07/31 16:24:36 ajafari Exp $
 //
 //
 
@@ -89,7 +89,16 @@ SingleTop::SingleTop(const edm::ParameterSet& iConfig)
   produces<double>( alias = "MTW" ).setBranchAlias( alias );
   produces<double>( alias = "MTWtrueNu" ).setBranchAlias( alias );
   produces<bool>( alias = "hasRealSolutions" ).setBranchAlias( alias );
-  produces<std::vector<pat::Particle> >( alias = "recoW" ).setBranchAlias( alias );
+  
+  produces<std::vector<pat::Particle> >( alias ="recoW1030").setBranchAlias( alias ); 
+  produces<std::vector<pat::Particle> >( alias ="recoW1040").setBranchAlias( alias ); 
+  produces<std::vector<pat::Particle> >( alias ="recoW1050").setBranchAlias( alias ); 
+  produces<std::vector<pat::Particle> >( alias ="recoW2030").setBranchAlias( alias ); 
+  produces<std::vector<pat::Particle> >( alias ="recoW2040").setBranchAlias( alias ); 
+  produces<std::vector<pat::Particle> >( alias ="recoW2050").setBranchAlias( alias ); 
+  produces<std::vector<pat::Particle> >( alias ="recoW3030").setBranchAlias( alias ); 
+  produces<std::vector<pat::Particle> >( alias ="recoW3040").setBranchAlias( alias ); 
+  produces<std::vector<pat::Particle> >( alias ="recoW3050").setBranchAlias( alias ); 
   produces<std::vector<pat::Jet> >( alias = "ForwardJet" ).setBranchAlias( alias );
   produces<std::vector<pat::Jet> >( alias = "PreSelectedCentralJet" ).setBranchAlias( alias );
   //produces<std::vector<pat::Particle> >( alias = "recoWMorePzNu" ).setBranchAlias( alias );
@@ -138,7 +147,16 @@ void SingleTop::produce( edm::Event& iEvent, const edm::EventSetup& iSetup)
   // --------------------------------------------------
   singleTopEvent_ = true;
   
-  std::auto_ptr< std::vector<pat::Particle> > tmpW(new std::vector<pat::Particle>);
+  std::auto_ptr< std::vector<pat::Particle> > W1030(new std::vector<pat::Particle>);
+  std::auto_ptr< std::vector<pat::Particle> > W1040(new std::vector<pat::Particle>);
+  std::auto_ptr< std::vector<pat::Particle> > W1050(new std::vector<pat::Particle>);
+  std::auto_ptr< std::vector<pat::Particle> > W2030(new std::vector<pat::Particle>);
+  std::auto_ptr< std::vector<pat::Particle> > W2040(new std::vector<pat::Particle>);
+  std::auto_ptr< std::vector<pat::Particle> > W2050(new std::vector<pat::Particle>);
+  std::auto_ptr< std::vector<pat::Particle> > W3030(new std::vector<pat::Particle>);
+  std::auto_ptr< std::vector<pat::Particle> > W3040(new std::vector<pat::Particle>);
+  std::auto_ptr< std::vector<pat::Particle> > W3050(new std::vector<pat::Particle>);
+  
 //  std::auto_ptr< std::vector<pat::Particle> > tmpWMore(new std::vector<pat::Particle>);
   std::vector<bool> cuts;
   std::vector<string> cutsDescription;
@@ -302,11 +320,28 @@ void SingleTop::produce( edm::Event& iEvent, const edm::EventSetup& iSetup)
     //    if ( verbosity > 100 ) cout << " Transverse mass (2): " << W->mt() << endl; // it's equal to Pt! why?
     //    W->setMass(80.425);
     //    if ( verbosity > 100 ) cout << " Transverse mass (3): " << W->mt() << endl; // it's equal to Pt! why?
-    tmpW->push_back(*WLessPzNu);
-    tmpW->push_back(*WMorePzNu);
-    cout << "(produce) first solution: " << (*tmpW).at(0).pz() << ", second solution: " << (*tmpW).at(1).pz()<< endl;
-  }
+      if (MET>30. && pt_1mu>10.) { W1030->push_back(*WLessPzNu);    W1030->push_back(*WMorePzNu); }
+       cout<<"MET>30 && pt_1mu>10"<<endl;
+      if (MET>30. && pt_1mu>20.) { W2030->push_back(*WLessPzNu);    W2030->push_back(*WMorePzNu); }
+       cout<<"MET>30 && pt_1mu>20"<<endl;
+      if (MET>30. && pt_1mu>30.) { W3030->push_back(*WLessPzNu);    W3030->push_back(*WMorePzNu); }
+       cout<<"MET>30 && pt_1mu>30"<<endl;
+      if (MET>40. && pt_1mu>10.) { W1040->push_back(*WLessPzNu);    W1040->push_back(*WMorePzNu); }
+       cout<<"MET>40 && pt_1mu>10"<<endl;
+       
+      if (MET>40. && pt_1mu>20.) { W2040->push_back(*WLessPzNu);    W2040->push_back(*WMorePzNu); }
+       cout<<"MET>40 && pt_1mu>20"<<endl;
+      if (MET>40. && pt_1mu>30.) { W3040->push_back(*WLessPzNu);    W3040->push_back(*WMorePzNu); }
+       cout<<"MET>40 && pt_1mu>30"<<endl;
+      if (MET>50. && pt_1mu>10.) { W1050->push_back(*WLessPzNu);    W1050->push_back(*WMorePzNu); }
+       cout<<"MET>50 && pt_1mu>10"<<endl;
+      if (MET>50. && pt_1mu>20.) { W2050->push_back(*WLessPzNu);    W2050->push_back(*WMorePzNu); }
+       cout<<"MET>50 && pt_1mu>20"<<endl;
+      if (MET>50. && pt_1mu>30.) { W3050->push_back(*WLessPzNu);    W3050->push_back(*WMorePzNu); }
 
+   // cout << "(produce) first solution: " << (*W1030).at(0).pz() << ", second solution: " << (*W1030).at(1).pz()<< endl;
+  }
+  cout<<"Run sho torokhoda!"<<endl;
   if ( verbosity > 10 ) cout << "Summary of cuts:" << endl;
   int firstCutToConsider = 0;
   if (!isFullSim_) firstCutToConsider = 1; // there is no HLT info in FastSim in the 1.6.x series
@@ -327,7 +362,15 @@ void SingleTop::produce( edm::Event& iEvent, const edm::EventSetup& iSetup)
   iEvent.put(auto_ptr<double>(new double(mtw)), "MTW");
   iEvent.put(auto_ptr<double>(new double(mtw_trueNu)), "MTWtrueNu");
   iEvent.put(auto_ptr<bool>(new bool(hasRealSolutions)), "hasRealSolutions");
-  iEvent.put(tmpW,"recoW"); 
+  iEvent.put(W1030,"recoW1030"); 
+  iEvent.put(W1040,"recoW1040"); 
+  iEvent.put(W1050,"recoW1050"); 
+  iEvent.put(W2030,"recoW2030"); 
+  iEvent.put(W2040,"recoW2040"); 
+  iEvent.put(W2050,"recoW2050"); 
+  iEvent.put(W3030,"recoW3030"); 
+  iEvent.put(W3040,"recoW3040"); 
+  iEvent.put(W3050,"recoW3050"); 
   //iEvent.put(tmpWMore, "recoWMorePzNu"); 
  // iEvent.put(auto_ptr< reco::GenParticle>(new reco::GenParticle (*GenW)), "GenW"); 
 
@@ -374,15 +417,19 @@ void SingleTop::createW(pat::Muon mu, math::XYZVector met, double & massWn, bool
   *WMorePzNu = *W;
   double sumLess =  pznu2 + mu.pz() ;
   double sumMore =   pznu1 + mu.pz();  
+  
+  math::XYZTLorentzVector p4Less(sum_2d.x(),sum_2d.y(), sumLess, mu.energy() + sqrt(met.R()*met.R() + pznu2*pznu2 ) ); 
+  math::XYZTLorentzVector p4More(sum_2d.x(),sum_2d.y(),sumMore, mu.energy() + sqrt(met.R()*met.R() + pznu1*pznu1 ) ); 
   if (fabs(pznu1)>fabs(pznu2)){
-      
-        WLessPzNu->setPz(sumLess);
-        WMorePzNu->setPz(sumMore);
+        WLessPzNu->setP4(p4Less);
+        WMorePzNu->setP4(p4More);
                               } 
   else {
-              WLessPzNu->setPz(sumMore);
-              WMorePzNu->setPz(sumLess);
+              WLessPzNu->setP4(p4More);
+              WMorePzNu->setP4(p4Less);
        }
+  
+  //WLessPzNu->
   cout << "(SingleTop::createW) first solution: " << pznu1 + mu.pz()<< ", second solution: " << pznu2+ mu.pz() << endl;
   cout << "(SingleTop::createW, bis) first solution: " << WLessPzNu->pz() << ", second solution: " << WMorePzNu->pz() << endl;
 
