@@ -1,12 +1,14 @@
 #if !defined(__CINT__) && !defined(__MAKECINT__)
 #include <stdlib.h>
 #include <Math/GenVector/LorentzVector.h>
+#include <FWCore/Framework/interface/Event.h>
 #include "Riostream.h"
 #include "TROOT.h"
 #include "TFile.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TMath.h"
+#include "TDirectory.h"
 
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 #include "DataFormats/FWLite/interface/Handle.h"
@@ -31,10 +33,15 @@ double InnerProduct(const reco::Particle p1 , const reco::Particle p2){
 void CreateHLParticle(reco::Particle &HLP, const reco::Particle p1 , const reco::Particle p2){//no charge
     HLP.setP4(p1.p4()+p2.p4());
 }
-double Mass(const reco::Particle HLP){
-    double M2 = fabs(InnerProduct(HLP,HLP));
-    return sqrt(M2);
+
+// tmp method to find the problem with recoW
+void Labels(std::vector<string>  &labels){
+
+    labels.push_back("recoW1030");labels.push_back( "recoW1040");labels.push_back( "recoW1050");
+    labels.push_back("recoW2030");labels.push_back("recoW2040");labels.push_back( "recoW2050");
+    labels.push_back( "recoW3030");labels.push_back("recoW3040");labels.push_back("recoW3050");
 }
+
 
 
 double Distance(double phi1, double phi2, double eta1, double eta2 ){
@@ -91,9 +98,36 @@ void loop_on_sample(TString input, bool file_in_same_path)
   cout << "Writing output in file " << output << endl;
 
   TFile* outfile = new TFile(output,"RECREATE","file with histograms");
-  outfile->mkdir("MuonHists","MuonHists");
-  outfile->cd("MuonHists");
-  outfile->mkdir("MuonIsolation","MuonIsolation");
+  
+  outfile->mkdir("Muons","Muons");
+  outfile->mkdir("HighLevelObjects","HighLevelObjects");
+  outfile->mkdir("Jets","Jets");
+  outfile->mkdir("UsefulHists","UsefulHists");
+  outfile->mkdir("MissingEt","MissingEt");
+  outfile->mkdir("GenHists","GenHists");
+    cout<<"first layer is done"<<endl;
+  TDirectory* jets = outfile->GetDirectory("Jets");
+  cout<<"it takes Jets directory"<<endl;
+  jets->mkdir("NonBtagged");
+  jets->mkdir("FJets(MostEta)");
+  jets->mkdir("FJets(CutonEta)");
+  jets->mkdir("Bjets");
+  cout<<"subdirectories for jets are created  "<<endl;
+  TDirectory* mus = outfile->GetDirectory("Muons");
+  cout<<"it takes Muons directory"<<endl;
+  
+  mus->mkdir("MuonIsolation");
+  cout<<"subdirectoriy for isolations is created  "<<endl;
+  TDirectory* Iso03 = mus->GetDirectory("MuonIsolation");
+  cout<<"it takes Muons/MuonIsolation directory"<<endl;
+  Iso03->mkdir("Iso03");
+  Iso03->mkdir("Iso05");
+  cout<<"subdirectories for different iso algos are created  "<<endl;
+  TDirectory* HLO = outfile->GetDirectory("HighLevelObjects");
+  cout<<"it takes HighLevelObjects directory"<<endl;
+  HLO->mkdir("WHists");
+  HLO->mkdir("TopHists");
+  cout<<"subdirectories for W and Top are created  "<<endl;
 
 //-------------Data  Members-------------- 
 // Suitable to calculate efficiency
@@ -109,11 +143,15 @@ void loop_on_sample(TString input, bool file_in_same_path)
   for(int i=0; i<11; i++)   n_accepted[i] = 0;
   std::vector<string> cutsDescription;
   cuts_description(cutsDescription);
-
+ 
+  std::vector<string> MyLabels;
+  Labels(MyLabels);
 
   
 // Histogram declaration 
   
+  outfile->cd("UsefulHists");
+  cout<<"directory changed to Usefull Hists"<<endl;
   TH1F *hHT = new TH1F("ht","ht",nbins,low,high);
   TH1D *hMTWtrueNu = new TH1D("MTWtrueNu","MTWtrueNu",nbins,low,high);
   TH1D *hMTW = new TH1D("MTW","MTW",nbins,low,high);
@@ -121,14 +159,8 @@ void loop_on_sample(TString input, bool file_in_same_path)
   
   //Jet Hists
   TH1D* JetMultiplicity =  new TH1D("JetMultiplicity","Jet Multiplicity",10, 0., 20.);
-  TH1D *fJetEta = new TH1D("fJetEta","#eta",10, -5.,5.);
-  TH1D *fJetPt = new TH1D("fJetPt","P_{t}, forward jets",50 ,0., 100.);
-  TH1D *JetEtanonBtag = new TH1D("EtaNonBtag","#eta",10, -5.,5.);
-  TH1D *JetPtnonBtag = new TH1D("PtNonBtag","P_{t}, non-b-tagged jets",50 ,0.,100);
-  TH1D *PtMostEnergicFjet = new TH1D("PtMostEnergicFjet","P_{t}, MostEnergicFjet",50 ,0.,100);
-  TH1D *EtMostEnergicFjet = new TH1D("EtMostEnergicFjet","E_{t}, MostEnergicFjet",50 ,0.,100);
+  outfile->cd("Jets/Bjets");
   TH1D *EtDifferenceQuarkJet = new TH1D("EtDifferenceQuarkJet","E_{t}",200 ,-100.,100.);
-  TH1D *temEta = new TH1D("temEta","#eta",10, -5.,5.);
   //bTags
   TH1F* btagDiscriminator1 = new TH1F("btagDiscriminator1","b-tag Discriminator1",10,-2.,3.);
   /* TH1F* btagDiscriminator2 = new TH1F("btagDiscriminator2","b-tag Discriminator2",100,-12.,5.);
@@ -137,46 +169,107 @@ void loop_on_sample(TString input, bool file_in_same_path)
    TH1F* btagDiscriminator5 = new TH1F("btagDiscriminator5","b-tag Discriminator5",100,-12.,5.);
  */
   TH2F* bTagvsDistance = new TH2F ("bTagvsDistance","bTagvsDistance",40,0.,2. , 100, 0., 10.);
+  outfile->cd("Jets/NonBtagged");
+  cout<<"directory changed to ../NonBtagged Hists"<<endl;
+  TH1D *JetEtanonBtag = new TH1D("EtaNonBtag","#eta",10, -5.,5.);
+  TH1D *JetPtnonBtag = new TH1D("PtNonBtag","P_{t}, non-b-tagged jets",50 ,0.,100);
+  outfile->cd("Jets/FJets(MostEta)");
+  cout<<"directory changed to ../Jets/FJets(MostEta) Hists"<<endl;
+  TH1D *fJetEta = new TH1D("fJetEta","#eta",10, -5.,5.);
+  TH1D *fJetPt = new TH1D("fJetPt","P_{t}, forward jets",50 ,0., 100.);
+  outfile->cd("Jets/FJets(CutonEta)");
+  TH1D *PtMostEnergicFjet = new TH1D("PtMostEnergicFjet","P_{t}, MostEnergicFjet",50 ,0.,100);
+  TH1D *EtMostEnergicFjet = new TH1D("EtMostEnergicFjet","E_{t}, MostEnergicFjet",50 ,0.,100);
+  TH1D *temEta = new TH1D("temEta","#eta",10, -5.,5.);
+  
   //Muon Hists
+  outfile->cd("Muons");
+  cout<<"directory changed to Muons Hists"<<endl;
   TH1D* MuPt = new TH1D("Muon Pt","P_{t}, Muon",50 ,0., 100.);
   TH1D* MuEta = new TH1D("MuonEta","#eta_{#mu}",10, -5.,5.);
   
      //Iso03 
-  TH1F* MuIso03emEt = new TH1F("MuIso03emEt","#mu Iso03emEt",50 ,0., 100.);
-  TH1F* MuIso03hadEt = new TH1F("MuIso03hadEt","#mu Iso03hadEt",50 ,0., 100.);
-  TH1F* MuIso03hoEt = new TH1F("MuIso03hoEt","#mu Iso03hoEt",50 ,0., 100.);
-  TH1F* MuIso03sumPt = new TH1F("MuIso03sumPt","#mu Iso03sumPt",50 ,0., 100.);
+  outfile->cd("Muons/MuonIsolation/Iso03");
+  cout<<"directory changed to Muons/MuonIsolation/Iso03 Hists"<<endl;
+  TH1F* MuIso03emEt = new TH1F("MuIso03emEt","#mu Iso03emEt",60 ,0.,30.);
+  TH1F* MuIso03hadEt = new TH1F("MuIso03hadEt","#mu Iso03hadEt",60 ,0.,30.);
+  TH1F* MuIso03hoEt = new TH1F("MuIso03hoEt","#mu Iso03hoEt",60 ,0.,30.);
+  TH1F* MuIso03sumPt = new TH1F("MuIso03sumPt","#mu Iso03sumPt",60 ,0.,30.);
   
   TH1I* MuIso03nJets = new TH1I("MuIso03nJets","#mu Iso03nJets",20 ,0, 20);
   TH1I* MuIso03nTracks = new TH1I("MuIso03nTracks","#mu Iso03nTracks",20 ,0, 20);
    
      //Iso05
-  TH1F* MuIso05emEt = new TH1F("MuIso05emEt","#mu Iso05emEt",50 ,0., 100.);
-  TH1F* MuIso05hadEt = new TH1F("MuIso05hadEt","#mu Iso05hadEt",50 ,0., 100.);
-  TH1F* MuIso05hoEt = new TH1F("MuIso05hoEt","#mu Iso05hoEt",50 ,0., 100.);
-  TH1F* MuIso05sumPt = new TH1F("MuIso05sumPt","#mu Iso05sumPt",50 ,0., 100.);
+  outfile->cd("Muons/MuonIsolation/Iso05");
+  TH1F* MuIso05emEt = new TH1F("MuIso05emEt","#mu Iso05emEt",60 ,0.,30.);
+  TH1F* MuIso05hadEt = new TH1F("MuIso05hadEt","#mu Iso05hadEt",60 ,0.,30.);
+  TH1F* MuIso05hoEt = new TH1F("MuIso05hoEt","#mu Iso05hoEt",60 ,0.,30.);
+  TH1F* MuIso05sumPt = new TH1F("MuIso05sumPt","#mu Iso05sumPt",60 ,0.,30.);
   
   TH1I* MuIso05nJets = new TH1I("MuIso05nJets","#mu Iso05nJets",20 ,0, 20);
   TH1I* MuIso05nTracks = new TH1I("MuIso05nTracks","#mu Iso05nTracks",20 ,0, 20);
 
 //MET Hists
+  outfile->cd("MissingEt");
+  cout<<"directory changed to MET "<<endl;
   TH1D* MET = new TH1D("MET","MET",100 ,0., 200.);
   
-  
+  outfile->cd ("GenHists");
+  TH1D* TbQuarkPt = new TH1D("TbQuark Pt","P_{t}, TbQuark",50 ,0., 100.);
+  TH1D* TbQuarkEnergy = new TH1D("TbQuark Energy","E, TbQuark",50 ,0., 100.);
+  TH1D* GenTopMass = new TH1D("Top Mass","Top Mass",75, 0., 400.);
   // W Hists
   // RECO
+  outfile->cd("HighLevelObjects/WHists");
+   cout<<"directory changed to ../HighLevelObjects/WHists "<<endl;
   TH1D *DifPtL = new TH1D("DifPtL","P_{t}, |recoW-genW| Less NuPz",400 ,0., 500.);
   TH1D *DifPtM = new TH1D("DifPtM","P_{t}, |recoW-genW| More NuPz",400 ,0., 500.);
   
   TH1D *DifPzL = new TH1D("DifPzL","P_{z}, |recoW-genW| Less NuPz",400,0., 500.);
   TH1D *DifPzM = new TH1D("DifPzM","P_{z}, |recoW-genW| More NuPz",400 ,0., 500.);
   TH2D *DifLvsM = new TH2D("DifLvsM","P_{z} |recoW-genW|",200,0.,300.,200,0.,300.);
+  //TH1D *WmassL = new TH1D("WmassL","WmassL",400 ,0., 500.);
+  //TH1D * WmassM = new TH1D("WmassM","WmassM",400 ,0., 500.);
+ 
+  std::vector<TH1D*> WmassL;
+  std::vector<TH1D*> WmassM;
+  TH1D* tmpl;
+  TH1D* tmpm;
+  TH1D* tmpg;
+
+  for(int i = 0; i<9; i++){
+             TString LL = MyLabels.at(i)+"L";
+             TString ML = MyLabels.at(i)+"M";
+             tmpl = new TH1D(LL,"WmassL",1000 ,0.,500.);//= WmassL.at(i) ;
+             tmpm =  new TH1D(ML,"WmassM",1000 ,0.,500.);//WmassM.at(i) 
+             WmassL.push_back(tmpl);
+             WmassM.push_back(tmpm);
+  }
   
   // Top Hists
-  TH1D *topMass = new TH1D("Top Mass","Top Mass",75, 0., 400.);
+  outfile->cd("HighLevelObjects/TopHists");
+  cout<<"directory changed to ../TopHists "<<endl;
+  std::vector<TH1D*> topMass;
+  std::vector<TH1D*> SemiTmassGenW;
+  std::vector<TH1D*> SemiTmassGenB;
+       
+  for(int i = 0; i<9; i++){
+      TString FL =  MyLabels.at(i)+"topMass(FullReco)";
+      TString WL =  MyLabels.at(i)+"SemiTmassGenW(Reco b-jet)";
+      TString BL =  MyLabels.at(i)+"SemiTmassGenB(Reco W)";
+      tmpl = new TH1D(FL,"Top Mass",75, 0., 400.);
+      tmpm = new TH1D(WL,"Top Mass",75, 0., 400.);
+      tmpg = new TH1D(BL,"Top Mass",75, 0., 400.);
+      topMass.push_back(tmpl);
+      SemiTmassGenW.push_back(tmpm);
+      SemiTmassGenB.push_back(tmpg);        
+  }
+ // TH1D *topMass = new TH1D("Top Mass","Top Mass",75, 0., 400.);
+  //TH1D *SemiTmassGenW = new TH1D("SemiTmassGenW","SemiTmassGenW",75, 0., 400.);
+  //TH1D *SemiTmassGenB = new TH1D("SemiTmassGenB","SemiTmassGenB",75, 0., 400.);
   //TH1D *topMass2 = new TH1D("Top Mass2","Top Mass2",300, 0., 400.);
   TH1D *DotTopFjet = new TH1D("DotTopFjet","Scalar product of the p4 recoTop and the most forwardjet",20 ,-5.,5.);
-  TH2D *EtaFJvsTopdotFJ = new TH2D("EtaFJvsTopdotFJ","EtaFJvsTopdotFJ",10, -5.,5.,50, -5.,5.);
+  TH2D *EtaFJvsTopdotFJ = new TH2D("EtaFJvsTopdotFJ","EtaFJvsTopdotFJ",10, 0.,5.,50, -5.,5.);
   
 // Loop on the sample
     cout<<"Loop on the sample begins!!"<<endl;
@@ -208,6 +301,7 @@ void loop_on_sample(TString input, bool file_in_same_path)
         fwlite::Handle<double > handle_HT;
         handle_HT.getByLabel(ev,"SingleTop", "HT");
         double HT = handle_HT.ref();
+       
         hHT->Fill(HT,weight);
         cout<<"HT is retrieved:" <<HT<<endl;
         
@@ -228,30 +322,46 @@ void loop_on_sample(TString input, bool file_in_same_path)
         handle_genParticles.getByLabel(ev,"genParticles");
         std::vector<reco::GenParticle> genParticles = handle_genParticles.ref();
 
+        double NBQ = 0.;
         double GenPz = 0.;
         double GenPt = 0.;
         double bQuarkEta = 0.;
         double bQuarkPhi = 0.;
         double bQuarkEnergy = -1.;
         double Etb;
+        const reco::Candidate* mother;
+        const reco::GenParticle* GenW;
+        const reco::GenParticle* GenbQuark;
+        reco::Particle GenTop;
 
         for(size_t i = 0; i < genParticles.size(); ++ i) 
         {
-            if (abs(genParticles.at(i).pdgId()) == 24 && genParticles.at(i).status() == 3) 
+            mother = (genParticles.at(i)).mother(0);
+            if (abs(genParticles.at(i).pdgId()) == 24 && genParticles.at(i).status() == 3 && genParticles.at(i).numberOfMothers() == 1 && fabs(mother->pdgId()) == 6) 
             {
-                GenPz = genParticles.at(i).pz();
-                GenPt = genParticles.at(i).pt();
-                cout<<"Pz of GenW: "<<genParticles.at(i).pz()<<endl;
-                cout<<"The status is: "<<genParticles.at(i).status()<<endl;
+                GenW = &(genParticles.at(i));
+                GenPz = GenW->pz();
+                GenPt = GenW->pt();
+                cout<<"Pz of GenW: "<<GenPz<<endl;
+                cout<<"The status is: "<<GenW->status()<<endl;
             }  
-            else if(abs(genParticles.at(i).pdgId()) == 5 && genParticles.at(i).energy()>bQuarkEnergy/*genParticles.at(i).status() == 3*/)   
-                 {
-                     bQuarkPhi = genParticles.at(i).phi();
-                     bQuarkEta = genParticles.at(i).eta();                                                    
-                     bQuarkEnergy = genParticles.at(i).energy();    
-                     Etb = genParticles.at(i).et();  
-                 }
+            else if (genParticles.at(i).numberOfMothers() == 1)
+                {
+                    NBQ++;
+                    if(abs(genParticles.at(i).pdgId()) == 5 && genParticles.at(i).energy()>bQuarkEnergy && fabs(mother->pdgId()) == 6/*genParticles.at(i).status() == 3*/)   
+                        { 
+                             GenbQuark = &(genParticles.at(i));
+                             bQuarkPhi = GenbQuark->phi();
+                             bQuarkEta = GenbQuark->eta();                                                    
+                             bQuarkEnergy = GenbQuark->energy();    
+                             Etb = GenbQuark->et(); 
+                             TbQuarkPt->Fill(GenbQuark->pt(),weight);
+                             TbQuarkEnergy->Fill(bQuarkEnergy,weight);
+                        }
+            }
        }
+       CreateHLParticle(GenTop, *GenW , *GenbQuark);
+       GenTopMass->Fill(fabs(GenTop.mass()),weight);
        cout<<"reco::GenParticles have been retrieved!!"<<endl;
 
  // Retrive patJets  
@@ -278,6 +388,8 @@ void loop_on_sample(TString input, bool file_in_same_path)
         double EtB ;
         const pat::Jet * TopBJet; //jet of the most b-tag value
         const pat::Jet * MostForwardJet;
+        reco::Particle SemiTopGenW;
+        reco::Particle SemiTopGenB;
         
         
         JetMultiplicity->Fill(double(handle_Jet->size()),weight);
@@ -311,31 +423,36 @@ void loop_on_sample(TString input, bool file_in_same_path)
             if (btag1<0)
             {
                 cout<<"btag1<0"<<endl;
+                
                 JetEtanonBtag->Fill(jetEta,weight);        
                 JetPtnonBtag->Fill(jetPt,weight);
             } 
             else 
-            {  // Find the closest b-jet to the GenBQuark and observe it's bDiscriminator
-                
-                if(Distance(jetPhi,bQuarkPhi,jetEta, bQuarkEta) < distance) 
+            {  
+                if (NBQ!=0.)
                 {
-                    distance = Distance(jetPhi, bQuarkPhi,jetEta,  bQuarkEta );  
-                    bTag = btag1;           
-                    EtB = jetEt;
-                }
-                if ( btag1 >= 0.9 && btag1>MaxTag) //btag1>MaxTag = -1000000. 
-                {
-                    
-                    
-                    MaxTag = btag1;
-                    NoBtag++;
-                    TopBJet = &(*it);
-                    
-                    
-                    cout<<"TopBJet eta: "<<(*TopBJet).eta()<<endl;
-                    cout<<"TopBJet Pz: "<<(*TopBJet).pz()<<endl;
-                }
+                // Find the closest b-jet to the GenBQuark and observe it's bDiscriminator
                 
+                    if(Distance(jetPhi,bQuarkPhi,jetEta, bQuarkEta) < distance) 
+                    {
+                        distance = Distance(jetPhi, bQuarkPhi,jetEta,  bQuarkEta );  
+                        bTag = btag1;           
+                        EtB = jetEt;
+                    }
+                    if ( btag1 >= 0.8 && btag1>MaxTag) //btag1>MaxTag = -1000000. 
+                    {
+
+
+                        MaxTag = btag1;
+                        NoBtag++;
+                        TopBJet = &(*it);
+
+
+                        cout<<"TopBJet eta: "<<(*TopBJet).eta()<<endl;
+                        cout<<"TopBJet Pz: "<<(*TopBJet).pz()<<endl;
+                    }
+                
+                }
             }
 
             //eta and Pt of highest abs(eta) jet
@@ -360,22 +477,61 @@ void loop_on_sample(TString input, bool file_in_same_path)
 
             }
 
-        }    
+        }  
+        
         fJetEta->Fill(MostForwardJet->eta(),weight);        
         fJetPt->Fill(MostForwardJet->pt(),weight);
+       
         bTagvsDistance->Fill(bTag,distance,weight);
         EtDifferenceQuarkJet->Fill(((EtB-Etb)/Etb),weight);
         if (j!= 0)
         {
+           
            PtMostEnergicFjet->Fill(maxPt,weight);
            EtMostEnergicFjet->Fill(maxEt,weight);
            temEta->Fill(EtaofMax,weight);
 
         }
         cout<<"All pat::Jets have been retrived"<<endl;
-            
-     // Retrive reconstructed W and fill the histograms   
+        
+        
+        
+        
         fwlite::Handle<std::vector<pat::Particle> > handle_recoW;
+       
+        for (int i = 0;i<9; i++){
+
+             cout<<"martabeye : "<<i<<endl;
+             TString L = MyLabels.at(i);
+             handle_recoW.getByLabel(ev,"SingleTop",L );
+             std::vector<pat::Particle> recoW = handle_recoW.ref();
+             
+            if (recoW.size()!=0){
+                
+                if (NoBtag!=0.)
+                {
+                       cout<<"at least on b-jet :)"<<endl;
+                       CreateHLParticle(SemiTopGenW,*TopBJet,*GenW);
+                       SemiTmassGenW.at(i)->Fill( fabs(SemiTopGenW.mass()),weight);
+                       CreateHLParticle(TOP, *TopBJet,recoW.at(0));
+                       CreateHLParticle(SemiTopGenB, *GenbQuark,recoW.at(0));
+                       topMass.at(i)->Fill( fabs(TOP.mass()),weight);
+                       SemiTmassGenB.at(i)->Fill( fabs(SemiTopGenB.mass()),weight);
+                       cout<<"Hist of top mass has been filled!!!!!!!!!!"<<endl;
+                }
+                WmassL.at(i)->Fill(fabs(recoW.at(0).mass()),weight);
+                cout<<"WmassL = "<<fabs(recoW.at(0).mass())<<endl;
+                WmassM.at(i)->Fill(fabs(recoW.at(1).mass()),weight);
+                cout<<"WmassM = "<<fabs(recoW.at(1).mass())<<endl;
+            } else cout<<"NO W Exist with Label "<<L<<endl;
+
+        }
+                
+                              
+        
+        
+        // Retrive reconstructed W and fill the histograms   
+      /*  fwlite::Handle<std::vector<pat::Particle> > handle_recoW;
         handle_recoW.getByLabel(ev,"SingleTop", "recoW");
         std::vector<pat::Particle> recoW = handle_recoW.ref();
         pat::Particle W;
@@ -383,16 +539,25 @@ void loop_on_sample(TString input, bool file_in_same_path)
         {
             cout<<"W finder!"<<endl;
             W = recoW.at(0);
+            // just a test on W
+            WmassL->Fill(fabs(W.mass()),weight);
+            WmassM->Fill(fabs(recoW.at(1).mass()), weight);
             cout<<"W is found!!!"<<endl;
             if (NoBtag!=0.)
             {
                 cout<<"at least on b-jet :)"<<endl;
                 CreateHLParticle(TOP, *TopBJet,W);
-                cout<<"TOP.mass(): "<<TOP.mass() <<"   Mass(TOP):  "<<Mass(TOP);
+                CreateHLParticle(SemiTopGenW,*TopBJet,*GenW);
+                CreateHLParticle(SemiTopGenB, *GenbQuark,W);
+              //  cout<<"TOP.mass(): "<<TOP.mass() <<"   Mass(TOP):  "<<Mass(TOP);
+               
                 topMass->Fill( fabs(TOP.mass()),weight);
+                SemiTmassGenW->Fill( fabs(SemiTopGenW.mass()),weight);
+                SemiTmassGenB->Fill( fabs(SemiTopGenB.mass()),weight);
                 cout<<"Hist of top mass has been filled!!!!!!!!!!"<<endl;
             }
      //Which W solution is better?
+           
             DifPzL->Fill(fabs(recoW.at(0).pz() - GenPz),weight);
             DifPtL->Fill(fabs(recoW.at(0).pt() - GenPt),weight);
 
@@ -402,7 +567,7 @@ void loop_on_sample(TString input, bool file_in_same_path)
 
         }
         cout<<"All pat::recoW's have been retrived"<<endl;
-     
+     */
        // Retrive patMuons 
         fwlite::Handle<std::vector<pat::Muon> > handle_Muon;
         handle_Muon.getByLabel(ev,"selectedLayer1Muons");
@@ -421,12 +586,12 @@ void loop_on_sample(TString input, bool file_in_same_path)
             const reco::MuonIsolation& muIsoInfo05 = (*it).getIsolationR05();
 
             // Fill
-
+            
             MuEta->Fill(muEta,weight);
             MuPt->Fill(muPt,weight);
 
             // Iso03
-            
+           
             cout<<"Muon Iso 03:"<<endl;
             MuIso03emEt->Fill(muIsoInfo03.emEt);
             cout<<"muIsoInfo03.emEt : "<<muIsoInfo03.emEt<<endl;
@@ -443,8 +608,8 @@ void loop_on_sample(TString input, bool file_in_same_path)
             cout<<"muIsoInfo03.nTracks : "<<muIsoInfo03.nTracks<<endl;
 
              // Iso05
-
-             cout<<"Muon Iso 05:"<<endl;
+           
+            cout<<"Muon Iso 05:"<<endl;
             MuIso05emEt->Fill(muIsoInfo05.emEt);
             cout<<"muIsoInfo05.emEt : "<<muIsoInfo05.emEt<<endl;
             MuIso05hadEt->Fill(muIsoInfo05.hadEt);
@@ -470,19 +635,21 @@ void loop_on_sample(TString input, bool file_in_same_path)
             double met = (*it).pt();
             double metPx = (*it).px(); 
             double metPy = (*it).py(); 
+            
             MET ->Fill(met,weight); 
 
          }
          cout<<"MET has been retrived"<<endl;
       // Top Calculations
-         cout<<"top energy = "<<TOP.energy()<<endl;
+        /* cout<<"top energy = "<<TOP.energy()<<endl;
          cout<<"Most fjet energy = "<<(*MostForwardJet).energy()<<endl;
          cout<<"InnerProduct(TOP, *MostForwardJet): "<< InnerProduct(TOP, *MostForwardJet)/(TOP.energy()*(*MostForwardJet).energy())<<endl;
          double DotP = InnerProduct(TOP, *MostForwardJet)/(TOP.energy()*(*MostForwardJet).energy());
+         
          DotTopFjet->Fill(DotP,weight);
          
-         EtaFJvsTopdotFJ->Fill((*MostForwardJet).eta(),DotP,weight);
-        
+         EtaFJvsTopdotFJ->Fill(fabs((*MostForwardJet).eta()),DotP,weight);
+        */
          
       }
  
@@ -499,11 +666,11 @@ int main()
   
 
  // loop_on_sample("/home/ajafari/ROOTfiles/SkimmedFiles/Signal/MCatNLO/SingleTopSkimSignalMCatNLO.root",false); // first sample (e.g. signal)
-  loop_on_sample("/home/ajafari/ROOTfiles/SkimmedFiles/Chowder/SingleTopSkimChowder.root",false); // first sample (e.g. one of the backgrounds)
+   // loop_on_sample("/home/ajafari/ROOTfiles/SkimmedFiles/Chowder/SingleTopSkimChowder.root",false); // first sample (e.g. one of the backgrounds)
   //loop_on_sample("/home/ajafari/ROOTfiles/SkimmedFiles/QCD/Gumbo/SingleTopSkimQCDgumbo.root",false); // second sample (e.g. one of the backgrounds)
   //loop_on_sample("/home/ajafari/ROOTfiles/SkimmedFiles/QCD/Stew/SingleTopSkimQCDstew.root",false);
-  loop_on_sample("/home/ajafari/ROOTfiles/SkimmedFiles/Signal/MADGRAPH/SingleTopSkimFastMADGRAPH.root",false);
-  loop_on_sample("/home/ajafari/ROOTfiles/SkimmedFiles/QCD/ppMuPt20-15/SingleTopSkimQCDpp.root",false);
+    loop_on_sample("/afs/cern.ch/user/a/ajafari/scratch0/TMP/CMSSW_1_6_12/src/TopQuarkAnalysis/SingleTop/test/Signal/MADGRAPH/SingleTopSkimFastMADGRAPH.root",false);
+   // loop_on_sample("/home/ajafari/ROOTfiles/SkimmedFiles/QCD/ppMuPt20-15/SingleTopSkimQCDpp.root",false);
   
 //
 //loop_on_sample("../test/tmp3SingleTopSkim.root",false);
