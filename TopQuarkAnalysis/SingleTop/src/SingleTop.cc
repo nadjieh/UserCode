@@ -13,7 +13,7 @@
 //
 // Original Author:  Abideh Jafari
 //         Created:  Thu Jun 19 17:34:54 CEST 2008
-// $Id: SingleTop.cc,v 1.1 2008/07/31 16:24:36 ajafari Exp $
+// $Id: SingleTop.cc,v 1.3 2008/08/11 18:00:11 ajafari Exp $
 //
 //
 
@@ -79,7 +79,7 @@ SingleTop::SingleTop(const edm::ParameterSet& iConfig)
   cutUpMTW = iConfig.getUntrackedParameter<double>("cutUpMTW");
 
   // ----- Name production branch -----
-
+  std::cout<<""<<std::endl;
   std::string alias;
   produces<bool>( alias = "SingleTopEvent" ).setBranchAlias( alias ); // true if event contains at least one 'valid' single top event
   produces<vector<bool> >( alias = "cuts" ).setBranchAlias( alias );
