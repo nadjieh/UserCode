@@ -33,7 +33,7 @@ using namespace reco;
 //
 // class declaration
 //
-
+// Just to make it different
 class SingleTop : public edm::EDProducer
 {
 public:
