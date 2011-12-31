@@ -1,0 +1,93 @@
+/*                                                                                                                                              
+ * File:   PVHists.h                                                                                                                     
+ * Author: ajafari                                                                                                                              
+ *                                                                                                                                              
+ * Created on November 29, 2009, 8:55 PM                                                                                                        
+ */
+
+#ifndef _PVHISTS_H
+#define _PVHISTS_H
+
+#include <iomanip>
+#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootMuon.h"
+#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootElectron.h"
+#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootJet.h"
+#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootMET.h"
+#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootGenEvent.h"
+#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootSignalEvent.h"
+#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootEvent.h"
+#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootRun.h"
+#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootParticle.h"
+#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootMCParticle.h"
+#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootVertex.h"
+#include <sstream>
+
+#include <TFile.h>
+#include <TH1.h>
+#include <TH2.h>
+#include <TCanvas.h>
+#include <TBranch.h>
+#include <TString.h>
+#include <TDirectory.h>
+#include <TTree.h>
+#include <TClonesArray.h>
+#include <vector>
+#include <string>
+
+#include "KinematicHists.h"
+
+using namespace TopTree;
+
+class PVHists{
+ public:
+  PVHists(std::string name):Name(name){ 
+    rho = new TH1D((Name+"_Rho").c_str(), (Name+"_Rho").c_str(), 100,0.,10.);
+    rho->GetXaxis()->SetTitle("#rho");
+    z = new TH1D((Name+"_z").c_str(),( Name+"_z").c_str(), 50,0.,50.);
+    z->GetXaxis()->SetTitle("Z");
+    ndof = new TH1D((Name+"_ndof").c_str(),( Name+"_ndof").c_str(), 150,0.,300.);
+    ndof->GetXaxis()->SetTitle("ndof");
+    isFake = new TH1D((Name+"_isFake").c_str(),( Name+"_isFake").c_str(), 2,0.,2.);
+    isFake->GetXaxis()->SetTitle("isFake");
+    nGPV = new TH1D((Name+"_nGPV").c_str(),( Name+"_nGPV").c_str(), 2,0.,2.);
+    nGPV->GetXaxis()->SetTitle("nGPV");
+  };
+  virtual ~PVHists(){};
+  virtual void Fill(std::vector<TRootVertex> pvs, int nGpv = 10.){
+	for(unsigned int i = 0; i<1/*pvs.size()*/; i++){
+		TRootVertex pv = pvs.at(i);
+		double Rho = sqrt((pv.x() * pv.x()) + (pv.y() * pv.y()));
+	        rho->Fill(Rho);
+      //std::cout<<"in Fill Electron Method: 3"<<std::endl;
+	        z->Fill(fabs(pv.z()));
+      //std::cout<<"in Fill Electron Method: 4"<<std::endl;
+        	ndof->Fill(pv.ndof());
+      //std::cout<<"in Fill Electron Method: 5"<<std::endl;
+	        isFake->Fill(pv.isFake());
+	}
+	nGPV->Fill(nGpv);
+     
+  };
+  virtual void WriteAll(TDirectory * dir){
+        if (dir == 0)
+            return;
+        TDirectory* my_dir = dir->mkdir((Name+"_PrimaryVertex").c_str());
+        my_dir->cd();
+	rho->Write();
+        z->Write();
+        ndof->Write();
+        isFake->Write();
+	nGPV->Write();
+        dir->cd();
+  };
+ private:
+  TH1D * rho;
+  TH1D * z;
+  TH1D * ndof;
+  TH1D * isFake;
+  TH1D * nGPV;
+  std::string Name;
+
+};
+#endif
+
