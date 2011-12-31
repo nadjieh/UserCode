@@ -1,9 +1,9 @@
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/ChiSquared/interface/Combinator.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/ChiSquared/interface/TopEvent.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/ChiSquared/interface/ChiSquaredAnalysisHandler.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/EventSelection/interface/PracticalEvent.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/EventSelection/interface/Event.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/EventSelection/interface/GoodObjects.h"
+#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/AnalysisClasses/ChiSquared/interface/Combinator.h"
+#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/AnalysisClasses/ChiSquared/interface/TopEvent.h"
+#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/AnalysisClasses/ChiSquared/interface/ChiSquaredAnalysisHandler.h"
+#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/AnalysisClasses/EventSelection/interface/PracticalEvent.h"
+#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/AnalysisClasses/EventSelection/interface/Event.h"
+#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/AnalysisClasses/EventSelection/interface/GoodObjects.h"
 
 
 
@@ -20,9 +20,6 @@ int main(int argc, char** argv){
     double intialBeforePresel = 0;
     double XSec = 0;
     bool isTtBar = false;
-    bool isData = false;
-    double beta = 1;
-    double finalCoeff = 1;
     for (int f = 1; f < argc; f++) {
         std::string arg_fth(*(argv + f));
         if (arg_fth == "out") {
@@ -32,17 +29,9 @@ int main(int argc, char** argv){
         }else if (arg_fth == "input") {
           f++;
           std::string in(*(argv + f));
-          if(in == "Signal.root" || in == "OtherTtBar.root"){
+          if(in == "Signal.root" || in == "OtherTtBar.root")
               isTtBar = true;
-	      finalCoeff = 0.108*9*0.676*1.5*0.982*0.950;
-	  }else if(in == "twChannel.root"){
-	      isTtBar = false;
-	      finalCoeff = 0.108*9 * 0.982 * 0.950;
-	  }else{
-              isTtBar = false;
-              finalCoeff =  0.982 * 0.950;
-          }
-          in ="/user/ajafari/FinalSkims/"+in;
+          in ="/home/ajafari/rootfiles/TopTrees/7TeV/July10/Skimmed/FullSelection/FS_ECalDriven_"+in;
           inputName = in;
         }else if(arg_fth == "XSec"){
           f++;
@@ -56,56 +45,38 @@ int main(int argc, char** argv){
           f++;
           std::string intialBeforePresel_(*(argv + f));
           intialBeforePresel = atof(intialBeforePresel_.c_str());
-        }else if(arg_fth == "Beta"){
-          f++;
-          std::string intialBeforePresel_(*(argv + f));
-          beta = atof(intialBeforePresel_.c_str());
-        }else if (arg_fth == "isData") {
-            f++;
-            std::string in(*(argv + f));
-//          cout<<in<<endl;
-            if(in == "yes" || in == "YES" || in == "Yes" || in == "y" || in == "Y")
-                isData = true;
-            else
-                isData = false;
-//          cout<<"1- "<<isData<<endl;
         }
-
     }
     TFile * F = new TFile(inputName.c_str(),"read");
     TTree* runTree = (TTree*) F->Get("runTree");
     TTree* eventTree = (TTree*) F->Get("eventTree");
 
-    double weight = (double)(finalCoeff*beta*XSec*Luminosity)/(double)intialBeforePresel;
-    if(isData)
-	weight = 1.;
+    double weight = (double)(XSec*Luminosity)/(double)intialBeforePresel;
     cout<<inputName<<"\n\tWeight: "<<weight<<endl;
     ElectronCuts myElecCuts;
     myElecCuts.Pt = 30;
-    myElecCuts.eta = 2.5; myElecCuts.ExLow = 1.4442; myElecCuts.ExHigh = 1.5660;
+    myElecCuts.eta = 2.4; myElecCuts.ExLow = 1.442; myElecCuts.ExHigh = 1.56;
     myElecCuts.Id = "VBTF70"; myElecCuts.IdSecond = "VBTF95";
     myElecCuts.IsoType = "";
     myElecCuts.D0 = 0.02; 
     myElecCuts.IsoCut = 0.1;
-    myElecCuts.drToPV = 1.;
-    myElecCuts.SecondEIso = 1.;
 
     JetCuts myJetCuts;
     myJetCuts.bTagAlgo = "TCHE"; myJetCuts.Pt = 30.; myJetCuts.eta = 2.4;
-    myJetCuts.nCaloTower = 0;
-    myJetCuts.EmfUp = 1000; myJetCuts.EmfLow = 0.01;
-    myJetCuts.fhpd = 0.98; myJetCuts.N90 = 1;
+    myJetCuts.nCaloTower = 5;
+    myJetCuts.EmfUp = 0.9; myJetCuts.EmfLow = 0.05;
+    myJetCuts.fhpd = 1000.; myJetCuts.N90 = -1;
     myJetCuts.bTagCut = 4.;
 
     MassAndResolution myMassResolution;
-    myMassResolution.topMass = 183.3;
-    myMassResolution.topRes = 15.16;
-    myMassResolution.wMass = 89.95;
-    myMassResolution.wRes = 10.99;
+    myMassResolution.topMass = 180.6;
+    myMassResolution.topRes = 3.462;
+    myMassResolution.wMass = 88.76;
+    myMassResolution.wRes = 10.73;
 
     PracticalEvent pracEvt(eventTree,runTree,isTtBar);
 
-    ChiSquaredAnalysisHandler myAnalysis(anaName,/*dobtag*/false,/*dataLike*/false,/*ExtJets*/ true, Luminosity,myMassResolution,
+    ChiSquaredAnalysisHandler myAnalysis(anaName,false, true, Luminosity,myMassResolution,
             myElecCuts,myJetCuts,"minChi2");
 //    myAnalysis.setChi2Cut(100.);
 //    myAnalysis.setTopPtCut(200.);
@@ -113,23 +84,19 @@ int main(int argc, char** argv){
     myAnalysis.setVerbosity(0);
 //    myAnalysis.setVerbosity(6);
 
-    int i = 0;
+    int i = 1;
 
     while (pracEvt.Next()){
-//	if(i<1340)
-//		continue;
- //       cout<<"----------------------------------------------------------------------event number : "<<i+1<<endl;
+//        cout<<"----------------------------------------------------------------------event number : "<<i<<endl;
 //        if(i<1220)
 //            continue;
-        myAnalysis.Analyze(&pracEvt,weight,/*JES*/ 1., /*nAna*/ -1, isData);
-	i++;
-        //if(i > 10000)
-        //    break;
+        myAnalysis.Analyze(&pracEvt,weight);
+//        if(i == 1221)
+//            break;
+        i++;
     }
 
     myAnalysis.End();
-    cout<<"n4Jets: "<<myAnalysis.n4jets<<endl;
-    cout<<"nScrap: "<<myAnalysis.nScrap<<endl;
     cout<<i<<endl;
     return 0;
 };

@@ -60,7 +60,7 @@ public:
         dir->cd();
     }
 
-    virtual void End(int q = 0 ){
+    virtual void End(){
         TFile * f = new TFile(string(BASE_::Name+"_"+BASE_::whichMethodToSelectHadTop+".root").c_str(),"recreate");
         this->WriteAll(f);
         f->Close();

@@ -39,7 +39,7 @@
 #include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootVertex.h"
 #include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootHLTInfo.h"
 #include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/EventSelection/interface/PracticalEvent.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/EventSelection/interface/EventPropertiesHist.h"
+
 
 
 
@@ -71,9 +71,6 @@ JetHists sas_Jets("before_Jet_selection");
 JetHists sas_BJets("before_BJet_selection");
 ElectronHists sas_AllFinalElectrons("before_BJet_AllFinalElec");
 ElectronHists sas_GoldenFinalElectrons("before_BJet_GoldenFinalElec");
-EventPropertiesHist sas_evtProps_Final("before_BJet_eventProperties");
-EventPropertiesHist sas_evtProps("before_GE_eventProperties");
-PVHists sas_PV_Final("before_BJet_PrimaryVertex");
 
 
 /*EventHists sas_Zveto("Zveto");
@@ -110,8 +107,6 @@ int sas_nBtag;
 bool sas_doBtag;
 bool sas_doZveto;
 int sas_nZveto;
-bool sas_doMET;
-int sas_nMET;
 double XSec;
 double Luminosity;
 double PreSelEff;
@@ -122,14 +117,13 @@ bool isTtBar;
 bool isSignal;
 
 int sas_verbosity;
-int n_beforescrap;
+
 bool fillTree;
 TFile * sas_out;
 TTree * eventTree_f;
 TH1D * M3;
 TH1D * HT;
-TH1D * nTrackRatio;
-TH1D * met;
+
 std::vector<std::string> sas_inputFileNames;
 std::string sas_outFileName;
 std::string sas_plotFileName;
@@ -159,12 +153,9 @@ void beginJob(){
      sas_nJet3 = 0;
      sas_dojet = true;//
      sas_nBtag= 0;
-     sas_doBtag = false;//
+     sas_doBtag = true;
      sas_verbosity = 0;
-     fillTree = false;//
-     n_beforescrap = 0;
-     sas_nMET = 0;
-     sas_doMET = true;//
+     fillTree = false;
      //isData = false;
      //inputFileNames.clear();
 }
@@ -173,7 +164,7 @@ void beginJob(){
 
 void endJob(){
     TFile * plots = new TFile(sas_plotFileName.c_str(),"recreate");
-    TH1D * CutFlowHist = new TH1D("CutFlow","",10,0,10);
+    TH1D * CutFlowHist = new TH1D("CutFlow","",9,0,9);
     CutFlowHist->GetXaxis()->SetBinLabel(1,"Initial");
     CutFlowHist->GetXaxis()->SetBinLabel(2,"primaryVertex");
     CutFlowHist->GetXaxis()->SetBinLabel(3,"goodElectron");
@@ -182,7 +173,6 @@ void endJob(){
     CutFlowHist->GetXaxis()->SetBinLabel(6,"conversion");
     CutFlowHist->GetXaxis()->SetBinLabel(7,">= 3 jets");
     CutFlowHist->GetXaxis()->SetBinLabel(8,">= 4 jets");
-    CutFlowHist->GetXaxis()->SetBinLabel(9,"MET>30 ");
 
     CutFlowHist->SetBinContent(1,sas_n0);
     CutFlowHist->SetBinContent(2,sas_nPV);
@@ -192,7 +182,6 @@ void endJob(){
     CutFlowHist->SetBinContent(6,sas_nConv_b);
     CutFlowHist->SetBinContent(7,sas_nJet3);
     CutFlowHist->SetBinContent(8,sas_nJet);
-    CutFlowHist->SetBinContent(9,sas_nMET);
 
 
 
@@ -201,7 +190,6 @@ void endJob(){
         CutFlowHist->Write();
         sas_atLeastOnGPV.WriteAll(plots);
     }
-    sas_evtProps.WriteAll(plots);
     if(sas_doElectron)
         sas_ExactlyOneGESelection.WriteAll(plots);
     if(sas_doMuon)
@@ -218,15 +206,11 @@ void endJob(){
         sas_BJets.WriteAll(plots);
         sas_AllFinalElectrons.WriteAll(plots);
         sas_GoldenFinalElectrons.WriteAll(plots);
-        sas_evtProps_Final.WriteAll(plots);
-	sas_PV_Final.WriteAll(plots);
         plots->cd();
         M3->Write();
         HT->Write();
-	nTrackRatio->Write();
     }
-    if(sas_doMET)
-	met->Write();
+
 
 /*    sas_beforSelection.WriteAll(plots);
     sas_atLeastOnGPV.WriteAll(plots);
@@ -262,9 +246,9 @@ void endJob(){
     cout<<"\n"<<XSec*Luminosity<<"\n"<<sas_n0*weight<<"\n"<<sas_nPV*weight<<"\n"<<sas_nLeatsOneGE*weight<<"\n"<<sas_nExactOneGE*weight
             <<"\n"<<sas_nConv*weight<<"\n"<<sas_nNoLE*weight<<"\n"<<sas_nNoMu*weight<<"\n"<<sas_nJet*weight<<"\n"<<sas_nBtag*weight<<endl;
 
-    cout<<"\n"<<intialBeforePresel<<"\n"<<n_beforescrap<<"\n"<<sas_n0<<"\n"<<sas_nPV<<"\n"<<sas_nLeatsOneGE<<"\n"<<sas_nExactOneGE<<"\n"<<sas_nNoMu<<"\n"<<sas_nZveto
+    cout<<"\n"<<intialBeforePresel<<"\n"<<sas_n0<<"\n"<<sas_nPV<<"\n"<<sas_nLeatsOneGE<<"\n"<<sas_nExactOneGE<<"\n"<<sas_nNoMu<<"\n"<<sas_nZveto
             <<"\n"<<sas_nConv_a<<"\n"<<sas_nConv_b<<"\n"<<sas_nJet3<<"\n"<<sas_nJet<<"\n"<<sas_nBtag<<endl;
-    cout<<sas_nMET<<endl;
+
 
 }
 
@@ -280,7 +264,7 @@ int main(int argc, char** argv){
           f++;
           std::string out(*(argv + f));
           sas_outFileName_FullSelection = out;
-	  sas_plotFileName = "Histograms_"+out;
+//	  sas_plotFileName = "Histograms_"+out;
 	  sas_plotFileName = out;
         }else if (arg_fth == "input") {
           f++;
@@ -314,15 +298,8 @@ int main(int argc, char** argv){
 //	    cout<<"1- "<<isData<<endl;
         }
     }
-    M3 = new TH1D("M3","",100,0.,500);
-    M3->GetXaxis()->SetTitle("M3");
-    HT = new TH1D("HT","",100,0.,1000);
-    HT->GetXaxis()->SetTitle("H_{T}");
-    nTrackRatio = new TH1D("nTrackRatio","",100,0.,1.);
-    nTrackRatio->GetXaxis()->SetTitle("High Purity track content of event");
-    met = new TH1D("MET","",1000,0.,500.);
-    met->GetXaxis()->SetTitle("missing transverse energy");
-
+    M3 = new TH1D("M3","M3",100,0.,500);
+    HT = new TH1D("HT","HT",100,0.,1000);
 //    cout<<"2- "<<isData<<endl;
     cout<<doJES<<endl;
     cout << sas_inputFileNames.at(0).c_str() << endl;
@@ -359,7 +336,7 @@ int main(int argc, char** argv){
    bool onepassed = false;
     while (pracEvt->Next()) {
 	ievt++;
-//	if(ievt > 1000)
+//	if(ievt > 10)
 //	     break;
         
 //cout<<ievt<<"        //////////////////////////////////"<<endl;
@@ -373,26 +350,7 @@ int main(int argc, char** argv){
         //cout<<"I am going to Jet Correction "<<isData<<endl;
         myJets_ = pracEvt->ScaledJetCollection(doJES,isData);
 	//cout<<"Correction is done\n\t"<<myJets_.at(0).Pt()<<endl;
-        n_beforescrap++;
-       //if(tevt == NULL ){
-//	   cout<<"Hell"<<endl;
-//	   return 0;
-//	}
-        if(isData){
-        	bool isBeamBG = true;
-        	float nTrk = ( (float) (pracEvt->Event()->nTracks()) );
-        	float nPureTrk  = ( (float)  (pracEvt->Event()->nHighPurityTracks()) );
-       //cout<<"SCRAPPING: "<<nTrk<<endl;
-       		if(nTrk > 10)
-       		{
-         		if( ( (float) nPureTrk ) / ( (float)nTrk ) > 0.25 )
-           		isBeamBG = false;
-       		}
-       		nTrackRatio->Fill(( (float) nPureTrk ) / ( (float)nTrk ));
-       		if(isBeamBG) {
-         		continue;
-        	}
-	}
+
         Event myEvent_tmp( myJets_, *pracEvt->ElectronCollection(),*pracEvt->METCollection(),*pracEvt->MuonCollection(),*pracEvt->VertexCollection());
         myEvent_tmp.verbose(sas_verbosity);
         if(sas_verbosity > 0)
@@ -427,7 +385,7 @@ int main(int argc, char** argv){
             } else
                 continue;
         }
-	sas_evtProps.Fill(pracEvt->Event());
+
         if(sas_doElectron){
 	    TLorentzVector ge(-1,-1,-1,-1);
             sas_ExactlyOneGESelection.Fill(myEvent_tmp.electrons,ge,myEvent_tmp.Gpvs.at(0).z(),myEvent_tmp.Gelectrons.size());
@@ -516,15 +474,6 @@ int main(int argc, char** argv){
             } else
                 continue;
         }
-	if(sas_doMET){
-	    //cout<<"b MET"<<endl;
-	    met->Fill(myEvent_tmp.mets.at(0).Pt());
-	    //cout<<"a MET"<<endl;
-	    if(myEvent_tmp.mets.at(0).Pt()>30)
-		sas_nMET++;
-	    else
-		continue;
-	}
         if(sas_doBtag){
 	    TLorentzVector ge(-1,-1,-1,-1);
 	    sas_BJets.Fill(myEvent_tmp.Gjets,myEvent_tmp.Gjets.size(),myEvent_tmp.Bjets.size(),true);
@@ -533,9 +482,6 @@ int main(int argc, char** argv){
         //    cout<<"2"<<endl;
 	    sas_GoldenFinalElectrons.Fill(myEvent_tmp.Gelectrons,ge,myEvent_tmp.Gpvs.at(0).z(),myEvent_tmp.Gelectrons.size());
         //    cout<<"3"<<endl;
-            sas_evtProps_Final.Fill(pracEvt->Event());
-            sas_PV_Final.Fill(myEvent_tmp.pvs,myEvent_tmp.Gpvs.size());
-
 	    double ht = 0;
 	    for(unsigned int wq = 0; wq < myEvent_tmp.Gjets.size(); wq++){
 		ht += myEvent_tmp.Gjets.at(wq).Pt();

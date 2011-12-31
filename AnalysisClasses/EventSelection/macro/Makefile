@@ -89,14 +89,6 @@ tmp:
 	@rm -f *.o
 	@rm -f ../interface/*.gch
 
-PV:
-	@echo "Compiling the PVtest ...."
-	$(CXX) $(CXXFLAGS) $(HEADERS) PVtest.C
-	@echo "Linking \n\n\n\t"
-	gcc -o FillPVinfo $(CLIBS) $(LIBS) PVtest.o
-	@rm -f *.o
-	@rm -f ../interface/*.gch
-
 
 otc:
 	@echo "Compiling the SelectAndSave ...."
@@ -106,11 +98,5 @@ otc:
 	@rm -f *.o
 clean:
 	@echo "Cleaning..."
-	@rm -f *.o
-elec:
-	@echo "Compiling the electron ...."
-	$(CXX) $(CXXFLAGS) $(HEADERS) electron.C
-	@echo "Linking \n\n\n\t"
-	gcc -o doElectron $(CLIBS) $(LIBS) electron.o
 	@rm -f *.o
 

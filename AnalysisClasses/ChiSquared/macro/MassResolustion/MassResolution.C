@@ -1,20 +1,20 @@
 #include <iomanip>
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootMuon.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootElectron.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootMET.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootGenEvent.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootSignalEvent.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootEvent.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootRun.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootParticle.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootMCParticle.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/ChiSquared/interface/TopEvent.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/EventSelection/interface/Event.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/ChiSquared/interface/DR.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/EventSelection/interface/JetMatching.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/EventSelection/interface/PracticalEvent.h"
+#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/TopBrussels/TopTreeProducer/interface/TRootMuon.h"
+#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/TopBrussels/TopTreeProducer/interface/TRootElectron.h"
+#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
+#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
+#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/TopBrussels/TopTreeProducer/interface/TRootMET.h"
+#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/TopBrussels/TopTreeProducer/interface/TRootGenEvent.h"
+#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/TopBrussels/TopTreeProducer/interface/TRootSignalEvent.h"
+#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/TopBrussels/TopTreeProducer/interface/TRootEvent.h"
+#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/TopBrussels/TopTreeProducer/interface/TRootRun.h"
+#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/TopBrussels/TopTreeProducer/interface/TRootParticle.h"
+#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/TopBrussels/TopTreeProducer/interface/TRootMCParticle.h"
+#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/AnalysisClasses/ChiSquared/interface/TopEvent.h"
+#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/AnalysisClasses/EventSelection/interface/Event.h"
+#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/AnalysisClasses/ChiSquared/interface/DR.h"
+#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/AnalysisClasses/EventSelection/interface/JetMatching.h"
+
 #include <sstream>
 #include <string>
 #include <TFile.h>
@@ -41,7 +41,7 @@ std::vector<TRootCaloJet> recoJets;
 TBranch* mjets_br;
 TClonesArray* mjets;
 TBranch* genEvent_br;
-//TClonesArray* genEvents;
+TClonesArray* genEvents;
 TBranch* electron_br;
 TClonesArray* electrons;
 TH1D * WMassDr;
@@ -75,7 +75,7 @@ std::string inName;
 
 #ifdef My
 
-void analyze(Event myEvt, TRootGenEvent * gevent, TClonesArray * genEvents){
+void analyze(Event myEvt, TRootGenEvent * gevent){
     //=========================
     std::vector<std::pair<TRootCaloJet, int> > jetQpairs;
     jetQpairs.clear();
@@ -157,16 +157,23 @@ int main(int argc, char** argv){
               inName = std::string(*(argv + f));
             }
         }
-	fIn =  TFile::Open("~/ttbar/signal/Signal.root");
+	fIn =  TFile::Open("/home/ajafari/rootfiles/TopTrees/7TeV/July10/Skimmed/FullSelection/FS_ECalDriven_Signal.root");
 //	fIn =  TFile::Open(string("/home/ajafari/rootfiles/TopTrees/7TeV/July10/SystematicSamples/FullSelection/JES"+inName).c_str());
 	std::cout<<"file opened: "<<fIn->GetName()<<std::endl;
         
 	TTree* eventTree = (TTree*) fIn->Get("eventTree");
-	    TTree* runTree = (TTree*) fIn->Get("runTree");
-    	//cout<<"Tree is got"<<endl;
-    	PracticalEvent * pracEvt = new PracticalEvent(eventTree,runTree,true);
-    	pracEvt->eventTree->SetBranchStatus("*", 1);
-	
+	event_br = (TBranch *) eventTree->GetBranch("Event");
+	TRootEvent* event = 0;
+	event_br->SetAddress(&event);
+	mjets_br = (TBranch *) eventTree->GetBranch("CaloJets_selectedPatJetsAK5Calo");
+	mjets = new TClonesArray("TopTree::TRootCaloJet", 0);
+	mjets_br->SetAddress(&mjets);
+	genEvent_br = (TBranch *) eventTree->GetBranch("GenEvent");
+	genEvents = new TClonesArray("TopTree::TRootGenEvent", 0);
+	genEvent_br->SetAddress(&genEvents);
+	electron_br = (TBranch *) eventTree->GetBranch("Electrons");
+	electrons = new TClonesArray("TopTree::TRootElectron", 0);
+	electron_br->SetAddress(&electrons);
 	
         WMassDr = new TH1D("WMassDr","WMassDr", 200,20.,220.);
 	TopMassDr = new TH1D("TopMassDr","TopMassDr", 450,50.,500.);
@@ -182,15 +189,20 @@ int main(int argc, char** argv){
 //        nEvents = 10;
 	
 	std::cout<<"total number of events: "<<nEvents<<std::endl;
-	int ievt = 0;
-	double doJES = 1.;
-	bool isData = false;
-	while (pracEvt->Next()) {
+	for(unsigned int ievt=0; ievt<nEvents; ievt++){
             cout<<"Event "<<ievt+1<<"  ..."<<endl;
+            eventTree->GetEvent(ievt);
+            cout<<electrons->GetEntriesFast()<<endl;
             std::vector<TRootCaloJet> myJets;
             myJets.clear();
-	    myJets = pracEvt->ScaledJetCollection(doJES,isData);
-            Event myEvent_tmp(myJets,*pracEvt->ElectronCollection());
+            for(int o = 0; o<mjets->GetEntriesFast(); o++){
+                TRootCaloJet jet_ = *(TRootCaloJet*)mjets->At(o);
+//                cout<<"1- "<<jet_.Pt()<<endl;
+                jet_.SetPxPyPzE(JES*jet_.Px(),JES*jet_.Py(),JES*jet_.Pz(),JES*jet_.E());
+//                cout<<"2- "<<jet_.Pt()<<endl;
+                myJets.push_back(jet_);
+            }
+            Event myEvent_tmp(myJets,*electrons);
             myEvent_tmp.verbose(verbosity);
             if(verbosity > 0)
                 cout<<"Electron Maker ---------------------------------------------------------------------"<<endl;
@@ -201,15 +213,14 @@ int main(int argc, char** argv){
             myEvent_tmp.JetCleaning();
             if(verbosity > 0)
                 cout<<"Jet Makers ---------------------------------------------------------------------"<<endl;
-            myEvent_tmp.JetMaker(/*bTagAlgo*/"TCHE",/*pt*/30.,/*eta*/2.4,/*nCaloTower*/-1,/*EmfUp*/1000,
-                    /*EmfLow*/0.01,/*fhpd_*/0.98,/*N90_*/1,/*bTagCut_*/4.);
+            myEvent_tmp.JetMaker(/*bTagAlgo*/"TCHE",/*pt*/30.,/*eta*/2.4,/*nCaloTower*/5,/*EmfUp*/0.9,
+                    /*EmfLow*/0.05,/*fhpd_*/1000.,/*N90_*/-1,/*bTagCut_*/4.);
                 // first find the semiElec Event
             if(eventTree == NULL){
                     std::cout<<"EventTree is NULL"<<std::endl;
                     continue;
             }
-            TRootGenEvent * gevent = (TRootGenEvent*) pracEvt->GenEvtCollection()->At(0);
-	    cout<<"GenEvt: "<<gevent<<endl;
+            TRootGenEvent * gevent = (TRootGenEvent*) genEvents->At(0);
 
             if(myEvent_tmp.Gjets.size() < 4)
                 continue;
@@ -221,7 +232,7 @@ int main(int argc, char** argv){
             // then analyze the semiLep event
             if(verbosity > 0)
                 cout<<"Event "<<ievt+1<<" has 4 jets from top. Let's analyze it ..."<<endl;
-            analyze(myEvent_tmp,gevent,pracEvt->GenEvtCollection());
+            analyze(myEvent_tmp,gevent);
 	}
 	endJob();
 	return 1;

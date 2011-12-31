@@ -45,8 +45,6 @@ public:
         Only4MatchedJets = false;
         PileUp = 10000.;
         verbosity = 0;
-	n4jets = 0;
-	nScrap = 0;
     };
     virtual ~BaseAnalysisHandler(){};
     T * AddAnalysis(T * analysis){
@@ -60,15 +58,15 @@ public:
     }
     virtual void Fill(TopEvent jetElec, double weight = 1., int nAna = -1) = 0;
     
-    virtual void End(int q = 0) = 0;
+    virtual void End() = 0;
     void setOnly4MatchedJets(){Only4MatchedJets = true;};
     void setVerbosity(int i){
         verbosity = i;
 //        cout<<"In AnalysisHandler "<<Name<<" verbosity is set to "<<verbosity<<endl;
     }
 
-    void Analyze(PracticalEvent* e,double weight, double JES = 1., int nAna = -1, bool isData = false, bool doCorr=true){
-        GoodObjects * GO = new GoodObjects(e,  electronCuts,jetCuts,extJetOk,verbosity,OtherTts,0,e->GenEvtCollection(),matchEle,JES,isData,doCorr);
+    void Analyze(PracticalEvent* e,double weight, double JES = 1., int nAna = -1){
+        GoodObjects * GO = new GoodObjects(e,  electronCuts,jetCuts,extJetOk,verbosity,OtherTts,0,e->GenEvtCollection(),matchEle,JES);
         if(verbosity > 1)
             cout<<"In the BaseAnalysis::Analyze method of "<<Name<<"\n\tOnly4MatchedJets is "
                     <<Only4MatchedJets<<" and GO->has4MatchedJets is "<<GO->has4MatchedJets()<<endl;
@@ -82,12 +80,6 @@ public:
             delete GO;
             return;
         }
-	n4jets++;
-	if(isData && e->isBeamBkg()){
-            delete GO;
-            return;
-	}
-        nScrap++;
 //        cout<<"After JetChecking of analysis "<<nAna<<endl;
         if(RejectRadEvt){
             if(verbosity > 0){
@@ -153,8 +145,7 @@ public:
         }
         delete GO;
     }
-    int n4jets;
-    int nScrap;
+
     std::vector<double> f;
     std::string getName()const{return Name;}
     bool isDoBtag()const{return doBtag;}

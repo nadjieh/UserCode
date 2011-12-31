@@ -25,7 +25,7 @@ public:
         BASE_::AddAnalysis(purity_h);
         MatchedEffChiSquaredHandler * meff_h = new MatchedEffChiSquaredHandler("MatchedEfficiency");
         BASE_::AddAnalysis(meff_h);
-/*        std::vector<ObjectProperty<TopEvent> * > propsToStudy;
+        std::vector<ObjectProperty<TopEvent> * > propsToStudy;
         propsToStudy.clear();
         EffChiSquaredHandler * eff_h = new EffChiSquaredHandler("Efficiency");
         eff_h->AddProp(new TopEventShape("isotropy",2.));
@@ -148,7 +148,7 @@ public:
 
         eff_h->AddProp(new DPhiHadBLepton());
         propsToStudy.push_back(new DPhiHadBLepton());
-        eff_h->AiddProp(new DPhiHadWHadB());
+        eff_h->AddProp(new DPhiHadWHadB());
         propsToStudy.push_back(new DPhiHadWHadB());
         eff_h->AddProp(new DPhiHadWLepB());
         propsToStudy.push_back(new DPhiHadWLepB());
@@ -165,8 +165,8 @@ public:
         
         BASE_::AddAnalysis(eff_h);
         
-        my2Ds = new TwoDObjectPropertyCreator<TopEvent>("DiscrimW",propsToStudy);*/
-        my2Ds = 0;
+        my2Ds = new TwoDObjectPropertyCreator<TopEvent>("DiscrimW",propsToStudy);
+
         matchedChi2 = new TH1D("matched_Chi2","matched_Chi2",1000,0.,100.);
         matchedChi2->GetXaxis()->SetTitle("#chi^{2} of matched top");
         matchedTopPt = new TH1D("matched_TopPt","matched_TopPt",1000,0.,1000.);
@@ -207,9 +207,7 @@ public:
             matchedChi2->Fill(myTop.getTopChiSquared());
             matchedTopPt->Fill(myTop.getHadronicTop().Pt());
         }
-	//cout<<"my2Ds = "<<my2Ds<<endl;
-	if(my2Ds != NULL)
-	        my2Ds->Fill(&je,weight);
+        my2Ds->Fill(&je,weight);
     }
     void WriteAll(TDirectory * dir){
         dir->cd();
@@ -222,12 +220,11 @@ public:
             matchedChi2->Write();
             matchedTopPt->Write();
         }
-	if(my2Ds != NULL)
-        	my2Ds->Write(my_Dir);
+        my2Ds->Write(my_Dir);
         dir->cd();
     }
     
-    virtual void End(int q = 0 ){
+    virtual void End(){
         TFile * f = new TFile(string(BASE_::Name+"_"+BASE_::whichMethodToSelectHadTop+".root").c_str(),"recreate");
         this->WriteAll(f);
         f->Close();

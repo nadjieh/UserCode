@@ -4,21 +4,21 @@ ROOTINC=-I$(shell root-config --incdir)
 
 ROOTFLAGS=$(shell root-config --libs)
 
-TROOTLIBS = -L/user/ajafari/lib -lTotoData
-BASELIBS = -L/user/ajafari/lib -lBaseBaseAnalysis
-CHISLIB = -L/user/ajafari/lib -lChiSquared385P3
-EVTSELECLIB = -L/user/ajafari/lib -lEventSelection385P3
+TROOTLIBS = -L/afs/cern.ch/user/a/ajafari/lib -lTotoData
+BASELIBS = -L/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/lib/slc5_ia32_gcc434 -lBaseBaseAnalysis
+CHISLIB = -L/afs/cern.ch/user/a/ajafari/lib -lChiSquared385P3
+EVTSELECLIB = -L/afs/cern.ch/user/a/ajafari/lib -lEventSelection385P3
 
 
 
-TROOTINCLUDES = -I/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface
-CHISHEADERS=-I/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/ChiSquared/interface
-SELECTIONHEADERS=-I/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/EventSelection/interface
+TROOTINCLUDES = -I/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/TopBrussels/TopTreeProducer/interface
+CHISHEADERS=-I/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/AnalysisClasses/ChiSquared/interface
+SELECTIONHEADERS=-I/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/AnalysisClasses/EventSelection/interface
 CXX=g++
 
 
-CXXFLAGS=-ggdb -O0 -DDEBUG -Wall -fPIC -DNO_ORCA_CLASSES -pthread -rpath -g -c
-LIBS 	= $(ROOTFLAGS)
+CXXFLAGS=-ggdb -O0 -DDEBUG -Wall -fPIC -DNO_ORCA_CLASSES -pthread -g -c
+LIBS = $(ROOTFLAGS)
 LIBS	+=$(TROOTLIBS)
 LIBS	+=$(BASELIBS)
 LIBS	+=$(EVTSELECLIB)

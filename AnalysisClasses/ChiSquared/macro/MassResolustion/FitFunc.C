@@ -71,18 +71,16 @@ Double_t invsq2pi = 0.3989422804014; // (2 pi)^(-1/2)
  /*--------------------------------------------*/
  {
 //TH1F *brgauss = new TH1F("breitg","", 131, 0, 130);
- TFile * file = new TFile("masses_.root","READ");
-// TH1D * h = (TH1D*)file->Get("TopMassDr");
-  TH1D * h = (TH1D*)file->Get("WMassDr");
-// h->Rebin(3);
+ TFile * file = new TFile("0.9masses_.root","READ");
+ TH1D * h = (TH1D*)file->Get("TopMassDr");
+ h->Rebin(5);
  //h->GetXaxis()->SetRangeUser(20.,180.);
-//TF1 *f = new TF1("f",breitgausfun, 20, 300 ,4);
-TF1 *f = new TF1("f",breitgausfun, 20, 160 ,4);
+TF1 *f = new TF1("f",breitgausfun, 20, 500 ,4);
 //TF1 *f = new TF1("f",myGauss, 50, 450 ,3);
  Double_t par[4];
  par[0] = 2.5;
- par[1] = 80.;
- par[2] = 12455.;
+ par[1] = 173.;
+ par[2] = 7268.;
  par[3] = 10;
 
  f->SetParameters(par);
@@ -101,6 +99,4 @@ TF1 *f = new TF1("f",breitgausfun, 20, 160 ,4);
 
  }
 
-// 282.6/186
-//225.94
-//199.8/61
+

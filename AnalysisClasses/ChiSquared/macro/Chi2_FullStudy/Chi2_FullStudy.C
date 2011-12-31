@@ -24,7 +24,6 @@ int main(int argc, char** argv){
     double intialBeforePresel = 0;
     double XSec = 0;
     bool isTtBar = false;
-    bool isData = false;
     for (int f = 1; f < argc; f++) {
         std::string arg_fth(*(argv + f));
 //        cout<<"-------- "<< arg_fth<<endl;
@@ -38,7 +37,7 @@ int main(int argc, char** argv){
           if(in == "Signal.root" || in == "OtherTtBar.root")
               isTtBar = true;
           IsTtBar.push_back(isTtBar);
-          in ="/user/ajafari/FinalSkims/"+in;
+          in ="/home/ajafari/rootfiles/TopTrees/7TeV/July10/Skimmed/FullSelection/FS_ECalDriven_"+in;
           inputNameWeight.first = in;
 //          cout<<inputNameWeight.first<<endl;
         }else if(arg_fth == "XSec"){
@@ -53,15 +52,6 @@ int main(int argc, char** argv){
           f++;
           std::string intialBeforePresel_(*(argv + f));
           intialBeforePresel = atof(intialBeforePresel_.c_str());
-	}else if (arg_fth == "isData") {
-            f++;
-            std::string in(*(argv + f));
-//          cout<<in<<endl;
-            if(in == "yes" || in == "YES" || in == "Yes" || in == "y" || in == "Y")
-                isData = true;
-            else
-                isData = false;
-//          cout<<"1- "<<isData<<endl;OB
         }else if(arg_fth == "nextinput"){
           f++;
           inputNameWeight.second = (double)(XSec*Luminosity)/(double)intialBeforePresel;
@@ -73,7 +63,7 @@ int main(int argc, char** argv){
           if(in == "Signal.root" || in == "OtherTtBar.root")
               isTtBar = true;
           IsTtBar.push_back(isTtBar);
-          in ="/user/ajafari/FinalSkims/"+in;
+          in ="/home/ajafari/rootfiles/TopTrees/7TeV/July10/Skimmed/FullSelection/FS_ECalDriven_"+in;
           inputNameWeight.first = in;
 //          cout<<inputNameWeight.first<<endl;
           inputNameWeight.second = 0.;

@@ -13,7 +13,7 @@
 #include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootJet.h"
 #include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/ChiSquared/interface/ExtendedJet.h"
 #include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/ChiSquared/interface/TopEvent.h"
-//#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/LightJets/interface/EventShapeVariables.h"
+#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/LightJets/interface/EventShapeVariables.h"
 #include "DR.h"
 
 #include <iostream>
@@ -74,7 +74,7 @@ public:
 class ExtChi2 : public ObjectProperty<TopEvent> {
 public:
 
-    ExtChi2() : ObjectProperty<TopEvent>("ExtChi2", "ExtChi2", 0., 3000., 10000, "TopEvent", 3) {
+    ExtChi2() : ObjectProperty<TopEvent>("ExtChi2", "ExtChi2", 0., 100000., 10000, "TopEvent", 3) {
     };
 
     virtual ~ExtChi2() {
@@ -536,33 +536,6 @@ public:
 
 
 };
-class TestBtag : public ObjectProperty<ExtendedJet> {
-public:
-    TestBtag() : ObjectProperty<ExtendedJet>("TestBtag", "TestBtag",4, "ExtendedJet", 5) {
-        std::vector<double> x;
-        x.push_back(-200);
-        x.push_back(1.7);
-        x.push_back(3.3);
-        x.push_back(10.2);
-        x.push_back(60);
-        ObjectProperty<ExtendedJet>::SetBinsLowEdge(x);
-    };
-
-    virtual ~TestBtag() {
-    };
-
-    virtual std::vector<double> ReadValue(const ExtendedJet * c)const {
-       std::vector<double> values;
-       values.clear();
-       values.push_back(c->getJet().btag_trackCountingHighEffBJetTags());
-        return(values);
-    };
-
-
-};
-
-
-
 class Pt : public ObjectProperty<ExtendedJet> {
 public:
 
@@ -616,7 +589,7 @@ public:
 };
 
 //EventShapes
-/*class TopEventShape : public ObjectProperty<TopEvent> {
+class TopEventShape : public ObjectProperty<TopEvent> {
 public:
 
     TopEventShape(std::string which, double R = 2.) :
@@ -656,7 +629,7 @@ public:
 private:
     std::string Which;
     double r;
-};*/
+};
 class HT : public ObjectProperty<TopEvent> {
 public:
 

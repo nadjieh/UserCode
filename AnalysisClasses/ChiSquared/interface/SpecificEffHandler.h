@@ -44,9 +44,8 @@ public:
         BASE_::setSelfEff();
 //        BASE_::Condition = FunctionBtag;
         BASE_::AllCondition = 0;
-        BASE_::AddProp(new Pt());
-        BASE_::AddProp(new TestBtag());
         BASE_::AddProp(new TBtag());
+        BASE_::AddProp(new Pt());
         BASE_::AddProp(new Eta());
         BASE_::AddProp(new JetBasedMLJ());
         twoD = false;
@@ -92,8 +91,8 @@ public:
 
         dir->cd();
     }
-    void set2Ds(bool twoD_ = true){
-        twoD = twoD_;
+    void set2Ds(){
+        twoD = true;
         TBtag myBtag;
         Pt myPt;
         Eta myEta;

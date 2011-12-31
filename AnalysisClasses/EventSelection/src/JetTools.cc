@@ -41,7 +41,6 @@ void JetTools::correctJet(TRootJet* inJet, int nPV)
   }
   float corr = JEC_->getCorrection();
   inJet->SetPxPyPzE(inJet->Px()*corr, inJet->Py()*corr, inJet->Pz()*corr, inJet->E()*corr);
-//cout<<"000000"<<endl;
 }
 
 void JetTools::correctJets(vector<TRootJet*> inJets)
