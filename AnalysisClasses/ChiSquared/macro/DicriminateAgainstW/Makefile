@@ -4,16 +4,16 @@ ROOTINC=-I$(shell root-config --incdir)
 
 ROOTFLAGS=$(shell root-config --libs)
 
-TROOTLIBS = -L/afs/cern.ch/user/a/ajafari/lib -lTotoData
-BASELIBS = -L/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_8_5_patch3/lib/slc5_ia32_gcc434 -lBaseBaseAnalysis
-CHISLIB = -L/afs/cern.ch/user/a/ajafari/lib -lChiSquared385P3
-EVTSELECLIB = -L/afs/cern.ch/user/a/ajafari/lib -lEventSelection385P3
+TROOTLIBS = -L/user/ajafari/lib -lTotoData
+BASELIBS = -L../../../../../lib/slc5_ia32_gcc434 -lBaseBaseAnalysis
+CHISLIB = -L/user/ajafari/lib -lChiSquared385P3
+EVTSELECLIB = -L/user/ajafari/lib -lEventSelection385P3
 
 
 
-TROOTINCLUDES = -I/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface
-CHISHEADERS=-I/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_8_5_patch3/src/AnalysisClasses/ChiSquared/interface
-SELECTIONHEADERS=-I/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_8_5_patch3/src/AnalysisClasses/EventSelection/interface
+TROOTINCLUDES = -I../../../../TopBrussels/TopTreeProducer/interface
+CHISHEADERS=-I../../../../AnalysisClasses/ChiSquared/interface
+SELECTIONHEADERS=-I../../../../AnalysisClasses/EventSelection/interface
 DATAFORMATS=-I/afs/cern.ch/cms/sw/slc5_ia32_gcc434/cms/cmssw/CMSSW_3_8_5/src/DataFormats/Math/interface/
 CXX=g++
 

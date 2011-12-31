@@ -1,10 +1,10 @@
-#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/AnalysisClasses/ChiSquared/interface/Combinator.h"
-#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/AnalysisClasses/ChiSquared/interface/TopEvent.h"
-#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/AnalysisClasses/ChiSquared/interface/ChiSquaredAnalysisHandler.h"
-#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/AnalysisClasses/EventSelection/interface/PracticalEvent.h"
-#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/AnalysisClasses/EventSelection/interface/Event.h"
-#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/AnalysisClasses/EventSelection/interface/GoodObjects.h"
-#include "/afs/cern.ch/user/a/ajafari/scratch0/CMSSW_3_6_1_patch3/src/AnalysisClasses/ChiSquared/interface/TwoDObjectPropertyCreator.h"
+#include "../../../../AnalysisClasses/ChiSquared/interface/Combinator.h"
+#include "../../../../AnalysisClasses/ChiSquared/interface/TopEvent.h"
+#include "../../../../AnalysisClasses/ChiSquared/interface/ChiSquaredAnalysisHandler.h"
+#include "../../../../AnalysisClasses/EventSelection/interface/PracticalEvent.h"
+#include "../../../../AnalysisClasses/EventSelection/interface/Event.h"
+#include "../../../../AnalysisClasses/EventSelection/interface/GoodObjects.h"
+#include "../../../../AnalysisClasses/ChiSquared/interface/TwoDObjectPropertyCreator.h"
 
 
 
