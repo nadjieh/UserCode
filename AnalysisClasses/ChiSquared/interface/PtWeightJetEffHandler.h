@@ -8,7 +8,7 @@
 #ifndef _PTWEIGHTJETEFFHANDLER_H
 #define	_PTWEIGHTJETEFFHANDLER_H
 #include "SpecificEffHandler.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/LightJets/interface/ReweithingFunctions.h"
+#include "../../../AnalysisClasses/LightJets/interface/ReweithingFunctions.h"
 #include <string>
 #include <iostream>
 using namespace std;

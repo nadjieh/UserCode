@@ -7,12 +7,12 @@
 
 #ifndef _SPECIFICEFFHANDLER_H
 #define	_SPECIFICEFFHANDLER_H
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/Base/BaseAnalysis/interface/EfficiencyHandler.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/Base/BaseAnalysis/interface/TH2Ext.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootJet.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/ChiSquared/interface/MyObjectProperties.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/ChiSquared/interface/ExtendedJet.h"
+#include "../../../Base/BaseAnalysis/interface/EfficiencyHandler.h"
+#include "../../../Base/BaseAnalysis/interface/TH2Ext.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootJet.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
+#include "../../../AnalysisClasses/ChiSquared/interface/MyObjectProperties.h"
+#include "../../../AnalysisClasses/ChiSquared/interface/ExtendedJet.h"
 
 #include "TH2.h"
 #include "TDirectory.h"

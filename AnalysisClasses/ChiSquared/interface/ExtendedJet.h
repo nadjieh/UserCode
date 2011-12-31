@@ -8,8 +8,8 @@
 #ifndef _EXTENDEDJET_H
 #define	_EXTENDEDJET_H
 #include <iostream>
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootJet.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootJet.h"
 using namespace std;
 using namespace TopTree;
 typedef std::pair<int,double> jetIndexValueThis;

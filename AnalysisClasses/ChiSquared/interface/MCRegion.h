@@ -11,7 +11,7 @@
 #include <iostream>
 #include "SpecificEffHandler.h"
 #include "SpecificHistograms.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/ChiSquared/interface/ExtendedJet.h"
+#include "../../../AnalysisClasses/ChiSquared/interface/ExtendedJet.h"
 using namespace std;
 using namespace TopTree;
 bool FunctionBtag_MC(const ExtendedJet * e){return(true);}

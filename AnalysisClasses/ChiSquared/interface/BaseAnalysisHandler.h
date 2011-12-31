@@ -10,10 +10,10 @@
 
 
 
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/EventSelection/interface/GoodObjects.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/ChiSquared/interface/TopEvent.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/ChiSquared/interface/Combinator.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/LightJets/interface/NeededStructs.h"
+#include "../../../AnalysisClasses/EventSelection/interface/GoodObjects.h"
+#include "../../../AnalysisClasses/ChiSquared/interface/TopEvent.h"
+#include "../../../AnalysisClasses/ChiSquared/interface/Combinator.h"
+#include "../../../AnalysisClasses/LightJets/interface/NeededStructs.h"
 
 
 template <class T>

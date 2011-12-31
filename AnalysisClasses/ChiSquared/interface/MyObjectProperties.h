@@ -7,13 +7,13 @@
 
 #ifndef _TopEvent_H
 #define _TopEvent_H
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/Base/BaseAnalysis/interface/ObjectProperty.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootElectron.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootJet.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/ChiSquared/interface/ExtendedJet.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/ChiSquared/interface/TopEvent.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/LightJets/interface/EventShapeVariables.h"
+#include "../../../Base/BaseAnalysis/interface/ObjectProperty.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootElectron.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootJet.h"
+#include "../../../AnalysisClasses/ChiSquared/interface/ExtendedJet.h"
+#include "../../../AnalysisClasses/ChiSquared/interface/TopEvent.h"
+#include "../../../AnalysisClasses/LightJets/interface/EventShapeVariables.h"
 #include "DR.h"
 
 #include <iostream>

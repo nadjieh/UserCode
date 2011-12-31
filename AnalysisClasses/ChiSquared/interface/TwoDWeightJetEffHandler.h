@@ -9,7 +9,7 @@
 #define	_TWODWEIGHTJETEFFHANDLER_H
 #include "SpecificEffHandler.h"
 #include "LightStudyJetHandler.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/LightJets/interface/ReweithingFunctions.h"
+#include "../../../AnalysisClasses/LightJets/interface/ReweithingFunctions.h"
 #include <string>
 using namespace std;
 using namespace TopTree;

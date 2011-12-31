@@ -7,8 +7,8 @@
 
 #ifndef _BASECHIAQUAREDHANDLER_H
 #define	_BASECHIAQUAREDHANDLER_H
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/Base/BaseAnalysis/interface/EfficiencyHandler.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/ChiSquared/interface/MyObjectProperties.h"
+#include "../../../Base/BaseAnalysis/interface/EfficiencyHandler.h"
+#include "../../../AnalysisClasses/ChiSquared/interface/MyObjectProperties.h"
 #include "TH2.h"
 #include "TDirectory.h"
 using namespace std;

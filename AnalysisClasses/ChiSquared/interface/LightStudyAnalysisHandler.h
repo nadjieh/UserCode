@@ -8,7 +8,7 @@
 #ifndef _LIGHTSTUDYANALYSISHANDLER_H
 #define	_LIGHTSTUDYANALYSISHANDLER_H
 
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/LightJets/interface/LightAnalysis.h"
+#include "../../../AnalysisClasses/LightJets/interface/LightAnalysis.h"
 #include "BaseAnalysisHandler.h"
 #include "TH1.h"
 class LightStudyAnalysisHandler: public BaseAnalysisHandler<LightAnalysis>{

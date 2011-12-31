@@ -7,10 +7,10 @@
 
 #ifndef _SPECIFICHISTOGRAMS_H
 #define	_SPECIFICHISTOGRAMS_H
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/Base/BaseAnalysis/interface/Histograms.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootJet.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/ChiSquared/interface/MyObjectProperties.h"
+#include "../../../Base/BaseAnalysis/interface/Histograms.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootJet.h"
+#include "../../../AnalysisClasses/ChiSquared/interface/MyObjectProperties.h"
 #include "TH2.h"
 #include "TDirectory.h"
 #include <string>

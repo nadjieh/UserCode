@@ -8,9 +8,9 @@
 #ifndef _TOPEVENT_H
 #define	_TOPEVENT_H
 
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootElectron.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/ChiSquared/interface/ExtendedJet.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/LightJets/interface/NeededStructs.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootElectron.h"
+#include "../../../AnalysisClasses/ChiSquared/interface/ExtendedJet.h"
+#include "../../../AnalysisClasses/LightJets/interface/NeededStructs.h"
 #include "TLorentzVector.h"
 #include <vector>
 #include <string>
