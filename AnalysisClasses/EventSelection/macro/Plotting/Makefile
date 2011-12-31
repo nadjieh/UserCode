@@ -11,12 +11,12 @@ ROOTCFLAGS	=$(shell root-config --cflags)
 ROOTGLIBS	=$(shell root-config --glibs) -lMinuit
 TROOTLIBS	= -L$(HOMELIB) -lTotoData
 ESLIBS 		= -L$(HOMELIB) -lEventSelection385P3
-BASELIBS	= -L/user/ajafari/CMSSW_3_8_5_patch3/lib/slc5_ia32_gcc434 -lBaseBaseAnalysis
-BASEINCLUDES	=-I/user/ajafari/CMSSW_3_8_5_patch3/src/Base/BaseAnalysis/interface
-TROOTINCLUDES = -I/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface
+BASELIBS	= -L../../../../lib/slc5_ia32_gcc434 -lBaseBaseAnalysis
+BASEINCLUDES	=-I../../../Base/BaseAnalysis/interface
+TROOTINCLUDES = -I../../../TopBrussels/TopTreeProducer/interface
 
-MYHEADERS=-I/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/EventSelection/interface
-MYSOURCES= /user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/EventSelection/src
+MYHEADERS=-I../../interface
+MYSOURCES= ../../src
 CXX=g++
 CXXFLAGS	= -ggdb -O0 -DDEBUG -Wall -fPIC -DNO_ORCACLASSES -g -c
 LD		= g++

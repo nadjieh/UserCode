@@ -8,7 +8,7 @@
 #ifndef _PrimaryVertexSelector_H
 #define	_PrimaryVertexSelector_H
 
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootVertex.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootVertex.h"
 #include <string>
 #include <TMath.h>
 

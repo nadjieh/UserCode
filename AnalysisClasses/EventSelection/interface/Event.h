@@ -9,18 +9,18 @@
 #ifndef _EVENT_H
 #define	_EVENT_H
 #include "TClonesArray.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootEvent.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootRun.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootJet.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootMuon.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootMET.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootElectron.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootTagProbeObject.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootVertex.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootEvent.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootRun.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootJet.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootMuon.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootMET.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootElectron.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootTagProbeObject.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootVertex.h"
 
-//#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/ChiSquared/interface/DR.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/EventSelection/interface/JetMatching.h"
+//#include "../../../AnalysisClasses/ChiSquared/interface/DR.h"
+#include "../../../AnalysisClasses/EventSelection/interface/JetMatching.h"
 
 
 #include "ElectronSelector.h"

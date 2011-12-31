@@ -9,16 +9,16 @@
 #define	_KINEMATICHISTS_H
 
 #include <iomanip>
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootMuon.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootElectron.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootJet.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootMET.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootGenEvent.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootSignalEvent.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootEvent.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootRun.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootParticle.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootMCParticle.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootMuon.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootElectron.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootJet.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootMET.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootGenEvent.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootSignalEvent.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootEvent.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootRun.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootParticle.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootMCParticle.h"
 #include <sstream>
 
 #include <TFile.h>

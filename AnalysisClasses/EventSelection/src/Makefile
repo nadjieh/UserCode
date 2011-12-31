@@ -12,11 +12,11 @@ ROOTGLIBS	=$(shell root-config --glibs) -lMinuit
 TROOTLIBS	= -L$(HOMELIB) -lTotoData
 JETCORRLIB 		= -L$(HOMELIB) -lJetCorrection385P3
 
-TROOTINCLUDES = -I/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface
-JETCORRINCLUDES = -I/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/JetCorrections/interface
+TROOTINCLUDES = -I../../../TopBrussels/TopTreeProducer/interface
+JETCORRINCLUDES = -I../../JetCorrections/interface
 
-MYHEADERS=-I/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/EventSelection/interface
-MYSOURCES= /user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/EventSelection/src
+MYHEADERS=-I../interface
+MYSOURCES= ../src
 CXX=g++
 CXXFLAGS	= -O -Wall -fPIC
 LD		= g++

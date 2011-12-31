@@ -12,12 +12,12 @@
 
 #include <iostream>
 #include <vector>
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootElectron.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/EventSelection/interface/PracticalEvent.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/EventSelection/interface/JetMatching.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/ChiSquared/interface/ExtendedJet.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/LightJets/interface/NeededStructs.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootElectron.h"
+#include "../../../AnalysisClasses/EventSelection/interface/PracticalEvent.h"
+#include "../../../AnalysisClasses/EventSelection/interface/JetMatching.h"
+#include "../../../AnalysisClasses/ChiSquared/interface/ExtendedJet.h"
+#include "../../../AnalysisClasses/LightJets/interface/NeededStructs.h"
 #include "Event.h"
 
 

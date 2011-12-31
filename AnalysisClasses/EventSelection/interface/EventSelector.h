@@ -9,14 +9,14 @@
 #define	_EVENTSELECTOR_H
 #include "TClonesArray.h"
 #include "Event.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootEvent.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootRun.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootElectron.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootJet.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootMET.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootMuon.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootHLTInfo.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootEvent.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootRun.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootElectron.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootJet.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootMET.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootMuon.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootHLTInfo.h"
 #include <iostream>
 using namespace std;
 using namespace TopTree;

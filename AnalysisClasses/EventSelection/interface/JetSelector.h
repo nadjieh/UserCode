@@ -9,7 +9,7 @@
 #define	_JetSelector_H
 #include <string>
 #include <iostream>
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
 
 using namespace TopTree;
 using namespace std;

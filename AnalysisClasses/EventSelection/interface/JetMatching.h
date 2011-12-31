@@ -1,3 +1,4 @@
+
 /* 
  * File:   JetMatching.h
  * Author: ajafari
@@ -10,12 +11,12 @@
 #include <TLorentzVector.h>
 #include <TClonesArray.h>
 #include <iostream>
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootGenEvent.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootElectron.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootNPGenEvent.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootMCParticle.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/ChiSquared/interface/DR.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootGenEvent.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootElectron.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootNPGenEvent.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootMCParticle.h"
+#include "../../../AnalysisClasses/ChiSquared/interface/DR.h"
 using namespace std;
 using namespace TopTree;
 struct mySortByPt{

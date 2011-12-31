@@ -11,7 +11,7 @@
 
 #include <string>
 #include <iostream>
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootMuon.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootMuon.h"
 using namespace TopTree;
 using namespace std;
 class MuonVetoSelector{

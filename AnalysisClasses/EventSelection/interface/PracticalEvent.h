@@ -14,24 +14,24 @@
 #include <string>
 #include <iomanip>
 #include <iostream>
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootMuon.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootElectron.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootMET.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootGenEvent.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootNPGenEvent.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootSignalEvent.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootEvent.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootRun.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootParticle.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootMCParticle.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootVertex.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootTagProbeObject.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/TopBrussels/TopTreeProducer/interface/TRootHLTInfo.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootMuon.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootElectron.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootMET.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootGenEvent.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootNPGenEvent.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootSignalEvent.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootEvent.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootRun.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootParticle.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootMCParticle.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootVertex.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootTagProbeObject.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootHLTInfo.h"
 //#include "EventsHists.h
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/EventSelection/interface/JetCorrectorParameters.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/EventSelection/interface/JetCorrectionUncertainty.h"
-#include "/user/ajafari/CMSSW_3_8_5_patch3/src/AnalysisClasses/EventSelection/interface/JetTools.h"
+#include "../../../AnalysisClasses/EventSelection/interface/JetCorrectorParameters.h"
+#include "../../../AnalysisClasses/EventSelection/interface/JetCorrectionUncertainty.h"
+#include "../../../AnalysisClasses/EventSelection/interface/JetTools.h"
 
 
 using namespace std;
