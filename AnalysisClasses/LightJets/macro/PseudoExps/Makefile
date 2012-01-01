@@ -3,12 +3,12 @@ CLIBS=-L/usr/lib -lstdc++
 ROOTINC=-I$(shell root-config --incdir)
 
 ROOTFLAGS=$(shell root-config --libs)
-
-TROOTLIBS = -L/user/ajafari/lib -lTRoot
-BASELIBS = -L../../../../../lib/slc5_ia32_gcc434 -lBaseBaseAnalysis
-CHISLIB = -L/user/ajafari/lib -lChiSquared361P3
-EVTSELECLIB = -L/user/ajafari/lib -lEventSelection361P3
-LJETSLIB = -L/user/ajafari/lib -lLightJets361P3
+HOMELIB=$(HOME)/lib
+TROOTLIBS = -L$(HOMELIB) -lTRoot
+BASELIBS = -L$(HOMELIB) -lBaseBaseAnalysis
+CHISLIB = -L$(HOMELIB) -lChiSquared361P3
+EVTSELECLIB = -L$(HOMELIB) -lEventSelection361P3
+LJETSLIB = -L$(HOMELIB) -lLightJets361P3
 
 
 TROOTINCLUDES = -I../../../../AnalysisDataFormats/TopTree/interface
@@ -35,19 +35,34 @@ HEADERS +=$(SELECTIONHEADERS)
 
 all:
 	@echo "Compiling TestNewPackage.C..."
-	$(CXX) $(CXXFLAGS) $(HEADERS) Pseudo.C
+	$(CXX) $(CXXFLAGS) $(HEADERS) SignalStudy.C
 
 	@echo "Link all shared objects..."
 
 
-	gcc -o Psuedo $(CLIBS) $(LIBS)  Pseudo.o
+	gcc -o StudyTheSignal $(CLIBS) $(LIBS)  SignalStudy.o
 
 	@echo "Cleaning up..."
 	@rm -f *.o
-Asymm:
-	@echo "Compile Asymm ..."
-	$(CXX) $(CXXFLAGS) $(ROOTINC) AsymmSub.C
+Correlation:
+	@echo "Compiling Macro.cc..."
+
+	$(CXX) $(CXXFLAGS) $(ROOTINC) $(TROOTLIBS) $(TROOTINCLUDES) DelB_Mlb_Correlation.C
 	@echo "Link all shared objects..."
-	gcc -o doMethodError $(CLIBS) $(ROOTFLAGS)  AsymmSub.o
+	gcc -o CorrelationLightJets $(CLIBS) $(ROOTFLAGS) $(TROOTLIBS) $(BASELIBS) $(EVENTSELECTIONLIBS)/Event.o $(EVENTSELECTIONLIBS)/EventSelector.o TopQuark.o HadronicW.o TopQuark.o DR.o Combination.o Combinator.o DelB_Mlb_Correlation.o
+
+clean: 
+
 	@echo "Cleaning up..."
-	@rm -f *.o
+
+	@rm *.o
+
+
+
+Test:
+	@echo "Compiling TestNewPackage.C ... "
+	$(CXX) $(CXXFLAGS) $(ROOTINC) $(TROOTLIBS) $(TROOTINCLUDES) $(MYHEADERS) $(SELECTIONHEADER) $(LIGHTJETSHEADER) TestNewPackage.C
+	@echo "Link all shared objects..."
+	gcc -o TestNewPackage $(CLIBS) $(ROOTFLAGS) $(TROOTLIBS) $(BASELIBS)   TopQuark.o HadronicW.o TopQuark.o DR.o Combination.o Combinator.o SpecificEffHandler.o TestNewPackage.o
+
+

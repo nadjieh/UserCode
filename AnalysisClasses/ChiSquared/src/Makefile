@@ -31,7 +31,7 @@ HEADERS 	= $(wildcard ../interface/*.h)
 OBJECTS 	= $(SOURCES:.$(SrcSuf)=.$(ObjSuf))
 DEPENDS 	= $(SOURCES:.$(SrcSuf)=.d)
 SOBJECTS	= $(SOURCES:.$(SrcSuf)=.$(DllSuf))
-HOMELIB		= /user/ajafari/lib
+HOMELIB		= $(HOME)/lib
 MV = mv -f *.o ../src/
 #PROGRAMS	=  $(SOBJECTS)
 

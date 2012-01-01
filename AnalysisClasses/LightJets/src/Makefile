@@ -11,7 +11,7 @@ ROOTGLIBS     = $(shell root-config --glibs) -lMinuit
 TROOTLIBS = -L$(HOMELIB) -lTotoData
 CHISLIB = -L$(HOMELIB) -lChiSquared385P3
 EVTSELEC = -L$(HOMELIB) -lEventSelection385P3
-BASELIB = -L../../../../lib/slc5_ia32_gcc434 -lBaseBaseAnalysis
+BASELIB = -L$(HOMELIB) -lBaseBaseAnalysis
 TROOTINCLUDES = -I../../../TopBrussels/TopTreeProducer/interface
 #BASEINCLUDE = 
 # Linux with egcs
@@ -35,7 +35,7 @@ HEADERS 	= $(wildcard ../../../AnalysisClasses/LightJets/interface/*.h)
 OBJECTS 	= $(SOURCES:.$(SrcSuf)=.$(ObjSuf))
 DEPENDS 	= $(SOURCES:.$(SrcSuf)=.d)
 SOBJECTS	= $(SOURCES:.$(SrcSuf)=.$(DllSuf))
-HOMELIB		= /user/ajafari/lib
+HOMELIB		= $(HOME)/lib
 MV = mv -f *.o ../../../AnalysisClasses/LightJets/src/
 #PROGRAMS	=  $(SOBJECTS)
 

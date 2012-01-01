@@ -3,11 +3,11 @@ CLIBS=-L/usr/lib -lstdc++
 ROOTINC=-I$(shell root-config --incdir)
 
 ROOTFLAGS=$(shell root-config --libs)
-
-TROOTLIBS = -L/user/ajafari/lib -lTotoData
-BASELIBS = -L../../../../../lib/slc5_ia32_gcc434 -lBaseBaseAnalysis
-CHISLIB = -L/user/ajafari/lib -lChiSquared385P3
-EVTSELECLIB = -L/user/ajafari/lib -lEventSelection385P3
+HOMELIB = $(HOME)/lib
+TROOTLIBS = -L$(HOMELIB) -lTotoData
+BASELIBS = -L$(HOMELIB) -lBaseBaseAnalysis
+CHISLIB = -L$(HOMELIB) -lChiSquared385P3
+EVTSELECLIB = -L$(HOMELIB) -lEventSelection385P3
 
 
 

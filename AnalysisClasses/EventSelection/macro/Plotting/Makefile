@@ -11,8 +11,8 @@ ROOTCFLAGS	=$(shell root-config --cflags)
 ROOTGLIBS	=$(shell root-config --glibs) -lMinuit
 TROOTLIBS	= -L$(HOMELIB) -lTotoData
 ESLIBS 		= -L$(HOMELIB) -lEventSelection385P3
-BASELIBS	= -L../../../../lib/slc5_ia32_gcc434 -lBaseBaseAnalysis
-BASEINCLUDES	=-I../../../Base/BaseAnalysis/interface
+BASELIBS	= -L$(HOMELIB) -lBaseBaseAnalysis
+BASEINCLUDES	=-I../../../../Base/BaseAnalysis/interface
 TROOTINCLUDES = -I../../../TopBrussels/TopTreeProducer/interface
 
 MYHEADERS=-I../../interface
@@ -48,7 +48,7 @@ HEADERS 	= $(wildcard ../interface/*.h)
 OBJECTS 	= $(SOURCES:.$(SrcSuf)=.$(ObjSuf))
 DEPENDS 	= $(SOURCES:.$(SrcSuf)=.d)
 SOBJECTS	= $(SOURCES:.$(SrcSuf)=.$(DllSuf))
-HOMELIB		= /user/ajafari/lib
+HOMELIB		= $(HOME)/lib
 OPTLIBS		= $(LIBS)
 OPTLIBS		+=$(BASELIBS)
 OPTHEADER	=$(HEADERS)
