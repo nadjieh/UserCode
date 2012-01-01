@@ -1,5 +1,0 @@
-#single top signal, generated with SingleTop generator
-replace PoolSource.fileNames = {
-	'rfio:/castor/cern.ch/user/g/giamman/singletop/SingleTop/fastsim1611_mu_0.root',
-	'rfio:/castor/cern.ch/user/g/giamman/singletop/SingleTop/fastsim1611_mu_1.root'
-}
