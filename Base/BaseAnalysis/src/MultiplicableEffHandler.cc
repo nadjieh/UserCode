@@ -1,0 +1,1 @@
+#include "../interface/MultiplicableEffHandler.h"
