@@ -90,10 +90,10 @@ public:
             return (jet.btag_trackCountingHighPurBJetTags() > bTagCut);
 //        if(btagAlgo == "SMNIP")
 //            return (jet.btag_softMuonNoIPBJetTags() > bTagCut);
-        if(btagAlgo == "SM")
+/*        if(btagAlgo == "SM")
             return (jet.btag_softMuonBJetTags() > bTagCut);
         if(btagAlgo == "SE")
-            return (jet.btag_softElectronBJetTags() > bTagCut);
+            return (jet.btag_softElectronBJetTags() > bTagCut);*/
 //        if(btagAlgo == "SSV")
 //            return (jet.btag_simpleSecondaryVertexBJetTags() > bTagCut);
         if(btagAlgo == "JP")

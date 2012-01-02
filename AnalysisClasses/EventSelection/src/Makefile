@@ -9,7 +9,7 @@ ROOTINC		=-I$(shell root-config --incdir)
 ROOTLIBS	=$(shell root-config --libs) -lMinuit
 ROOTCFLAGS	=$(shell root-config --cflags)
 ROOTGLIBS	=$(shell root-config --glibs) -lMinuit
-TROOTLIBS	= -L$(HOMELIB) -lTotoData
+TROOTLIBS	= -L$(HOMELIB) -lToto
 JETCORRLIB 		= -L$(HOMELIB) -lJetCorrection385P3
 
 TROOTINCLUDES = -I../../../TopBrussels/TopTreeProducer/interface
@@ -26,11 +26,11 @@ SOFLAGS 	= -shared
 CXXFLAGS	+= $(ROOTCFLAGS)
 LIBS		= $(ROOTFLAGS)
 LIBS		+= $(TROOTLIBS)
-LIBS		+= $(JETCORRLIB)
+#LIBS		+= $(JETCORRLIB)
 
 HEADERS 	=$(TROOTINCLUDES)
 HEADERS 	+=$(MYHEADERS)
-HEADERS         +=$(JETCORRINCLUDES)
+#HEADERS         +=$(JETCORRINCLUDES)
 
 
 # Linux with egcs
@@ -52,7 +52,7 @@ HOMELIB		= $(HOME)/lib
 
 #PROGRAMS	=  $(SOBJECTS)
 
-all: libEventSelection385P3.so clean ; cp libEventSelection385P3.so $(HOMELIB)
+all: libEventSelection.so clean ; cp libEventSelection.so $(HOMELIB)
 
 clean:
 	@echo "Cleaning..."
@@ -66,6 +66,6 @@ clean:
 .$(SrcSuf).$(ObjSuf):
 	$(CXX) $(CXXFLAGS) -c $<
 
-libEventSelection385P3.so: $(OBJECTS)
+libEventSelection.so: $(OBJECTS)
 	$(LD) $(LIBS) $(SOFLAGS) $(LDFLAGS) $+ -o $@
 	@echo "$@ done"

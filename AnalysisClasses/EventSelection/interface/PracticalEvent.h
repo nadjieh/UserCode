@@ -20,7 +20,6 @@
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootMET.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootGenEvent.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootNPGenEvent.h"
-#include "../../../TopBrussels/TopTreeProducer/interface/TRootSignalEvent.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootEvent.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootRun.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootParticle.h"

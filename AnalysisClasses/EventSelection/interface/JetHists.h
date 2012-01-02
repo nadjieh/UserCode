@@ -16,7 +16,6 @@
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootMET.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootGenEvent.h"
-#include "../../../TopBrussels/TopTreeProducer/interface/TRootSignalEvent.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootEvent.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootRun.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootParticle.h"
@@ -53,11 +52,11 @@ class JetHists{
     TCHP = new TH1D((Name+"_TCHP").c_str(),(Name+"_TCHP").c_str(),100,-300.,100.);
     TCHP->GetXaxis()->SetTitle("TrackCountingHighPurity");
     SMNIP = new TH1D((Name+"_SMNIP").c_str(),(Name+"_SMNIP").c_str(),100,-10000.,20000.);
-    SMNIP->GetXaxis()->SetTitle("softMuonByIP3dBJetTags");
+/*    SMNIP->GetXaxis()->SetTitle("softMuonByIP3dBJetTags");
     SM = new TH1D((Name+"_SM").c_str(),(Name+"_SM").c_str(),100,-1.,1.6);//
     SM->GetXaxis()->SetTitle("softMuonBJetTags");
     SMPt = new TH1D((Name+"_SMPt").c_str(),(Name+"_SMPt").c_str(),100,0.,450);//
-    SMPt->GetXaxis()->SetTitle("softMuonByPtBJetTags");
+    SMPt->GetXaxis()->SetTitle("softMuonByPtBJetTags");*/
     //SE = new TH1D((Name+"_SE").c_str(),(Name+"_SE").c_str(),1000,-150.,60.);
     //SE->GetXaxis()->SetTitle("softElectronBJetTags");
     SSVHE = new TH1D((Name+"_SSVHE").c_str(),(Name+"_SSVHE").c_str(),100,-106.,6.);
@@ -98,9 +97,9 @@ class JetHists{
         
         TCHE->Fill(jet.at(i).btag_trackCountingHighEffBJetTags());
         TCHP->Fill(jet.at(i).btag_trackCountingHighPurBJetTags());
-        SMNIP->Fill(jet.at(i).btag_softMuonByIP3dBJetTags());
+/*        SMNIP->Fill(jet.at(i).btag_softMuonByIP3dBJetTags());
         SM->Fill(jet.at(i).btag_softMuonBJetTags());
-	SMPt->Fill(jet.at(i).btag_softMuonByPtBJetTags());
+	SMPt->Fill(jet.at(i).btag_softMuonByPtBJetTags());*/
 //        SE->Fill(jet.at(i).btag_softElectronBJetTags());
         SSVHE->Fill(jet.at(i).btag_simpleSecondaryVertexHighEffBJetTags());
         SSVHP->Fill(jet.at(i).btag_simpleSecondaryVertexHighPurBJetTags());
