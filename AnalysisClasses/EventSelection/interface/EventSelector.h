@@ -42,7 +42,10 @@ public:
          Evt = evt.evt;
          Elecs = evt.electrons;
          Muons = evt.muons;
-         Jets = evt.jets; 
+	 if(evt.CaloJets.size()!=0)
+	         Jets = evt.CaloJets; 
+	 if(evt.PFJets.size()!=0) 
+		PFJets = evt.PFJets;
          Mets = evt.mets;
         verbosity = 0;
     };
@@ -117,6 +120,7 @@ private:
     std::vector<TRootElectron>  Elecs;
     std::vector<TRootMuon>  Muons;
     std::vector<TRootCaloJet>  Jets;
+    std::vector<TRootPFJet> PFJets;
     std::vector<TRootMET>  Mets;
     double elecEta;
     double elecPt;
@@ -166,18 +170,8 @@ private:
     };
     bool hasAtLeastOneElec(){
         int nGE = nGoodElectrons();
-//        int evtId= Evt.eventId();
-//        if(evtId == 108243 || evtId == 115571 ||evtId == 497345 ||evtId == 543540 ||evtId == 474425 ||evtId == 365247 || evtId == 199361 || evtId == 409736
-//               || evtId == 409736 || evtId ==  333560 || evtId ==  457016 || evtId ==  456337 || evtId ==  60853 || evtId ==  117042 || evtId ==  218627 || evtId ==  309878
-//                 ||  evtId ==  352666 || evtId ==  209264 || evtId ==  271794)
-//            cout<<"selected Electrons: "<<nGE<<endl;
         hasExactlyOneElec = false;
         hasExactlyOneElec = (nGE == 1);
-//        if(evtId == 108243 || evtId == 115571 ||evtId == 497345 ||evtId == 543540 ||evtId == 474425 ||evtId == 365247 || evtId == 199361 || evtId == 409736
-//       || evtId == 409736 || evtId ==  333560 || evtId ==  457016 || evtId ==  456337 || evtId ==  60853 || evtId ==  117042 || evtId ==  218627 || evtId ==  309878
-//         ||  evtId ==  352666 || evtId ==  209264 || evtId ==  271794)
-//            if (hasExactlyOneElec)
-//                cout<<"hasExactlyOneElec "<<nGE<<endl;
         return(nGE > 0 );
     };
     bool hasNoSecondElec(){

@@ -13,6 +13,7 @@
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootRun.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootJet.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootPFJet.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootMuon.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootMET.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootElectron.h"
@@ -35,8 +36,16 @@ class Event{
 public:
     Event(TRootEvent Evt, TRootRun Run, TClonesArray jets_,TClonesArray electrons_,TClonesArray mets_,TClonesArray muons_, TClonesArray primaryVertices):evt(Evt), run(Run){
         this->clear();
-        for(int i = 0; i<jets_.GetEntriesFast(); i++)
-            jets.push_back(*(TRootCaloJet*)jets_.At(i));
+	if(jets_.GetEntriesFast()!=0){ 
+		TRootJet* jet = (TRootJet*)jets_.At(0);
+		if(jet->jetType()==1)
+	        	for(int i = 0; i<jets_.GetEntriesFast(); i++)
+        		    CaloJets.push_back(*(TRootCaloJet*)jets_.At(i));
+		else if(jet->jetType() == 2)
+	                for(int i = 0; i<jets_.GetEntriesFast(); i++)
+                            PFJets.push_back(*(TRootPFJet*)jets_.At(i));
+		delete jet;
+	}
         for(int i = 0; i<electrons_.GetEntriesFast(); i++)
             electrons.push_back(*(TRootElectron*)electrons_.At(i));
         for(int i = 0; i<mets_.GetEntriesFast(); i++)
@@ -54,8 +63,16 @@ public:
     };
     Event(TRootEvent Evt, TRootRun Run, TClonesArray jets_,std::vector<TRootElectron> electrons_,TClonesArray mets_,TClonesArray muons_, TClonesArray primaryVertices):evt(Evt), run(Run){
         this->clear();
-        for(int i = 0; i<jets_.GetEntriesFast(); i++)
-            jets.push_back(*(TRootCaloJet*)jets_.At(i));
+	if(jets_.GetEntriesFast()!=0){ 
+		TRootJet* jet = (TRootJet*)jets_.At(0);
+		if(jet->jetType()==1)
+	        	for(int i = 0; i<jets_.GetEntriesFast(); i++)
+        		    CaloJets.push_back(*(TRootCaloJet*)jets_.At(i));
+		else if(jet->jetType() == 2)
+	                for(int i = 0; i<jets_.GetEntriesFast(); i++)
+                            PFJets.push_back(*(TRootPFJet*)jets_.At(i));
+		delete jet;
+	}
         for( unsigned int i = 0; i<electrons_.size(); i++)
             electrons.push_back(electrons_.at(i));
         for(int i = 0; i<mets_.GetEntriesFast(); i++)
@@ -74,8 +91,16 @@ public:
     Event(TClonesArray jets_,TClonesArray electrons_,TClonesArray mets_,TClonesArray muons_,
     TClonesArray primaryVertices){
         this->clear();
-        for(int i = 0; i<jets_.GetEntriesFast(); i++)
-            jets.push_back(*(TRootCaloJet*)jets_.At(i));
+	if(jets_.GetEntriesFast()!=0){ 
+		TRootJet* jet = (TRootJet*)jets_.At(0);
+		if(jet->jetType()==1)
+	        	for(int i = 0; i<jets_.GetEntriesFast(); i++)
+        		    CaloJets.push_back(*(TRootCaloJet*)jets_.At(i));
+		else if(jet->jetType() == 2)
+	                for(int i = 0; i<jets_.GetEntriesFast(); i++)
+                            PFJets.push_back(*(TRootPFJet*)jets_.At(i));
+		delete jet;
+	}
         for(int i = 0; i<electrons_.GetEntriesFast(); i++)
             electrons.push_back(*(TRootElectron*)electrons_.At(i));
         for(int i = 0; i<mets_.GetEntriesFast(); i++)
@@ -109,7 +134,7 @@ public:
     TClonesArray primaryVertices){
         this->clear();
         for(unsigned int i = 0; i<jets_.size(); i++)
-            jets.push_back(jets_.at(i));
+            CaloJets.push_back(jets_.at(i));
         for(int i = 0; i<electrons_.GetEntriesFast(); i++)
             electrons.push_back(*(TRootElectron*)electrons_.At(i));
         for(int i = 0; i<mets_.GetEntriesFast(); i++)
@@ -130,8 +155,16 @@ public:
     Event(TClonesArray jets_,std::vector<TRootElectron> electrons_,
     TClonesArray mets_,TClonesArray muons_, TClonesArray primaryVertices){
         this->clear();
-        for(int i = 0; i<jets_.GetEntriesFast(); i++)
-            jets.push_back(*(TRootCaloJet*)jets_.At(i));
+	if(jets_.GetEntriesFast()!=0){ 
+		TRootJet* jet = (TRootJet*)jets_.At(0);
+		if(jet->jetType()==1)
+	        	for(int i = 0; i<jets_.GetEntriesFast(); i++)
+        		    CaloJets.push_back(*(TRootCaloJet*)jets_.At(i));
+		else if(jet->jetType() == 2)
+	                for(int i = 0; i<jets_.GetEntriesFast(); i++)
+                            PFJets.push_back(*(TRootPFJet*)jets_.At(i));
+		delete jet;
+	}
         for( unsigned int i = 0; i<electrons_.size(); i++)
             electrons.push_back(electrons_.at(i));
         for(int i = 0; i<mets_.GetEntriesFast(); i++)
@@ -149,11 +182,16 @@ public:
     };
     Event(TClonesArray jets_,TClonesArray electrons_){
         this->clear();
-        for(int i = 0; i<jets_.GetEntriesFast(); i++)
-            jets.push_back(*(TRootCaloJet*)jets_.At(i));
-//        if(jets.size() != 0){
-//            cout<<"In the Event: "<<jets.at(0).Pt()<<endl;
-//        }
+	if(jets_.GetEntriesFast()!=0){ 
+		TRootJet* jet = (TRootJet*)jets_.At(0);
+		if(jet->jetType()==1)
+	        	for(int i = 0; i<jets_.GetEntriesFast(); i++)
+        		    CaloJets.push_back(*(TRootCaloJet*)jets_.At(i));
+		else if(jet->jetType() == 2)
+	                for(int i = 0; i<jets_.GetEntriesFast(); i++)
+                            PFJets.push_back(*(TRootPFJet*)jets_.At(i));
+		delete jet;
+	}
         for( int i = 0; i<electrons_.GetEntriesFast(); i++)
             electrons.push_back(*(TRootElectron*)electrons_.At(i));
         GenElec.SetPxPyPzE(0,0,0,0);
@@ -164,7 +202,7 @@ public:
     };
     Event(std::vector<TRootCaloJet> jets_,TClonesArray electrons_){
         this->clear();
-        jets = jets_;
+        CaloJets = jets_;
 //        if(jets_.size() != 0){
 //            cout<<"In the Event: "<<jets_.at(0).Pt()<<endl;
 //        }
@@ -178,8 +216,16 @@ public:
     };
     Event(TClonesArray jets_,TClonesArray TPelectrons_,TClonesArray electrons_){
         this->clear();
-        for(int i = 0; i<jets_.GetEntriesFast(); i++)
-            jets.push_back(*(TRootCaloJet*)jets_.At(i));
+	if(jets_.GetEntriesFast()!=0){ 
+		TRootJet* jet = (TRootJet*)jets_.At(0);
+		if(jet->jetType()==1)
+	        	for(int i = 0; i<jets_.GetEntriesFast(); i++)
+        		    CaloJets.push_back(*(TRootCaloJet*)jets_.At(i));
+		else if(jet->jetType() == 2)
+	                for(int i = 0; i<jets_.GetEntriesFast(); i++)
+                            PFJets.push_back(*(TRootPFJet*)jets_.At(i));
+		delete jet;
+	}
         for( int i = 0; i<TPelectrons_.GetEntriesFast(); i++)
             TPobjs.push_back(*(TRootTagProbeObject*)TPelectrons_.At(i));
         for( int i = 0; i<electrons_.GetEntriesFast(); i++)
@@ -192,8 +238,16 @@ public:
     };
     Event(TClonesArray jets_,TClonesArray * pv,TClonesArray electrons_){
         this->clear();
-        for(int i = 0; i<jets_.GetEntriesFast(); i++)
-            jets.push_back(*(TRootCaloJet*)jets_.At(i));
+	if(jets_.GetEntriesFast()!=0){ 
+		TRootJet* jet = (TRootJet*)jets_.At(0);
+		if(jet->jetType()==1)
+	        	for(int i = 0; i<jets_.GetEntriesFast(); i++)
+        		    CaloJets.push_back(*(TRootCaloJet*)jets_.At(i));
+		else if(jet->jetType() == 2)
+	                for(int i = 0; i<jets_.GetEntriesFast(); i++)
+                            PFJets.push_back(*(TRootPFJet*)jets_.At(i));
+		delete jet;
+	}
         for( int i = 0; i<pv->GetEntriesFast(); i++)
             pvs.push_back(*(TRootVertex*)pv->At(i));
         for( int i = 0; i<electrons_.GetEntriesFast(); i++)
@@ -241,9 +295,9 @@ public:
          std::vector<TRootCaloJet> CleanJets;
          CleanJets.clear();
 	if(verbosity > 0)
-		cout<<"Jet size before cleaning: "<<jets.size()<<endl;
-        for(uint s = 0; s < jets.size(); s++){
-            TRootCaloJet myJet = jets.at(s);
+		cout<<"Jet size before cleaning: "<<CaloJets.size()<<endl;
+        for(uint s = 0; s < CaloJets.size(); s++){
+            TRootCaloJet myJet = CaloJets.at(s);
             bool ifElecClosedBy = false;
 	    if(verbosity > 4)
 	        cout<<"In JetCleaning, number of GoldenElectrons is: "<<Gelectrons.size()<<endl;
@@ -264,28 +318,45 @@ public:
             }else if(verbosity > 4)
 			cout<<"Jet-Electron overlap"<<endl;
         }
-         jets.clear();
-         jets = CleanJets;
+         CaloJets.clear();
+         CaloJets = CleanJets;
 	if(verbosity > 0)
-		cout<<"Jet size after cleaning: "<<jets.size()<<endl;
+		cout<<"Jet size after cleaning: "<<CaloJets.size()<<endl;
     }
-    void JetMaker(std::string bTagAlgo = "TCHE", double pt = 25., double eta = 2.4,int nCaloTower = 5,
+    void CaloJetMaker(std::string bTagAlgo = "TCHE", double pt = 25., double eta = 2.4,int nCaloTower = 5,
         double EmfUp = 1000.,double EmfLow = -1., double fhpd_ = 1000., int N90_ = -1, double bTagCut_ = 4.){
         JetSelector jetSelector("JetSelector",bTagAlgo,pt,eta,nCaloTower,EmfUp,EmfLow,fhpd_,N90_,bTagCut_);
 //        jetSelector.setJES(JES);
         jetSelector.verbose(verbosity);
-        jetSelector.setJets(jets);
+        jetSelector.setCaloJets(CaloJets);
 
-        Gjets.clear();
-        Gjets = jetSelector.goldenJets();
+        GCaloJets.clear();
+        GCaloJets = jetSelector.goldenJetsCalo();
         firstBtagIndex = jetSelector.FirstBtagIndexInGJets();
         if(verbosity > 0)
             cout<<"\tThe index of the first b-jet: "<<firstBtagIndex<<endl;
-        Bjets.clear();
-        Bjets = jetSelector.bJets();
+        BCaloJets.clear();
+        BCaloJets = jetSelector.bJetsCalo();
 
     }
+    void JetMaker(std::string bTagAlgo = "TCHE", double pt = 25., double eta = 2.4,int nCaloTower = 5,
+        double EmfUp = 1000.,double EmfLow = -1., double fhpd_ = 1000., int N90_ = -1, double bTagCut_ = 4.){this->CaloJetMaker(bTagAlgo,pt,eta,nCaloTower,EmfUp,EmfLow,fhpd_,N90_,bTagCut_);} 
 
+    void PFJetMaker(std::string bTagAlgo = "TCHE", double pt = 25., double eta = 2.4,int nCaloTower = 1,
+        double EmfUp = 1000.,double EmfLow = -1., double fhpd_ = 1000., int N90_ = -1, double bTagCut_ = 4.){
+        JetSelector jetSelector("JetSelector",bTagAlgo,pt,eta,nCaloTower,EmfUp,EmfLow,fhpd_,N90_,bTagCut_);
+//        jetSelector.setJES(JES);
+        jetSelector.verbose(verbosity);
+        jetSelector.setPFJets(PFJets);
+
+        GPFJets.clear();
+        GPFJets = jetSelector.goldenJetsPF();
+        firstBtagIndex = jetSelector.FirstBtagIndexInGJets();
+        if(verbosity > 0)
+            cout<<"\tThe index of the first b-jet: "<<firstBtagIndex<<endl;
+        BPFJets.clear();
+        BPFJets = jetSelector.bJetsPF();
+    }
     void VertexMaker(double zCut = 24){
         PrimaryVertexSelector PVSelector("PrimaryVertexSelector",zCut);
         PVSelector.verbose(verbosity);
@@ -314,10 +385,13 @@ public:
 //        JES = jes;
 //    }
     void clear(){
-        jets.clear();
-        Gjets.clear();
-        Bjets.clear();
+        CaloJets.clear();
+        GCaloJets.clear();
+        BCaloJets.clear();
 
+        PFJets.clear();
+        GPFJets.clear();
+        BPFJets.clear();
         electrons.clear();
         Gelectrons.clear();
         Secondelectrons.clear();
@@ -369,9 +443,13 @@ public:
     }
     TRootEvent evt;
     TRootRun run;
-    std::vector<TRootCaloJet> jets;
-    std::vector<TRootCaloJet> Gjets;
-    std::vector<TRootCaloJet> Bjets;
+    std::vector<TRootCaloJet> CaloJets;
+    std::vector<TRootCaloJet> GCaloJets;
+    std::vector<TRootCaloJet> BCaloJets ;
+
+    std::vector<TRootPFJet> PFJets;
+    std::vector<TRootPFJet> GPFJets;
+    std::vector<TRootPFJet> BPFJets ;
 
     std::vector<TRootElectron> electrons;
     std::vector<TRootElectron> Gelectrons;
