@@ -220,8 +220,6 @@ private:
     double fhpd;
     int N90;
     double bTagCut;
-    std::vector<TRootCaloJet> GoldenBJets;
-    std::vector<TRootCaloJet> GoldenJets;
     std::vector<TRootPFJet> GoldenPFBJets;
     std::vector<TRootPFJet> GoldenPFJets;
     std::vector<TRootCaloJet> GoldenCaloBJets;
