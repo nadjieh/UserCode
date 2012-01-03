@@ -10,6 +10,8 @@
 #include <string>
 #include <iostream>
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootPFJet.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootJet.h"
 
 using namespace TopTree;
 using namespace std;
@@ -28,56 +30,134 @@ public:
         ,bTagCut(bTagCut_){verbosity =0;/*JES = 1.;*/};
     virtual ~JetSelector(){};
     void verbose(int i){verbosity = i;}
-    bool isGoodJet(TRootCaloJet jet){
+
+    bool isGoodPFJet(TRootPFJet jet){
+                bool cond1 = bool(fabs(jet.Eta()) < etaCut &&  jet.Pt() > ptCut &&  jet.nConstituents() > nCT );
+                bool cond2 = bool(jet.chargedEmEnergyFraction() < 0.99 && jet.neutralHadronEnergyFraction() < 0.99 &&
+                             jet.neutralEmEnergyFraction() < 0.99 && jet.chargedHadronEnergyFraction() > 0 &&
+                             jet.chargedMultiplicity() > 0);
+                if(verbosity > 0){
+                    cout<<"eta: "<<fabs(jet.Eta())<<" (cut: "<<etaCut<<"), "<<bool(fabs(jet.Eta()) < etaCut)<<endl;
+                    cout<<"pt: "<<jet.Pt()<<" (cut: "<<ptCut<<"), "<<bool(jet.Pt() > ptCut)<<endl;
+                    cout<<"nCT: "<<jet.nConstituents()<<" (cut: "<<nCT<<"), "<<bool(jet.nConstituents()>nCT)<<endl;
+                    if(fabs(jet.Eta())<2.4){
+                        cout<<"PFJet ID is applied:"<<endl;
+                        cout<<"CEF: "<<jet.chargedEmEnergyFraction()<<" (cut: 0.99), "<<bool(jet.chargedEmEnergyFraction()<0.99)<<endl;
+                        cout<<"NHF: "<<jet.neutralHadronEnergyFraction()<<" (cut: 0.99), "<<bool(jet.neutralHadronEnergyFraction()<0.99)<<endl;
+                        cout<<"NEF: "<<jet.neutralEmEnergyFraction()<<" (cut: 0.99), "<<bool(jet.neutralEmEnergyFraction()<0.99)<<endl;
+                        cout<<"CHF: "<<jet.chargedHadronEnergyFraction()<<" (cut: 0), "<<bool(jet.chargedHadronEnergyFraction()>0)<<endl;
+                        cout<<"NCH: "<<jet.chargedMultiplicity()<<" (cut: 0), "<<bool(jet.chargedMultiplicity()>0)<<endl;
+                    }
+                    cout<<"Golden Jet is Accepted :-)"<<endl;
+                }
+                if(cond1 && fabs(jet.Eta()>=2.4))
+                        return cond1;
+                else if(cond1 && fabs(jet.Eta())<2.4)
+                        return cond2;
+                return cond1;
+        }
+
+    
+
+
+    bool isGoodCaloJet(TRootCaloJet jet){
 //        double JetPt = (jet.Pt())*JES;
-	if(verbosity > 0){
-	    cout<<"eta: "<<fabs(jet.Eta())<<" (cut: "<<etaCut<<"), "<<bool(fabs(jet.Eta()) < etaCut)<<endl;
-	    cout<<"pt: "<<jet.Pt()<<" (cut: "<<ptCut<<"), "<<bool(jet.Pt() > ptCut)<<endl;
-	    cout<<"nCT: "<<jet.nConstituents()<<" (cut: "<<nCT<<"), "<<bool(jet.nConstituents()>nCT)<<endl;
-	    cout<<"Emf: "<<jet.ecalEnergyFraction()<<"\n\t(cut Up: "<<emfUp<<"), "
+        if(verbosity > 0){
+            cout<<"eta: "<<fabs(jet.Eta())<<" (cut: "<<etaCut<<"), "<<bool(fabs(jet.Eta()) < etaCut)<<endl;
+            cout<<"pt: "<<jet.Pt()<<" (cut: "<<ptCut<<"), "<<bool(jet.Pt() > ptCut)<<endl;
+            cout<<"nCT: "<<jet.nConstituents()<<" (cut: "<<nCT<<"), "<<bool(jet.nConstituents()>nCT)<<endl;
+            cout<<"Emf: "<<jet.ecalEnergyFraction()<<"\n\t(cut Up: "<<emfUp<<"), "
                     <<bool(jet.ecalEnergyFraction()<emfUp)<<"\n\t(cut Low: "<<emfLow<<"), "
                     <<bool(jet.ecalEnergyFraction()>emfLow)<<endl;
-	    cout<<"fHpd: "<<jet.fHPD()<<" (cut: "<<fhpd<<"), "<<bool(jet.fHPD()<fhpd)<<endl;
-	    cout<<"N90: "<<jet.n90Hits()<<" (cut: "<<N90<<"), "<<bool(jet.n90Hits()>N90)<<endl;
-	    if(fabs(jet.Eta()) < etaCut &&  jet.Pt() > ptCut &&  jet.nConstituents() > nCT &&
+            cout<<"fHpd: "<<jet.fHPD()<<" (cut: "<<fhpd<<"), "<<bool(jet.fHPD()<fhpd)<<endl;
+            cout<<"N90: "<<jet.n90Hits()<<" (cut: "<<N90<<"), "<<bool(jet.n90Hits()>N90)<<endl;
+            if(fabs(jet.Eta()) < etaCut &&  jet.Pt() > ptCut &&  jet.nConstituents() > nCT &&
                     jet.ecalEnergyFraction() < emfUp && jet.ecalEnergyFraction() > emfLow &&
                     jet.fHPD() < fhpd && jet.n90Hits() > N90)
-	    cout<<"Golden Jet is Accepted :-)"<<endl;
-	}
+            cout<<"Golden Jet is Accepted :-)"<<endl;
+        }
         return (fabs(jet.Eta()) < etaCut &&  jet.Pt() > ptCut &&  jet.nConstituents() > nCT &&
                 jet.ecalEnergyFraction() < emfUp && jet.ecalEnergyFraction() > emfLow
                 && jet.fHPD() < fhpd && jet.n90Hits() > N90);
     }
-    void setJets(std::vector<TRootCaloJet> jets){
-        GoldenJets.clear();
-        GoldenBJets.clear();
+
+    bool isGoodJet(TRootCaloJet jet){
+	return	this->isGoodCaloJet(jet);
+    }
+  void setCaloJets(std::vector<TRootCaloJet> jets){
+        GoldenCaloJets.clear();
+        GoldenCaloBJets.clear();
         GoldenBIndecies.clear();
         for(uint i = 0 ; i<jets.size(); i++){
-	    if(verbosity > 0)
-		cout<<"----- Jet number "<<i<<endl;
-            if(isGoodJet(jets.at(i))){
-                GoldenJets.push_back(jets.at(i));
-                if(isB(jets.at(i))){
+            if(verbosity > 0)
+                cout<<"----- Jet number "<<i<<endl;
+            if(isGoodCaloJet(jets.at(i))){
+                GoldenCaloJets.push_back(jets.at(i));
+                if(isCaloB(jets.at(i))){
                     if(verbosity > 0)
-			cout<<"The Golden BJet is found\n\tGolden Jet Number is "<<(GoldenJets.size() - 1)<<endl;
-		    GoldenBJets.push_back(jets.at(i));
-                    GoldenBIndecies.push_back((GoldenJets.size() - 1));
-		}
+                        cout<<"The Golden BJet is found\n\tGolden Jet Number is "<<(GoldenCaloJets.size() - 1)<<endl;
+                    GoldenCaloBJets.push_back(jets.at(i));
+                    GoldenBIndecies.push_back((GoldenCaloJets.size() - 1));
+                }
             }
         }
     }
+
+    void setJets(std::vector<TRootCaloJet> jets){
+       this->setCaloJets(jets);
+    }
+  void setPFJets(std::vector<TRootPFJet> jets){
+        GoldenPFJets.clear();
+        GoldenPFBJets.clear();
+        GoldenBIndecies.clear();
+        for(uint i = 0 ; i<jets.size(); i++){
+            if(verbosity > 0)
+                cout<<"----- Jet number "<<i<<endl;
+            if(isGoodPFJet(jets.at(i))){
+                GoldenPFJets.push_back(jets.at(i));
+                if(isPFB(jets.at(i))){
+                    if(verbosity > 0)
+                        cout<<"The Golden BJet is found\n\tGolden Jet Number is "<<(GoldenPFJets.size() - 1)<<endl;
+                    GoldenPFBJets.push_back(jets.at(i));
+                    GoldenBIndecies.push_back((GoldenPFJets.size() - 1));
+                }
+            }
+        }
+    }
+
+    int numberOfGoodCaloJets(){
+        return GoldenCaloJets.size();
+    }
     int numberOfGoodJets(){
-        return GoldenJets.size();
+        return this->numberOfGoodCaloJets();
+    }
+    int numberOfGoodPFJets(){
+        return GoldenPFJets.size();
+    }
+
+    virtual bool EventPassedMeCalo(){
+        return (numberOfGoodCaloJets() >= 4);
     }
     virtual bool EventPassedMe(){
-        return (numberOfGoodJets() >= 4);
+        return this->EventPassedMeCalo();
+    }
+
+    bool EventPassBtaggingCalo(){
+        return (GoldenCaloBJets.size() > 0);
+    }
+    bool EventPassBtaggingPF(){
+        return (GoldenPFBJets.size() > 0);
     }
     bool EventPassBtagging(){
-        return (GoldenBJets.size() > 0);
+        return this->EventPassBtaggingCalo();
     }
-    std::vector<TRootCaloJet> bJets()const{return GoldenBJets;}
-    std::vector<TRootCaloJet> goldenJets()const{return GoldenJets;}
-    bool isB(TRootCaloJet jet)const{
+    std::vector<TRootCaloJet> bJetsCalo()const{return GoldenCaloBJets;}
+    std::vector<TRootCaloJet> goldenJetsCalo()const{return GoldenCaloJets;}
+    std::vector<TRootCaloJet> bJets()const{return this->bJetsCalo();}
+    std::vector<TRootCaloJet> goldenJets()const{return this->goldenJetsCalo();}
+    std::vector<TRootPFJet> bJetsPF()const{return GoldenPFBJets;}
+    std::vector<TRootPFJet> goldenJetsPF()const{return GoldenPFJets;}
+    bool isCaloB(TRootCaloJet jet)const{
         if(btagAlgo == "TCHE"){
 	    if(verbosity > 0){
 		cout<<"-- bTag Value: "<<jet.btag_trackCountingHighEffBJetTags()<<endl;
@@ -106,12 +186,21 @@ public:
             return (jet.btag_combinedSecondaryVertexMVABJetTags() > bTagCut);
         if(btagAlgo == "CSV")
             return (jet.btag_combinedSecondaryVertexBJetTags() > bTagCut);
+       if(btagAlgo == "SSVE")
+            return (jet.btag_simpleSecondaryVertexHighEffBJetTags() > bTagCut);
+        if(btagAlgo == "SSVP")
+            return (jet.btag_simpleSecondaryVertexHighPurBJetTags() > bTagCut);
         std::cout<<"BAD ALGORITHM, RETURNS FALSE ..."<<std::endl;
         return false;
     }
-//    void setJES(double jes){
-//        JES = jes;
-//    }
+    bool isB(TRootCaloJet jet)const{return this->isCaloB(jet);}
+    bool isPFB(TRootPFJet jet)const{
+	const TRootJet * tmp = (TRootJet*)(&jet);
+        const TRootCaloJet* CaloJet = static_cast<const TRootCaloJet*>(tmp);
+	bool res = this->isCaloB(*CaloJet);
+	delete CaloJet; delete tmp;
+	return res;	
+    }
     int FirstBtagIndexInGJets()const{
         int res = -1;
         if(GoldenBIndecies.size() == 0)
@@ -133,6 +222,10 @@ private:
     double bTagCut;
     std::vector<TRootCaloJet> GoldenBJets;
     std::vector<TRootCaloJet> GoldenJets;
+    std::vector<TRootPFJet> GoldenPFBJets;
+    std::vector<TRootPFJet> GoldenPFJets;
+    std::vector<TRootCaloJet> GoldenCaloBJets;
+    std::vector<TRootCaloJet> GoldenCaloJets;
     std::vector<int> GoldenBIndecies;
     int verbosity;
 //    double JES;
