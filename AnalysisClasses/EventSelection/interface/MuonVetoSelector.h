@@ -76,6 +76,8 @@ public:
     int numberOfDesiredMuon(){
         return DesiredMuons.size();
     }
+    bool MuChannelPassMuVeto(){return (this->looseMuons().size() == 0);}
+    bool ElecChannelPassMuVeto(){return ((this->looseMuons().size() == 0) && (this->desiredMuons().size()==0));}
     virtual bool EventPassedMe(){
         return(this->numberOfDesiredMuon() < 1);
     }
