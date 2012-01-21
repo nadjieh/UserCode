@@ -41,13 +41,25 @@ public:
 		cout<<"D0: "<<muon.d0()<<" < ? "<<d0Cut<<endl;
 		cout<<"nvh: "<<muon.nofValidHits()<< " >= ? "<<nvhCut<<endl;
 		cout<<"nMuvh: "<<muon.nofValidMuHits()<< " >= ? 0"<<endl;
-		cout<<"isoVal: "<<relIso<<" < ? "<<relIso<<endl;
+		cout<<"isoVal: "<<relIso<<" < ? "<<isoCut<<endl;
 		cout<<"nPixelLayersWithMeasuredHits: "<<muon.nofPixelLayersWithMeasurement()<<" < ? "<<nPixelWithMeasuredHits<<endl;
 		cout<<"nSegMatched: "<<muon.nofMatches()<<" < ? "<<nSegMatched<<endl;
 		if(muon.Pt() > ptCut && fabs(muon.Eta()) < EtaCut  && fabs(muon.d0())< d0Cut && muon.nofValidHits()>= nvhCut && relIso< isoCut && isGlobalPromptTight && GlTrk && (muon.nofPixelLayersWithMeasurement() >= nPixelWithMeasuredHits) && (muon.nofMatches()>nSegMatched))
 		    cout<<"Desired Muon is found :-)"<<endl;
 	    }
             return(muon.Pt() > ptCut && fabs(muon.Eta()) < EtaCut && fabs(muon.d0())< d0Cut && muon.nofValidHits()>= nvhCut && relIso< isoCut && isGlobalPromptTight && GlTrk &&  (muon.nofPixelLayersWithMeasurement() >= nPixelWithMeasuredHits) && (muon.nofMatches()>nSegMatched));
+    }
+    bool isLooseMuon(TRootMuon muon ){
+            double relIso=(muon.chargedHadronIso()+muon.neutralHadronIso()+muon.photonIso())/muon.Pt();
+	    if(verbosity > 2){
+		cout<<"isGlobal: "<<muon.isGlobalMuon()<<endl;
+		cout<<"eta: "<<fabs(muon.Eta())<<" <? 2.5" <<endl;
+		cout<<"pt: "<<muon.Pt()<<" > ? 10"<<endl;
+		cout<<"isoVal: "<<relIso<<" < ? 0.2"<<endl;
+		if(muon.isGlobalMuon() && (fabs(muon.Eta())<2.5) && (muon.Pt()>10) && relIso<0.2)
+		    cout<<"Loose electron is found :-("<<endl;
+	    }
+	    return (muon.isGlobalMuon() && (fabs(muon.Eta())<2.5) && (muon.Pt()>10) && relIso<0.2);
     }
     void setMuons(std::vector<TRootMuon> muons){
         DesiredMuons.clear();
@@ -57,6 +69,8 @@ public:
 		cout<<"***** Muon number "<<i<<endl;
             if(isDesiredMuon(muons.at(i)))
                 DesiredMuons.push_back(muons.at(i));
+	    else if (isLooseMuon(muons.at(i)))
+		LooseMuons.push_back(muons.at(i));
         }
     }
     int numberOfDesiredMuon(){
