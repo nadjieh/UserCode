@@ -229,13 +229,11 @@ public:
     void setElectrons(std::vector<TRootElectron> input, double PVposition = 0.){
         goldenElecs.clear();
         secondElecs.clear();
-//        sourceGoodIndexForTPusage.clear();
         for(uint i =0; i<input.size(); i++){
 	    if(verbosity > 2)
 		cout<<"====== Electron number "<<i<<endl;
             if(isGoodElectron(input.at(i),"SC",PVposition)){
                 goldenElecs.push_back(input.at(i));
-//                sourceGoodIndexForTPusage.push_back(i);
             }
             else if(isSecondElectron(input.at(i)))
                 secondElecs.push_back(input.at(i));
@@ -253,28 +251,18 @@ public:
     virtual bool EventPassedMe(){
         return (this->numberOfGE() > 0);
     }
-    bool EventPassSecondElec()const{
-        return (secondElecs.size() < 1);
-    }
     TRootElectron GoldenElec()const{
         return goldenElecs.at(0);
     }
     bool MuChannelPassElecVeto(){return ((this->secondElectrons().size() == 0) && (this->GoldenElecs().size()==0));}
     bool ElecChannelPassElecVeto(){return ( this->secondElectrons().size()==0);}
-//    TRootElectron MatchedGoldenElec()const{
-//        if(matchedEleIndex != -1)
-//            return goldenElecs.at(matchedEleIndex);
-//        return TLorentzVector(-100,-100,-100,-100);
-//    }
     std::vector<TRootElectron> GoldenElecs()const{
 	if(verbosity > 2)
 	    cout<<"in the GoldenElecs method size is: "<<goldenElecs.size()<<endl;
 	return goldenElecs;
     }
-    std::vector<int> IndeciesOfGoldenElecs()const{
-        return sourceGoodIndexForTPusage;
-    }
-    bool EventPassConversion()const{return (goldenElecs.at(0).missingHits() == 0 );}
+    bool GoldenNotFromConversion()const{return ((fabs(goldenElecs.at(0).DCot()) > 0.02 || fabs(goldenElecs.at(0).Dist()) > 0.02)  &&(goldenElecs.at(0).missingHits() == 0) );}
+    bool EventPassConversion()const{return this->GoldenNotFromConversion();}// backward compatibility
     std::vector<TRootElectron> secondElectrons()const{return secondElecs;};
 private:
     std::string Name;
@@ -290,7 +278,6 @@ private:
     double secondptCut;
     std::vector<TRootElectron> secondElecs;
     std::vector<TRootElectron> goldenElecs;
-    std::vector<int> sourceGoodIndexForTPusage;
     int verbosity;
     double distToPv;
     double secondIsoCut;
