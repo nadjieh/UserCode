@@ -36,10 +36,10 @@ using namespace std;
 
 class ElectronSelector{
 public:
-    ElectronSelector(std::string name,double pt = 20., double eta = 2.4, double Exc_Low = 1.442
-        ,double Exc_High = 1.56, std::string Id = "rTight",std::string secondID = "rLoose" ,
-	std::string Iso = "", double D0 = 0.02, double IsoCut = 0.1,double secPt = 20., 
-        double distToPV = 10000.,double secIsoCut = 1000.):Name(name)
+    ElectronSelector(std::string name,double pt = 30., double eta = 2.5, double Exc_Low = 1.4442
+        ,double Exc_High = 1.5660, std::string Id = "rTight",std::string secondID = "rLoose" ,
+	std::string Iso = "", double D0 = 0.02, double IsoCut = 0.125,double secPt = 15., 
+        double distToPV = 10000.,double secIsoCut =0.2 ):Name(name)
         ,ptCut(pt)
         ,etaCut(eta)
         ,exclusion_Low(Exc_Low)
@@ -57,10 +57,10 @@ public:
     void verbose(int i){verbosity = i;}
 
     bool isGoodElectron(TRootElectron e, std::string gap= "SC", double PVposition = 0.){
-        double distanceToPV = fabs(e.vz() - PVposition);
-	bool closeToPV = (distanceToPV < distToPv);
-	if(verbosity > 2 )
-  	     cout<<"PV position Z: "<<PVposition<<", distanceToPV = "<<distanceToPV<<" ? "<<distToPv<<" isOk = "<<closeToPV<<endl;
+        //double distanceToPV = fabs(e.vz() - PVposition);
+	//bool closeToPV = (distanceToPV < distToPv);
+	//if(verbosity > 2 )
+  	//     cout<<"PV position Z: "<<PVposition<<", distanceToPV = "<<distanceToPV<<" ? "<<distToPv<<" isOk = "<<closeToPV<<endl;
         double eta = fabs(e.Eta());
 	if (verbosity > 2)
 		cout<<"eta: "<<eta<<endl;
@@ -78,44 +78,46 @@ public:
 	bool Id = this->isId(e);
 	if (verbosity > 2)
 		cout<<"ID: "<<Id<<endl;
-	bool isIso = (((double)e.combinedIso(3,3,3)/(double)e.Et())<isoCut);
+	double relIso = (e.chargedHadronIso()+e.neutralHadronIso()+e.photonIso())/e.Pt();
+	bool isIso = (relIso<isoCut);
 	if (verbosity > 2)
-		cout<<"IsoVal: "<<((double)e.combinedIso(3,3,3)/(double)e.Et())<<"\tisIso: "<<isIso<<endl;
-        bool d0Constraint = (fabs(e.d0()) < d0Cut);//wrt PV
+		cout<<"IsoVal: "<<relIso<<"\tisIso: "<<isIso<<endl;
+        bool d0Constraint = (fabs(e.d0()) < d0Cut);//wrt BS
 	if (verbosity > 2){
 		cout<<"D0: "<<fabs(e.d0())<<"\td0Constraint: "<<d0Constraint<<endl;
 //		cout<<"ip: "<<fabs(e.dB())<<"\td0Constraint: "<<d0Constraint<<endl;
         }
 	if (verbosity > 2)
-		if(EtaGoodRange && PtGoodRange && Id && isIso && d0Constraint && closeToPV)
+		if(EtaGoodRange && PtGoodRange && Id && isIso && d0Constraint/* && closeToPV*/)
 			cout<<"Golden Electron is Accepted :-)"<<endl;
-	return(EtaGoodRange && PtGoodRange && Id && isIso && d0Constraint && closeToPV);
+	return(EtaGoodRange && PtGoodRange && Id && isIso && d0Constraint/* && closeToPV*/);
     }
     bool isSecondElectron(TRootElectron e, std::string gap= "SC"){
         double eta = fabs(e.Eta());
 	if (verbosity > 2)
 		cout<<"eta: "<<eta<<endl;
 	bool EtaGoodRange = (eta < etaCut);
-        if(gap == "SC")
-            eta = fabs(e.caloPosition().Eta());
-	if (verbosity > 2)
-		cout<<"etaSC: "<<eta<<endl;
-        EtaGoodRange = (EtaGoodRange && !(exclusion_Low < eta && eta < exclusion_High) );
+       // if(gap == "SC")
+       //     eta = fabs(e.caloPosition().Eta());
+       //if (verbosity > 2)
+//		cout<<"etaSC: "<<eta<<endl;
+//        EtaGoodRange = (EtaGoodRange && !(exclusion_Low < eta && eta < exclusion_High) );
 	if (verbosity > 2)
 		cout<<"eta in range: "<<EtaGoodRange<<endl;
 	bool PtGoodRange = e.Pt() > secondptCut;
 	if (verbosity > 2)
 		cout<<"Pt: "<<e.Pt()<<"\tPtGoodRange: "<<PtGoodRange<<endl;
-	bool Id = this->isSecondId(e);
-	if (verbosity > 2)
-		cout<<"ID: "<<Id<<endl;
-        bool Iso = (((double)e.combinedIso(3,3,3)/(double)e.Et())<secondIsoCut);
+	//bool Id = this->isSecondId(e);
+	//if (verbosity > 2)
+	//	cout<<"ID: "<<Id<<endl;
+	double relIso = (e.chargedHadronIso()+e.neutralHadronIso()+e.photonIso())/e.Pt();
+	bool isIso = (relIso<secondIsoCut);
 	if(verbosity > 2 )
-	  cout<<"IsoVal = "<<((double)e.combinedIso(3,3,3)/(double)e.Et())<<" isIso: "<<Iso<<endl;
+	  cout<<"IsoVal = "<<relIso<<" isIso: "<<isIso<<endl;
 	if (verbosity > 2)
-		if(EtaGoodRange && PtGoodRange && Id && Iso)
+		if(EtaGoodRange && PtGoodRange /*&& Id*/ && isIso)
 			cout<<"Second Electron is Accepted :-)"<<endl;
-	return(EtaGoodRange && PtGoodRange && Id && Iso);
+	return(EtaGoodRange && PtGoodRange /*&& Id*/ && isIso);
     }
     bool isVBTF70Id(TopTree::TRootElectron * e){
 	if(e->isEB()){//ECal Barrel
@@ -257,6 +259,8 @@ public:
     TRootElectron GoldenElec()const{
         return goldenElecs.at(0);
     }
+    bool MuChannelPassElecVeto(){return ((this->secondElectrons().size() == 0) && (this->GoldenElecs().size()==0));}
+    bool ElecChannelPassElecVeto(){return ( this->secondElectrons().size()==0);}
 //    TRootElectron MatchedGoldenElec()const{
 //        if(matchedEleIndex != -1)
 //            return goldenElecs.at(matchedEleIndex);
