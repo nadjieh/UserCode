@@ -1,0 +1,9 @@
+Here I try to put the information about triggers which have to be used in different run ranges. I added them in my twiki as well.
+aug.txt:
+produced by lumiContent.py
+includes information about where HLT_IsoMu17_v* is prescaled in ReReco05Aug SingleMu dataset
+
+
+all2011.txt:
+produced by lumiContent.py
+includes information about where HLT_IsoMu17_v* is prescaled in full 2011 SingleMu dataset
