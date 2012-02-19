@@ -2,36 +2,31 @@
  * File:   SelectAndSave.c
  * Author: ajafari
  *
- * Created on August 6, 2010, 8:18 PM
+ * Created on January 29, 2012, 8:18 PM
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-
-//#include "../interface/Cut.h"
-//#include "../interface/Cut.h"
 #include "../interface/ElectronSelector.h"
 
 #include "../interface/Event.h"
-//#include "../interface/EventsHists.h"
+
 #include "../interface/ElectronHists.h"
 #include "../interface/MuonHists.h"
 #include "../interface/PVHists.h"
 #include "../interface/JetHists.h"
 #include "../interface/JetSelector.h"
 #include "../interface/MuonVetoSelector.h"
-//#include "../interface/NoSelection.h"
+
 #include "../interface/PrimaryVertexSelector.h"
-#include "../interface/EventSelector.h"
-#include <iomanip>
+//#include "../interface/EventSelector.h"
+
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootMuon.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootElectron.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootJet.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootPFJet.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootMET.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootGenEvent.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootNPGenEvent.h"
-#include "../../../TopBrussels/TopTreeProducer/interface/TRootSignalEvent.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootEvent.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootRun.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootParticle.h"
@@ -56,8 +51,7 @@
 
 using namespace std;
 using namespace TopTree;
-//EventHists sas_beforSelection("beforSelection");
-//EventHists sas_HLT("HLTSelection");
+
 
 PVHists sas_atLeastOnGPV("before_PV_selection");
 ElectronHists sas_ExactlyOneGESelection("before_GE_selection");
@@ -65,21 +59,15 @@ MuonHists sas_MuVetoSelection("before_MuVeto_selection");
 ElectronHists sas_zVetoHits("before_zVeto_Selection",3,true);
 ElectronHists sas_MissingHits("before_MissingHits_Selection");
 ElectronHists sas_PartnerTrack("before_PartnerTrack_selection");
-JetHists sas_Jets("before_Jet_selection");
+JetHists sas_Jets("before_Jet_selection",2);
 
 
-JetHists sas_BJets("before_BJet_selection");
+JetHists sas_BJets("before_BJet_selection",2);
 ElectronHists sas_AllFinalElectrons("before_BJet_AllFinalElec");
 ElectronHists sas_GoldenFinalElectrons("before_BJet_GoldenFinalElec");
 
 
-/*EventHists sas_Zveto("Zveto");
-EventHists sas_ConversionRejection("ConversionRejection");
-EventHists sas_AtLeastFourJetsSelection("AtLeastFourJets");
-EventHists sas_MetSelection("sas_MetSelection");
-EventHists sas_MuonVeto("sas_MuonVeto");
-EventHists sas_PassedBtagSelection("PassedBtag");
-*/
+
 
 
 int sas_n0;
@@ -212,13 +200,7 @@ void endJob(){
     }
 
 
-/*    sas_beforSelection.WriteAll(plots);
-    sas_atLeastOnGPV.WriteAll(plots);
-    sas_ExactlyOneGESelection.WriteAll(plots);
-    sas_MuonVeto.WriteAll(plots);
-    sas_Zveto.WriteAll(plots);
-    sas_ConversionRejection.WriteAll(plots);
-*/
+
     plots->Write();
     plots->Close();
     double intialBeforePresel = (double)sas_n0/(double)PreSelEff;
@@ -461,10 +443,10 @@ int main(int argc, char** argv){
 	if(fillTree)
             eventTree_f->Fill();
         if(sas_dojet){
-	    sas_Jets.Fill(myEvent_tmp.jets,myEvent_tmp.Gjets.size(),myEvent_tmp.Bjets.size());
-	    if(myEvent_tmp.Gjets.size() >= 3)		
+	    sas_Jets.FillPFJets(myEvent_tmp.PFJets,myEvent_tmp.GPFJets.size(),myEvent_tmp.BPFJets.size());
+	    if(myEvent_tmp.GPFJets.size() >= 3)		
 		sas_nJet3++;
-            if(myEvent_tmp.Gjets.size() >= 4){
+            if(myEvent_tmp.GPFJets.size() >= 4){
                 sas_nJet++;
     //                    sas_AtLeastFourJetsSelection.Fill(myEvent_tmp);
                 if(sas_verbosity > 0){
@@ -476,15 +458,15 @@ int main(int argc, char** argv){
         }
         if(sas_doBtag){
 	    TLorentzVector ge(-1,-1,-1,-1);
-	    sas_BJets.Fill(myEvent_tmp.Gjets,myEvent_tmp.Gjets.size(),myEvent_tmp.Bjets.size(),true);
+	    sas_BJets.FillPFJets(myEvent_tmp.GPFJets,myEvent_tmp.GPFJets.size(),myEvent_tmp.BPFJets.size(),true);
 	//    cout<<"1"<<endl;
 	    sas_AllFinalElectrons.Fill(myEvent_tmp.electrons,ge,myEvent_tmp.Gpvs.at(0).z(),myEvent_tmp.Gelectrons.size());
         //    cout<<"2"<<endl;
 	    sas_GoldenFinalElectrons.Fill(myEvent_tmp.Gelectrons,ge,myEvent_tmp.Gpvs.at(0).z(),myEvent_tmp.Gelectrons.size());
         //    cout<<"3"<<endl;
 	    double ht = 0;
-	    for(unsigned int wq = 0; wq < myEvent_tmp.Gjets.size(); wq++){
-		ht += myEvent_tmp.Gjets.at(wq).Pt();
+	    for(unsigned int wq = 0; wq < myEvent_tmp.GPFJets.size(); wq++){
+		ht += myEvent_tmp.GPFJets.at(wq).Pt();
 	    }
 	    HT->Fill(ht);
 	    double max = -100;
@@ -503,7 +485,7 @@ int main(int argc, char** argv){
                         cout<<"\tJet to consider: "<<wp<<endl;
                     }
 
-		    sum += myEvent_tmp.Gjets.at(wp);
+		    sum += myEvent_tmp.GPFJets.at(wp);
 		}
                 if(sas_verbosity > 0){
                     cout<<"current Pt: "<<sum.Pt()<<endl;
@@ -516,7 +498,7 @@ int main(int argc, char** argv){
 	    }
 //	    cout<<" M3  "<<m3<<endl;
 	    M3->Fill(m3);
-            if(myEvent_tmp.Bjets.size() != 0){
+            if(myEvent_tmp.BPFJets.size() != 0){
                 sas_nBtag++;
     //                    sas_PassedBtagSelection.Fill(myEvent_tmp);
                 if(sas_verbosity > 0)
@@ -525,18 +507,6 @@ int main(int argc, char** argv){
                 continue;
         }
         //cout<<"Event selected"<<endl;
- /*       TBranch* b = eventTree_f->GetBranch("PrimaryVertex");
-        TClonesArray * PVs = new TClonesArray("TopTree::TRootVertex", 0);
-        b->SetAddress(&PVs);
-
-        TBranch*eb = (TBranch *) eventTree_f->GetBranch("Electrons");
-        TClonesArray* tmpEle = new TClonesArray("TopTree::TRootElectron", 0);
-        eb->SetAddress(&tmpEle);
-
-        eventTree_f->GetEvent(ievt);
-        cout<<"PV: "<<PVs->GetEntriesFast()<<endl;
-        cout<<"Elec: "<<tmpEle->GetEntriesFast()<<endl;*/        
-	//cout<<"nEvents in final tree: "<<eventTree_f->GetEntries()<<endl;
         onepassed = true;
         
     }
