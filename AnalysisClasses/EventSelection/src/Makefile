@@ -66,6 +66,9 @@ clean:
 .$(SrcSuf).$(ObjSuf):
 	$(CXX) $(CXXFLAGS) -c $<
 
+tst:
+	echo $(LD) $(LIBS) $(SOFLAGS) $(LDFLAGS) $+ -o $@
+
 libEventSelection.so: $(OBJECTS)
 	$(LD) $(LIBS) $(SOFLAGS) $(LDFLAGS) $+ -o $@
 	@echo "$@ done"
