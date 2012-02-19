@@ -37,7 +37,7 @@ using namespace std;
 class ElectronSelector{
 public:
     ElectronSelector(std::string name,double pt = 30., double eta = 2.5, double Exc_Low = 1.4442
-        ,double Exc_High = 1.5660, std::string Id = "rTight",std::string secondID = "rLoose" ,
+        ,double Exc_High = 1.5660, std::string Id = "VBTF70",std::string secondID = "rLoose" ,
 	std::string Iso = "", double D0 = 0.02, double IsoCut = 0.125,double secPt = 15., 
         double distToPV = 10000.,double secIsoCut =0.2 ):Name(name)
         ,ptCut(pt)
@@ -97,27 +97,19 @@ public:
 	if (verbosity > 2)
 		cout<<"eta: "<<eta<<endl;
 	bool EtaGoodRange = (eta < etaCut);
-       // if(gap == "SC")
-       //     eta = fabs(e.caloPosition().Eta());
-       //if (verbosity > 2)
-//		cout<<"etaSC: "<<eta<<endl;
-//        EtaGoodRange = (EtaGoodRange && !(exclusion_Low < eta && eta < exclusion_High) );
 	if (verbosity > 2)
 		cout<<"eta in range: "<<EtaGoodRange<<endl;
 	bool PtGoodRange = e.Pt() > secondptCut;
 	if (verbosity > 2)
 		cout<<"Pt: "<<e.Pt()<<"\tPtGoodRange: "<<PtGoodRange<<endl;
-	//bool Id = this->isSecondId(e);
-	//if (verbosity > 2)
-	//	cout<<"ID: "<<Id<<endl;
 	double relIso = (e.chargedHadronIso()+e.neutralHadronIso()+e.photonIso())/e.Pt();
 	bool isIso = (relIso<secondIsoCut);
 	if(verbosity > 2 )
 	  cout<<"IsoVal = "<<relIso<<" isIso: "<<isIso<<endl;
 	if (verbosity > 2)
-		if(EtaGoodRange && PtGoodRange /*&& Id*/ && isIso)
+		if(EtaGoodRange && PtGoodRange  && isIso)
 			cout<<"Second Electron is Accepted :-)"<<endl;
-	return(EtaGoodRange && PtGoodRange /*&& Id*/ && isIso);
+	return(EtaGoodRange && PtGoodRange  && isIso);
     }
     bool isVBTF70Id(TopTree::TRootElectron * e){
 	if(e->isEB()){//ECal Barrel

@@ -49,13 +49,13 @@ class MuonHists{
 	  nMV->GetXaxis()->SetTitle("N_{muons} for veto");
      }
     virtual ~MuonHists(){};
-    virtual void Fill(std::vector<TRootMuon> mu, int nVM = -1){
+    virtual void Fill(std::vector<TRootMuon> mu, int nVM = -1,double weight = 1){
 	for(unsigned int i = 0; i<mu.size(); i++){
-            kinHists->Fill(&(mu.at(i)));
-	    isGood->Fill(mu.at(i).isGlobalMuon());
-	    relIso->Fill((mu.at(i).isoR03_sumPt()+mu.at(i).isoR03_emEt()+mu.at(i).isoR03_hadEt())/mu.at(i).Pt());
+            kinHists->Fill(&(mu.at(i)),weight);
+	    isGood->Fill(mu.at(i).isGlobalMuon(),weight);
+	    relIso->Fill((mu.at(i).isoR03_sumPt()+mu.at(i).isoR03_emEt()+mu.at(i).isoR03_hadEt())/mu.at(i).Pt(),weight);
 	}
-        nMV->Fill(nVM);
+        nMV->Fill(nVM,weight);
     }
     virtual void WriteAll(TDirectory * dir){
         if (dir == 0)

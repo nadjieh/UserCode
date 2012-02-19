@@ -38,9 +38,9 @@ public:
         eta->GetXaxis()->SetTitle("#eta");
     };
     virtual ~KinematicHists(){};
-    virtual void Fill(theObject * obj){
-        pt->Fill(obj->Pt());
-        eta->Fill(obj->Eta());
+    virtual void Fill(theObject * obj,double weight = 1){
+        pt->Fill(obj->Pt(),weight);
+        eta->Fill(obj->Eta(),weight);
     };
     virtual void Write(){
       pt->Write();

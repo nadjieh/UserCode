@@ -18,7 +18,7 @@ using namespace std;
 class JetSelector{
 public:
     JetSelector(std::string name, std::string bTagAlgo = "TCHE", double pt = 25., double eta = 2.4,
-            int nCaloTower = 5,double EmfUp = 1000.,double EmfLow = -1.,double fhpd_ = 1000., int N90_ = -1, double bTagCut_ = 4.):Name(name)
+            int nCaloTower = 5,double EmfUp = 1000.,double EmfLow = -1.,double fhpd_ = 1000., int N90_ = -1, double bTagCut_ = 3.41):Name(name)
         ,btagAlgo(bTagAlgo)
         ,ptCut(pt)
         ,etaCut(eta)
@@ -48,12 +48,16 @@ public:
                         cout<<"CHF: "<<jet.chargedHadronEnergyFraction()<<" (cut: 0), "<<bool(jet.chargedHadronEnergyFraction()>0)<<endl;
                         cout<<"NCH: "<<jet.chargedMultiplicity()<<" (cut: 0), "<<bool(jet.chargedMultiplicity()>0)<<endl;
                     }
-                    cout<<"Golden Jet is Accepted :-)"<<endl;
                 }
-                if(cond1 && fabs(jet.Eta()>=2.4))
+                if(cond1 && fabs(jet.Eta())>=2.4 && verbosity > 0)
+                    cout<<"Golden Jet is Accepted :-)\n"<<endl;
+                if(cond1 && fabs(jet.Eta())>=2.4)
                         return cond1;
-                else if(cond1 && fabs(jet.Eta())<2.4)
+                else if(cond1 && fabs(jet.Eta())<2.4){
+                        if(cond2 && verbosity > 0)
+                            cout<<"Golden Jet is Accepted :-)\n"<<endl;
                         return cond2;
+                }
                 return cond1;
         }
 
@@ -113,7 +117,8 @@ public:
         for(uint i = 0 ; i<jets.size(); i++){
             if(verbosity > 0)
                 cout<<"----- Jet number "<<i<<endl;
-            if(isGoodPFJet(jets.at(i))){
+            bool s = isGoodPFJet(jets.at(i));
+            if(s){
                 GoldenPFJets.push_back(jets.at(i));
                 if(isPFB(jets.at(i))){
                     if(verbosity > 0)
@@ -167,21 +172,16 @@ public:
 	    return (jet.btag_trackCountingHighEffBJetTags() > bTagCut);
 	}
         if(btagAlgo == "TCHP")
+            if(verbosity > 0){
+		cout<<"-- bTag Value: "<<jet.btag_trackCountingHighPurBJetTags()<<endl;
+		if(jet.btag_trackCountingHighPurBJetTags() > bTagCut)
+		    cout<<"bTagCut "<<bTagCut <<" passed ... "<<endl;
+	    }
             return (jet.btag_trackCountingHighPurBJetTags() > bTagCut);
-//        if(btagAlgo == "SMNIP")
-//            return (jet.btag_softMuonNoIPBJetTags() > bTagCut);
-/*        if(btagAlgo == "SM")
-            return (jet.btag_softMuonBJetTags() > bTagCut);
-        if(btagAlgo == "SE")
-            return (jet.btag_softElectronBJetTags() > bTagCut);*/
-//        if(btagAlgo == "SSV")
-//            return (jet.btag_simpleSecondaryVertexBJetTags() > bTagCut);
         if(btagAlgo == "JP")
             return (jet.btag_jetProbabilityBJetTags() > bTagCut);
         if(btagAlgo == "JBP")
             return (jet.btag_jetBProbabilityBJetTags() > bTagCut);
-//        if(btagAlgo == "IPMVA")
-//            return (jet.btag_impactParameterMVABJetTags() > bTagCut);
         if(btagAlgo == "CSVMVA")
             return (jet.btag_combinedSecondaryVertexMVABJetTags() > bTagCut);
         if(btagAlgo == "CSV")
@@ -195,11 +195,35 @@ public:
     }
     bool isB(TRootCaloJet jet)const{return this->isCaloB(jet);}
     bool isPFB(TRootPFJet jet)const{
-	const TRootJet * tmp = (TRootJet*)(&jet);
-        const TRootCaloJet* CaloJet = static_cast<const TRootCaloJet*>(tmp);
-	bool res = this->isCaloB(*CaloJet);
-	delete CaloJet; delete tmp;
-	return res;	
+        if(btagAlgo == "TCHE"){
+	    if(verbosity > 0){
+		cout<<"-- bTag Value: "<<jet.btag_trackCountingHighEffBJetTags()<<endl;
+		if(jet.btag_trackCountingHighEffBJetTags() > bTagCut)
+		    cout<<"bTagCut "<<bTagCut <<" passed ... "<<endl;
+	    }
+	    return (jet.btag_trackCountingHighEffBJetTags() > bTagCut);
+	}
+        if(btagAlgo == "TCHP")
+            if(verbosity > 0){
+		cout<<"-- bTag Value: "<<jet.btag_trackCountingHighPurBJetTags()<<endl;
+		if(jet.btag_trackCountingHighPurBJetTags() > bTagCut)
+		    cout<<"bTagCut "<<bTagCut <<" passed ... "<<endl;
+	    }
+            return (jet.btag_trackCountingHighPurBJetTags() > bTagCut);
+        if(btagAlgo == "JP")
+            return (jet.btag_jetProbabilityBJetTags() > bTagCut);
+        if(btagAlgo == "JBP")
+            return (jet.btag_jetBProbabilityBJetTags() > bTagCut);
+        if(btagAlgo == "CSVMVA")
+            return (jet.btag_combinedSecondaryVertexMVABJetTags() > bTagCut);
+        if(btagAlgo == "CSV")
+            return (jet.btag_combinedSecondaryVertexBJetTags() > bTagCut);
+       if(btagAlgo == "SSVE")
+            return (jet.btag_simpleSecondaryVertexHighEffBJetTags() > bTagCut);
+        if(btagAlgo == "SSVP")
+            return (jet.btag_simpleSecondaryVertexHighPurBJetTags() > bTagCut);
+        std::cout<<"BAD ALGORITHM, RETURNS FALSE ..."<<std::endl;
+        return false;
     }
     int FirstBtagIndexInGJets()const{
         int res = -1;

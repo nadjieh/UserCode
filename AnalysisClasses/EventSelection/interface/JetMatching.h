@@ -19,6 +19,7 @@
 #include "../../../AnalysisClasses/ChiSquared/interface/DR.h"
 using namespace std;
 using namespace TopTree;
+
 struct mySortByPt{
     bool operator() (std::pair<TLorentzVector, int> comb1, std::pair<TLorentzVector, int> comb2) { return (comb1.first.Pt() > comb2.first.Pt());}
 } SortByPt;

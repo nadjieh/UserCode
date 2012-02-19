@@ -52,19 +52,19 @@ class PVHists{
     nGPV->GetXaxis()->SetTitle("nGPV");
   };
   virtual ~PVHists(){};
-  virtual void Fill(std::vector<TRootVertex> pvs, int nGpv = 10.){
+  virtual void Fill(std::vector<TRootVertex> pvs, int nGpv = 10.,double weight=1){
 	for(unsigned int i = 0; i<1/*pvs.size()*/; i++){
 		TRootVertex pv = pvs.at(i);
 		double Rho = sqrt((pv.x() * pv.x()) + (pv.y() * pv.y()));
-	        rho->Fill(Rho);
+	        rho->Fill(Rho,weight);
       //std::cout<<"in Fill Electron Method: 3"<<std::endl;
-	        z->Fill(fabs(pv.z()));
+	        z->Fill(fabs(pv.z()),weight);
       //std::cout<<"in Fill Electron Method: 4"<<std::endl;
-        	ndof->Fill(pv.ndof());
+        	ndof->Fill(pv.ndof(),weight);
       //std::cout<<"in Fill Electron Method: 5"<<std::endl;
-	        isFake->Fill(pv.isFake());
+	        isFake->Fill(pv.isFake(),weight);
 	}
-	nGPV->Fill(nGpv);
+	nGPV->Fill(nGpv,weight);
      
   };
   virtual void WriteAll(TDirectory * dir){

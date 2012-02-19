@@ -9,6 +9,7 @@
 #ifndef _EVENT_H
 #define	_EVENT_H
 #include "TClonesArray.h"
+#include "TCanvas.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootEvent.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootRun.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootJet.h"
@@ -16,11 +17,11 @@
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootPFJet.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootMuon.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootMET.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootPFMET.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootElectron.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootTagProbeObject.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootVertex.h"
 
-//#include "../../../AnalysisClasses/ChiSquared/interface/DR.h"
 #include "../../../AnalysisClasses/EventSelection/interface/JetMatching.h"
 
 
@@ -28,7 +29,7 @@
 #include "MuonVetoSelector.h"
 #include "PrimaryVertexSelector.h"
 #include "JetSelector.h"
-//#include "EventsHists.h"
+
 
 
 using namespace TopTree;
@@ -92,14 +93,15 @@ public:
     TClonesArray primaryVertices){
         this->clear();
 	if(jets_.GetEntriesFast()!=0){ 
-		TRootJet* jet = (TRootJet*)jets_.At(0);
-		if(jet->jetType()==1)
+		TRootJet jet = *((TRootJet*)jets_.At(0));
+		if(jet.jetType()==1)
 	        	for(int i = 0; i<jets_.GetEntriesFast(); i++)
         		    CaloJets.push_back(*(TRootCaloJet*)jets_.At(i));
-		else if(jet->jetType() == 2)
+		else if(jet.jetType() == 2){
 	                for(int i = 0; i<jets_.GetEntriesFast(); i++)
                             PFJets.push_back(*(TRootPFJet*)jets_.At(i));
-		delete jet;
+                }
+		//delete jet;
 	}
         for(int i = 0; i<electrons_.GetEntriesFast(); i++)
             electrons.push_back(*(TRootElectron*)electrons_.At(i));
@@ -150,6 +152,26 @@ public:
         firstBtagIndex = -1;
         verbosity = 0;
 //        JES = 1;
+
+    };
+    Event(std::vector<TRootPFJet> jets_,TClonesArray electrons_,TClonesArray mets_,TClonesArray muons_,
+    TClonesArray primaryVertices){
+        this->clear();
+        for(unsigned int i = 0; i<jets_.size(); i++)
+            PFJets.push_back(jets_.at(i));
+        for(int i = 0; i<electrons_.GetEntriesFast(); i++)
+            electrons.push_back(*(TRootElectron*)electrons_.At(i));
+        for(int i = 0; i<mets_.GetEntriesFast(); i++)
+            mets.push_back(*(TRootMET*)mets_.At(i));
+        for(int i = 0; i<muons_.GetEntriesFast(); i++)
+            muons.push_back(*(TRootMuon*)muons_.At(i));
+        for(int i = 0; i<primaryVertices.GetEntriesFast(); i++)
+            pvs.push_back(*(TRootVertex*)primaryVertices.At(i));
+
+        GenElec.SetPxPyPzE(0,0,0,0);
+        doMatchElec = false;
+        firstBtagIndex = -1;
+        verbosity = 0;
 
     };
     Event(TClonesArray jets_,std::vector<TRootElectron> electrons_,
@@ -203,16 +225,22 @@ public:
     Event(std::vector<TRootCaloJet> jets_,TClonesArray electrons_){
         this->clear();
         CaloJets = jets_;
-//        if(jets_.size() != 0){
-//            cout<<"In the Event: "<<jets_.at(0).Pt()<<endl;
-//        }
         for( int i = 0; i<electrons_.GetEntriesFast(); i++)
             electrons.push_back(*(TRootElectron*)electrons_.At(i));
         GenElec.SetPxPyPzE(0,0,0,0);
         doMatchElec = false;
         firstBtagIndex = -1;
         verbosity = 0;
-//        JES = 1;
+    };
+    Event(std::vector<TRootPFJet> jets_,TClonesArray electrons_){
+        this->clear();
+        PFJets = jets_;
+        for( int i = 0; i<electrons_.GetEntriesFast(); i++)
+            electrons.push_back(*(TRootElectron*)electrons_.At(i));
+        GenElec.SetPxPyPzE(0,0,0,0);
+        doMatchElec = false;
+        firstBtagIndex = -1;
+        verbosity = 0;
     };
     Event(TClonesArray jets_,TClonesArray TPelectrons_,TClonesArray electrons_){
         this->clear();
@@ -263,13 +291,13 @@ public:
 
     ~Event(){};
     void verbose(int i){verbosity = i;}
-    void ElectronMaker(double pt = 20., double eta = 2.4, double Exc_Low = 1.442 ,double Exc_High = 1.56,
-        std::string Id = "rTight",std::string IdSecond = "rLoose", std::string Iso = "", double D0 = 0.02, double IsoCut = 0.1, 
-	double drToPV = 10000., double secondEIso = 1000.){
+    void ElectronMaker(double pt = 30., double eta = 2.5, double Exc_Low = 1.4442 ,double Exc_High = 1.5660,
+        std::string Id = "VBTF70",std::string IdSecond = "VBTF95", std::string Iso = "", double D0 = 0.02, double IsoCut = 0.125, 
+	double drToPV = 10000., double secondEIso = 0.2){ //secPt=15 GeV       
 	double PVz = 0;
 	if(Gpvs.size() != 0)
 	    PVz = Gpvs.at(0).z();
-        ElectronSelector electronSelector("ElectronSelector",pt,eta,Exc_Low,Exc_High,Id,IdSecond,Iso,D0,IsoCut,20.,drToPV ,secondEIso);
+        ElectronSelector electronSelector("ElectronSelector",pt,eta,Exc_Low,Exc_High,Id,IdSecond,Iso,D0,IsoCut,15.,drToPV ,secondEIso);
 	electronSelector.verbose(verbosity);
         electronSelector.setElectrons(electrons,PVz);
         if( verbosity > 1){
@@ -279,10 +307,8 @@ public:
                 cout<<"GenElec properties in ElectronSelector:\n\t"<<GenElec.Px()<<"\n\t"<<GenElec.Py()<<"\n\t"<<GenElec.Pz()<<endl;
         }
         if(doMatchElec){
-//            electronSelector.ElectronMatcher(GenElec);
             ElectronMatcher(GenElec,electronSelector.GoldenElecs(),matchElecIndex);
         }
-//        matchElecIndex = electronSelector.matchedEleIndex;
         Gelectrons.clear();
         Gelectrons = electronSelector.GoldenElecs();
 	if(verbosity > 0)
@@ -343,7 +369,7 @@ public:
         double EmfUp = 1000.,double EmfLow = -1., double fhpd_ = 1000., int N90_ = -1, double bTagCut_ = 4.){this->CaloJetMaker(bTagAlgo,pt,eta,nCaloTower,EmfUp,EmfLow,fhpd_,N90_,bTagCut_);} 
 
     void PFJetMaker(std::string bTagAlgo = "TCHE", double pt = 25., double eta = 2.4,int nCaloTower = 1,
-        double EmfUp = 1000.,double EmfLow = -1., double fhpd_ = 1000., int N90_ = -1, double bTagCut_ = 4.){
+        double EmfUp = 1000.,double EmfLow = -1., double fhpd_ = 1000., int N90_ = -1, double bTagCut_ = 3.41){
         JetSelector jetSelector("JetSelector",bTagAlgo,pt,eta,nCaloTower,EmfUp,EmfLow,fhpd_,N90_,bTagCut_);
 //        jetSelector.setJES(JES);
         jetSelector.verbose(verbosity);
@@ -367,16 +393,18 @@ public:
     }
 
 
-    void MuonMaker(double pt = 20., double eta = 2.4,double chi2 = 10, double D0 = 0.02, int nvh = 11,
-        double isoCut_ = 0.05, bool doGL = false){
+    void MuonMaker(double pt = 20., double eta = 2.1,double chi2 = 10, double D0 = 0.02, int nvh = 10,
+        double isoCut_ = 0.15, bool doGL = false, int nPixWithMeasuredHits = 1, int nSegM = 1){
         if(verbosity > 2)
 		cout<<"In MuMaker Method: "<<endl;
-	MuonVetoSelector MuSelector("MuonVetoSelector",pt,eta,chi2,D0,nvh,isoCut_,doGL);
+	MuonVetoSelector MuSelector("MuonVetoSelector",pt,eta,chi2,D0,nvh,isoCut_,nPixWithMeasuredHits,nSegM);
         MuSelector.verbose(verbosity);
         MuSelector.setMuons(muons);
 
         Dmuons.clear();
         Dmuons = MuSelector.desiredMuons();
+        looseMuons.clear();
+        looseMuons = MuSelector.looseMuons();
     }
     void TagAndProbeMaker(){
         
@@ -398,6 +426,7 @@ public:
 
         muons.clear();
         Dmuons.clear();
+        looseMuons.clear();
 
         pvs.clear();
         Gpvs.clear();
@@ -457,10 +486,11 @@ public:
 
     std::vector<TRootMuon> muons;
     std::vector<TRootMuon> Dmuons;
+    std::vector<TRootMuon> looseMuons;
     
     std::vector<TRootVertex> pvs;
     std::vector<TRootVertex> Gpvs;
-    std::vector<TRootMET> mets;
+    std::vector<TRootPFMET> mets;
 
     std::vector<TRootTagProbeObject> TPobjs;
     
@@ -469,7 +499,6 @@ public:
     int matchElecIndex;
     int firstBtagIndex;
     int verbosity;
-//    double JES;
 };
 
 

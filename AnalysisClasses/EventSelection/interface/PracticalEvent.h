@@ -17,7 +17,9 @@
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootMuon.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootElectron.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootPFJet.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootMET.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootPFMET.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootGenEvent.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootNPGenEvent.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootEvent.h"
@@ -28,9 +30,9 @@
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootTagProbeObject.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootHLTInfo.h"
 //#include "EventsHists.h
-#include "../../../AnalysisClasses/EventSelection/interface/JetCorrectorParameters.h"
-#include "../../../AnalysisClasses/EventSelection/interface/JetCorrectionUncertainty.h"
-#include "../../../AnalysisClasses/EventSelection/interface/JetTools.h"
+#include "../../../TopBrussels/TopTreeAnalysis/Reconstruction/interface/JetCorrectorParameters.h"
+#include "../../../TopBrussels/TopTreeAnalysis/Reconstruction/interface/JetCorrectionUncertainty.h"
+#include "../../../TopBrussels/TopTreeAnalysis/Tools/interface/JetTools.h"
 
 
 using namespace std;
@@ -65,12 +67,12 @@ public:
            //---------------------------- Jets
             
 //            if(jetOk_){
-                jets = new TClonesArray("TopTree::TRootCaloJet", 0);
-                jets_br = (TBranch *) eventTree->GetBranch("CaloJets_selectedPatJetsAK5Calo");
+                jets = new TClonesArray("TopTree::TRootPFJet", 0);
+                jets_br = (TBranch *) eventTree->GetBranch("PFJets_selectedPatJetsPF2PAT");
                 if(jets_br != NULL)
                     jets_br->SetAddress(&jets);
                 else
-                    cout<<"No Branch CaloJets_selectedPatJetsAK5Calo" <<endl;
+                    cout<<"No Branch PFJets_selectedPatJetsPF2PAT" <<endl;
 //            }
 
             //---------------------------- genEvents
@@ -95,32 +97,32 @@ public:
             //---------------------------- Electrons
 //            cout<<elecOk_<<endl;
 //            if(elecOk_){
-                electron_br = (TBranch *) eventTree->GetBranch("Electrons");
+                electron_br = (TBranch *) eventTree->GetBranch("Electrons_selectedPatElectronsPF2PAT");
                 electrons = new TClonesArray("TopTree::TRootElectron", 0);
                 if(electron_br != NULL)
                     electron_br->SetAddress(&electrons);
                 else
-                    cout<<"No Branch Electrons" <<endl;
+                    cout<<"No Branch Electrons_selectedPatElectronsPF2PAT" <<endl;
 //            }
             //---------------------------- Muons
 //            cout<<muOk_<<endl;
 //            if(muOk_){
-                muon_br = (TBranch *) eventTree->GetBranch("Muons");
+                muon_br = (TBranch *) eventTree->GetBranch("Muons_selectedPatMuonsPF2PAT");
                 muons = new TClonesArray("TopTree::TRootMuon", 0);
                 if(muon_br != NULL)
                     muon_br->SetAddress(&muons);
                 else
-                    cout<<"No Branch Muons" <<endl;
+                    cout<<"No Branch Muons_selectedPatMuonsPF2PAT" <<endl;
 //            }
             //---------------------------- MET
 //            cout<<metOk_<<endl;
 //            if(metOk_){
-                met_br = (TBranch *) eventTree->GetBranch("MET");
-                mets = new TClonesArray("TopTree::TRootMET", 0);
+                met_br = (TBranch *) eventTree->GetBranch("PFMET");
+                mets = new TClonesArray("TopTree::TRootPFMET", 0);
                 if(met_br != NULL)
                     met_br->SetAddress(&mets);
                 else
-                    cout<<"No Branch MET" <<endl;
+                    cout<<"No Branch PFMET" <<endl;
 //            }
             //---------------------------- PrimaryVertex
 //            if(pvOk_){
@@ -137,8 +139,8 @@ public:
                 tps = new TClonesArray("TopTree::TRootTagProbeObject", 0);
                 if(TP_br != NULL)
                     TP_br->SetAddress(&tps);
-//                else
-//                    cout<<"No Branch TagProbeObject" <<endl;
+                else
+                    cout<<"No Branch TagProbeObject" <<endl;
 //            }
             if(runTree != 0)
                 runTree->GetEntries();
@@ -154,7 +156,6 @@ public:
             eventNumber++;
             if(runTree != NULL)
                 runTree->GetEvent(0);
-//            cout<<eventNumber<<"8888888888888888888888888888888888888888888RUN : "<<this->RunInfo()->getHLTinfo(this->event->runId()).nHLTPaths()<<endl;
         }
         return true;
     };
@@ -166,8 +167,6 @@ public:
             eventNumber++;
             if(runTree != NULL)
                 runTree->GetEvent(0);
-//            cout<<eventNumber<<"8888888888888888888888888888888888888888888RUN : "<<this->RunInfo()->getHLTinfo(this->event->runId()).nHLTPaths()<<endl;
-//            cout<<eventNumber<<"\t"<<this->event->runId()<<"\t"<<this->event->eventId()<<endl;
         }
         return true;
     };
@@ -198,74 +197,69 @@ public:
     TClonesArray * TagProbeCollection()const{
         return tps;
     };
-    std::vector<TRootCaloJet> ScaledJetCollection(double fScaling, bool isData){
+    std::vector<TRootPFJet> ScaledPFJetCollection(double fScaling, bool isData){
         //cout<<"In prac: "<<isData<<endl;
-        std::vector<TRootCaloJet*> init_jets_corrected;
+        std::vector<TRootJet*> init_jets_corrected;
         init_jets_corrected.clear();
 //	cout<<jets->GetEntriesFast()<<endl;
         for(int i=0; i<jets->GetEntriesFast(); i++)
-        	init_jets_corrected.push_back( (TRootCaloJet*) jets->At(i)->Clone() );
-        //if(init_jets_corrected.size() != 0)
-	//	cout<<"Before Correction:\n\t"<<init_jets_corrected.at(0)->Pt()<<endl;
+        	init_jets_corrected.push_back( (TRootJet*) jets->At(i)->Clone() );
+//        if(init_jets_corrected.size() != 0)
+//		cout<<"Before Correction:\n\t"<<init_jets_corrected.at(0)->Pt()<<endl;
 	//////////////////////////////////
         //cout<<"//Step 1: Initialize JEC factors"<<endl;
         //////////////////////////////////
         vector<JetCorrectorParameters> vCorrParam;
         vCorrParam.clear();
-        if(isData){ //cout<<"// Data!"<<endl;
-            JetCorrectorParameters *L1JetCorPar = new JetCorrectorParameters("../../JetCorrections/parameters/Fall10_L1Offset_AK5PF.txt");
-            JetCorrectorParameters *L2JetCorPar = new JetCorrectorParameters("../../JetCorrections/parameters/GR_R_38X_V15_AK5PF_L2Relative.txt");
-            JetCorrectorParameters *L3JetCorPar = new JetCorrectorParameters("../../JetCorrections/parameters/GR_R_38X_V15_AK5PF_L3Absolute.txt");
-            JetCorrectorParameters *ResJetCorPar = new JetCorrectorParameters("../../JetCorrections/parameters/GR_R_38X_V15_AK5PF_L2L3Residual.txt");
-            vCorrParam.push_back(*L1JetCorPar);
-            vCorrParam.push_back(*L2JetCorPar);
-            vCorrParam.push_back(*L3JetCorPar);
-            vCorrParam.push_back(*ResJetCorPar);
-            delete L1JetCorPar;
-	    delete L2JetCorPar;
-	    delete L3JetCorPar;
-	    delete ResJetCorPar;
-        }
-        else {//cout<<"// MC!"<<endl;
-            JetCorrectorParameters *L2JetCorPar = new JetCorrectorParameters("../../JetCorrections/parameters/START38_V14_AK5PF_L2Relative.txt");
-            JetCorrectorParameters *L3JetCorPar = new JetCorrectorParameters("../../JetCorrections/parameters/START38_V14_AK5PF_L3Absolute.txt");
-            vCorrParam.push_back(*L2JetCorPar);
-            vCorrParam.push_back(*L3JetCorPar);
-	    delete L2JetCorPar;
-	    delete L3JetCorPar;
-        }
-	//cout<<"Before uncertainty "<<endl;
-        JetCorrectionUncertainty *jecUnc = new JetCorrectionUncertainty("../../JetCorrections/parameters/START38_V14_AK5PF_Uncertainty.txt");
-	//cout<<"define jetTools: "<<endl;
-        JetTools * jetTools = new JetTools(vCorrParam, jecUnc, true);
-        //cout<<"ACTION: "<<endl;   
-        jetTools->correctJets(init_jets_corrected, PVs);
-	//cout<<"DONE"<<endl;
-        //if(init_jets_corrected.size() != 0)
-        //        cout<<"After correction:\n\t"<<init_jets_corrected.at(0)->Pt()<<endl;
 
-	//cout<<"Scaling"<<endl;
-        std::vector<TRootCaloJet> res; res.clear();
+        JetCorrectorParameters *L3JetCorPar  = new JetCorrectorParameters("../../../../TopBrussels/TopTreeAnalysis/macros/JECFiles/START42_V17_AK5PFchs_L3Absolute.txt");
+        JetCorrectorParameters *L2JetCorPar  = new JetCorrectorParameters("../../../../TopBrussels/TopTreeAnalysis/macros/JECFiles/START42_V17_AK5PFchs_L2Relative.txt");
+        JetCorrectorParameters *L1JetCorPar  = new JetCorrectorParameters("../../../../TopBrussels/TopTreeAnalysis/macros/JECFiles/START42_V17_AK5PFchs_L1FastJet.txt");
+        JetCorrectorParameters *ResJetCorPar = new JetCorrectorParameters("../../../../TopBrussels/TopTreeAnalysis/macros/JECFiles/START42_V17_AK5PFchs_L2L3Residual.txt");
+        vCorrParam.push_back(*L1JetCorPar);
+        vCorrParam.push_back(*L2JetCorPar);
+        vCorrParam.push_back(*L3JetCorPar);
+        vCorrParam.push_back(*ResJetCorPar);
+        delete L1JetCorPar;
+        delete L2JetCorPar;
+        delete L3JetCorPar;
+        delete ResJetCorPar;
+
+        JetCorrectionUncertainty *jecUnc = new JetCorrectionUncertainty("../../../../TopBrussels/TopTreeAnalysis/macros/JECFiles/START42_V17_AK5PFchs_Uncertainty.txt");
+        // true means redo also the L1
+        JetTools *jetTools = new JetTools(vCorrParam, jecUnc, true);
+        //cout<<"ACTION: "<<endl;   
+      
+      
+        // Apply Jet Corrections on-the-fly
+        if( isData ) {
+            jetTools->correctJets(init_jets_corrected,event->kt6PFJetsPF2PAT_rho(),true);
+        } else {
+            jetTools->correctJets(init_jets_corrected,event->kt6PFJetsPF2PAT_rho(),false);
+        }
+        
+        TRootMET * myMet = (TRootMET*)this->mets->At(0)->Clone();
+        jetTools->correctMETTypeOne(init_jets_corrected,myMet, isData);
+        CorrectedMETI = *((TRootPFMET*)myMet);
+        
+        
+        std::vector<TRootPFJet> res; res.clear();
         for(unsigned int i = 0; i < init_jets_corrected.size(); i++){
-            TRootCaloJet myJet = *(init_jets_corrected.at(i));
+            TRootPFJet myJet = *((TRootPFJet*)init_jets_corrected.at(i));
 //            cout<<"\tNoScaling "<<myJet.Pt()<<endl;
             myJet.SetPxPyPzE(fScaling*myJet.Px(),fScaling*myJet.Py(),fScaling*myJet.Pz(), fScaling*myJet.E());
 //            cout<<"\tScaling "<<myJet.Pt()<<endl;
             res.push_back(myJet);
         }
-        //cout<<"befor d chain\n\tresSize: "<<res.size()<<"\n\tinit Size: "<<init_jets_corrected.size()<<endl;
 	for(unsigned int d = 0; d < res.size(); d++)
     	    if(init_jets_corrected[d]) delete init_jets_corrected[d];
 	init_jets_corrected.clear();
 	delete jecUnc;
         delete jetTools;
-
-        //if(init_jets_corrected.size() != 0)
-        //        cout<<"After Scaling:\n\t"<<init_jets_corrected.at(0)->Pt()<<endl;
-
-       //cout<<res.size()<<endl;
+        delete myMet;
         return res;
     };
+
     TRootEvent * Event()const{return event;};
     TRootRun * RunInfo()const{return run_;};
     
@@ -281,7 +275,7 @@ public:
               // get the trigger bits
         int HLT = hltInfo.hltPath("HLT_Ele15_LW_L1R");
 
-//        if(verbosity>0) cout << "HLT_Electron_bit: " <<  HLT << endl;
+
 
         if( this->Event()->trigHLT(HLT) ) // skip event if it doesn't pass our selected electron trigger
 
@@ -290,6 +284,7 @@ public:
     }
     TTree * eventTree;
     TTree * runTree;
+    TRootPFMET TypeICorrMET()const{return CorrectedMETI;}
 private:
 
     bool TtBar;
@@ -326,6 +321,8 @@ private:
     bool tpOk_;
 
     int eventNumber;
+    
+    TRootPFMET  CorrectedMETI;
 
 };
 
