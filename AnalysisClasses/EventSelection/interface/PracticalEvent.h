@@ -197,14 +197,6 @@ public:
     TClonesArray * TagProbeCollection()const{
         return tps;
     };
-    std::vector<TRootPFJet> unCorrectedPFJetVector(){
-        std::vector<TRootPFJet> init_jets_corrected;
-        init_jets_corrected.clear();
-//	cout<<jets->GetEntriesFast()<<endl;
-        for(int i=0; i<jets->GetEntriesFast(); i++)
-        	init_jets_corrected.push_back(*( (TRootPFJet*) jets->At(i)->Clone()) );
-        return init_jets_corrected;
-    }
     std::vector<TRootPFJet> ScaledPFJetCollection(double fScaling, bool isData){
         //cout<<"In prac: "<<isData<<endl;
         std::vector<TRootJet*> init_jets_corrected;
@@ -290,7 +282,6 @@ public:
             return true;
         return(false);
     }
-    
     TTree * eventTree;
     TTree * runTree;
     TRootPFMET TypeICorrMET()const{return CorrectedMETI;}
@@ -336,5 +327,4 @@ private:
 };
 
 #endif	/* _PRACTICALEVENT_H */
-
 
