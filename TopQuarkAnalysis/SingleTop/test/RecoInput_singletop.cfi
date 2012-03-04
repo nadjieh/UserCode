@@ -1,4 +1,0 @@
-# MC@NLO, t-channel
-replace PoolSource.fileNames = {
-	"rfio:/castor/cern.ch/user/g/giamman/singletop/MCatNLO/fastsim169_gen_0_999_tbq_mu.root"
-}
