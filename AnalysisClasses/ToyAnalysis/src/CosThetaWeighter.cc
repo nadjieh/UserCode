@@ -1,0 +1,1 @@
+#include "../interface/CosThetaWeighter.h"
