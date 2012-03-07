@@ -97,4 +97,3 @@ public:
 
 #endif	/* GENSINGLETOPMAKER_H */
 
-
