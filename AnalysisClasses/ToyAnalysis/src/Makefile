@@ -6,12 +6,12 @@ OutPutOpt     = -o
 HeadSuf       = h
 CLIBS		=-L/usr/lib -lstdc++
 ROOTINC		=-I$(shell root-config --incdir)
-ROOTLIBS	=$(shell root-config --libs) -lMinuit
+ROOTLIBS	=$(shell root-config --libs) -lMinuit 
 ROOTCFLAGS	=$(shell root-config --cflags)
 ROOTGLIBS	=$(shell root-config --glibs) -lMinuit
 HOMELIB		= $(HOME)/lib
 TROOTINC	=-I../../../../TopBrussels/TopTreeProducer/interface
-TROOTINC	=-I../../../PhysicsObjects/interface
+PHYSOBJINC	=-I../../../PhysicsObjects/interface
 
 MYHEADERS=-I../interface
 MYSOURCES= ../src
@@ -35,9 +35,14 @@ HEADERS 	=$(MYHEADERS)
 
 
 CXXFLAGS	+= $(ROOTCFLAGS)
-GLIBS		=$(ROOTGLIBS) 
-LIBS		= $(ROOTLIBS) 
-LIBS		+=$(RECOLIBS)
+#CXXFLAGS	+= $(MYHEADERS)
+CXXFLAGS	+= $(TROOTINC)
+CXXFLAGS	+= $(PHYSOBJINC)
+
+LIBS		=$(ROOTGLIBS) 
+LIBS		+= $(ROOTLIBS) 
+LIBS		+=$(TROOTLIB)
+LIBS		+=$(PHYSOBJLIB)
 #------------------------------------------------------------------------------
 SOURCES 	= $(wildcard $(MYSOURCES)/*.cc)
 HEADERS 	= $(wildcard ../interface/*.h)
@@ -45,7 +50,7 @@ OBJECTS 	= $(SOURCES:.$(SrcSuf)=.$(ObjSuf))
 DEPENDS 	= $(SOURCES:.$(SrcSuf)=.d)
 SOBJECTS	= $(SOURCES:.$(SrcSuf)=.$(DllSuf))
 
-HEADERS		+=$(TROOTINC)
+
 #PROGRAMS	=  $(SOBJECTS)
 
 all: libToyAnalysis.so clean ; cp libToyAnalysis.so $(HOMELIB)
@@ -65,4 +70,3 @@ clean:
 libToyAnalysis.so: $(OBJECTS)
 	$(LD) $(LIBS) $(SOFLAGS) $(LDFLAGS) $+ -o $@
 	@echo "$@ done"
-

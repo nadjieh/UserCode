@@ -1,7 +1,7 @@
 ROOTINC		=-I$(shell root-config --incdir)
-ROOTLIBS	=$(shell root-config --libs) -lMinuit
+ROOTLIBS	=$(shell root-config --libs) -lMinuit  -lRooFitCore -lRooFit -lRooStats
 ROOTCFLAGS	=$(shell root-config --cflags)
-ROOTGLIBS	=$(shell root-config --glibs) -lMinuit
+ROOTGLIBS	=$(shell root-config --glibs) -lMinuit  -lRooFitCore -lRooFit -lRooStats
 HOMELIB		= $(HOME)/lib
 TROOTLIBS	= -L$(HOMELIB) -lToto
 ESLIBS 		= -L$(HOMELIB) -lEventSelection
@@ -28,6 +28,7 @@ LIBS		+= $(PULIBS)
 LIBS		+= $(JETTOOLS)
 LIBS		+= $(RECOLIBS)
 LIBS		+= $(PHYSOBJLIBS)
+LIBS		+= $(TOYLIBS)
 HEADERS 	=$(TROOTINCLUDES)
 HEADERS		+=$(PUINCLUDES)
 HEADERS		+=$(JETINCLUDES)
@@ -43,6 +44,8 @@ sas:
 	$(CXX) TTJetsCosThetaSanityChecker.C -c -o TTJetsCosThetaSanityChecker.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
 	@echo "Linking ...... \n"
 	g++ TTJetsCosThetaSanityChecker.o -o CheckCosThetaInTt $(ROOTGLIBS) -lEG $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
+
+template: TEMPLATE clean
 	
 tmp:
 	@echo "Compiling the Test ...."
@@ -50,10 +53,14 @@ tmp:
 	@echo "Linking \n\n\n\t"
 	g++ test.o -o Test $(ROOTGLIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread 
 	
+TEMPLATE:
+	@echo "Compiling the TemplateFit.C .... \n"
+	$(CXX) TemplateFit.C -c -o TemplateFit.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
+	@echo "Linking ...... \n"
+	g++ TemplateFit.o -o doTemplateFit $(ROOTGLIBS) -lEG $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
 clean:
 	@echo "Cleaning..."
 	@rm -f *.o
 	@rm -f *~
-
 
 

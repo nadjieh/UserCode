@@ -23,19 +23,20 @@
  {
 
 //TH1F *brgauss = new TH1F("breitg","", 131, 0, 130);
-/*TFile * file = new TFile("cosTheta.root","READ");
- TH1D * h = (TH1D*)file->Get("cosThetaGen");*/
+TFile * file = new TFile("cosTheta.root","READ");
+ TH1D * h = (TH1D*)file->Get("cosThetaGen");
 //h->Scale(1./h->Integral());
 
-
-TFile * file= new TFile("WPol_SelectedTTBars.root","read");
-TH1D* h = (TH1D*)file->Get("costheta_mm/hCosThetaPosLepton_Gen");
-h->Rebin(20);
+h->Sumw2();
+/*TFile * file= new TFile("WPol_SelectedTTBars.root","read");
+TH1D* h = (TH1D*)file->Get("costheta_mm/hCosThetaPosLepton_Gen");*/
+h->Rebin(100);
+h->Scale(1./h->Integral());
  TF1 *f = new TF1("f",cosTheta, -1, 1 ,3);
  Double_t par[3];
  par[0] = 1;
  par[1] = 1;
- par[2] = 12947;//h->GetEntries();
+ par[2] = 0.5;//h->GetEntries();
  
 
 
@@ -49,5 +50,4 @@ h->Rebin(20);
 
  }
 //costheta_mm/hCosThetaPosLepton_Gen
-
 
