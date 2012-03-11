@@ -21,6 +21,8 @@ HOMELIB		= $(HOME)/lib
 
 all:  sas clean
 
+json: JSON clean
+
 sas:
 	@echo "Compiling the SelectAndSave .... \n"
 	$(CXX) SelectAndSave.C -c -o SelectAndSave.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
@@ -33,6 +35,11 @@ tmp:
 	@echo "Linking \n\n\n\t"
 	g++ test.o -o Test $(ROOTGLIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread 
 	
+JSON:
+	@echo "Compiling the ApplyJSON .... \n"
+	$(CXX) ApplyJSON.C -c -o ApplyJSON.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
+	@echo "Linking ...... \n"
+	g++ ApplyJSON.o -o applyJSON $(ROOTGLIBS) $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
 clean:
 	@echo "Cleaning..."
 	@rm -f *.o
