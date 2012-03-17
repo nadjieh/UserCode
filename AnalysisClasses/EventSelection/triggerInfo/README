@@ -1,80 +1,10 @@
-Here I try to put the information about triggers which have to be used in different run ranges. I added them in my twiki as well.
-There are CSV files produced by lumiContext.py:
+The previous info about prescale was not reliable since it was obtained by lumiContext which is not recommended.
+Now, I followed what proposed by Dennis 
+https://hypernews.cern.ch/HyperNews/CMS/get/singletop/432/2.html
+https://hypernews.cern.ch/HyperNews/CMS/get/AUX/2011/11/16/14:03:20-40395-trigger_and_lumi_results.txt
+and I recalculated the unprescaled lumis, found in unPrescaledLumi directory.
+A JSON is extracted from this info, found in unPrescaledJSON. 
 
-lumiContext.py hltbyls -i Cert_160404-178078_7TeV_PromptReco_Collisions11_JSON.txt -name "HLT_IsoMu17*" -o pr.txt
+The total unprescaled Lumi is
 
-These all can be found in CSV directory.
-Then from these files, a JSON file is created which includes runs in RunA2011 in which HLT_IsoMu17_v* is prescaled. 
-The code to produce JSONs is in
-AnalysisClasses/EventSelection/macro/PrescaledTest.C
-
-To calculate the lumi correctly, these JSON files then compared to runs which we have in our toptrees and the common runs are taken into account. JSON files are in prescaleJSONs directory with following explnations:
-
-prescaleAugJSON.txt:
-both prescaled runs are in TopTrees so the equivalent lumi should be subtracted from total lumi.
-
-prescaleMayJSON.txt:
-no path was prescaled.
-
-prescalePRV4.txt and prescalePRV6.txt:
-produced from CSV/pr.txt.
-pr.txt gives a more general JSON file. This file was compared with runs in TopTree and uncommon runs was removed.
-
-RunAPrescaleJSON.txt:
-all four files above together.
-
-The total lumi of this prescaled runs is 441.811:
-
-lumiCalc2.py overview -i RunAprescaledJSON.txt 
- ==  = 
-|    Run | Delivered LS |     Delivered | Selected LS |      Recorded |
------------------------------------------------------------------------
-| 166049 |          919 |  23.192 (/pb) |     [53-56] |  86.957 (/nb) |
-| 166530 |          104 | 912.456 (/nb) |     [43-63] | 460.834 (/nb) |
-| 167102 |          440 |   8.726 (/pb) |       [1-5] |  68.279 (/nb) |
-| 171050 |          666 |  19.771 (/pb) |     [47-91] |   1.569 (/pb) |
-| 171156 |          758 |  21.517 (/pb) |    [42-198] |   5.139 (/pb) |
-| 172630 |          176 |   7.361 (/pb) |    [36-160] |   5.487 (/pb) |
-| 172635 |          282 |  10.780 (/pb) |     [1-268] |  10.512 (/pb) |
-| 172778 |          139 |   2.979 (/pb) |     [48-97] |   2.013 (/pb) |
-| 172791 |         1684 |  55.618 (/pb) |    [65-663] |  23.200 (/pb) |
-| 172819 |          263 |   9.792 (/pb) |    [57-254] |   8.419 (/pb) |
-| 172822 |         2341 |  70.187 (/pb) |     [1-615] |  22.334 (/pb) |
-| 172847 |          165 |   3.987 (/pb) |    [62-131] |   3.001 (/pb) |
-| 172865 |          391 |  16.628 (/pb) |    [36-382] |  14.975 (/pb) |
-| 172868 |         2090 |  59.791 (/pb) |     [1-552] |  20.012 (/pb) |
-| 172949 |         1311 |  47.432 (/pb) |    [55-928] |  33.532 (/pb) |
-| 172992 |          978 |  38.222 (/pb) |   [505-946] |  15.791 (/pb) |
-| 173198 |          838 |  30.584 (/pb) |    [49-664] |  23.925 (/pb) |
-| 173236 |          245 |  10.389 (/pb) |   [128-231] |   4.778 (/pb) |
-| 173240 |          144 |   6.391 (/pb) |     [1-124] |   5.312 (/pb) |
-| 173241 |          765 |  29.156 (/pb) |     [1-759] |  28.435 (/pb) |
-| 173243 |           97 |   3.215 (/pb) |      [1-89] |   2.877 (/pb) |
-| 173380 |          225 |   8.364 (/pb) |    [75-209] |   5.664 (/pb) |
-| 173381 |          313 |  11.239 (/pb) |     [1-294] |  10.887 (/pb) |
-| 173389 |          672 |  26.803 (/pb) |    [18-653] |  24.841 (/pb) |
-| 173406 |          304 |  12.217 (/pb) |    [37-285] |  11.160 (/pb) |
-| 173430 |          176 |   6.607 (/pb) |    [72-163] |   4.170 (/pb) |
-| 173438 |           72 |   3.179 (/pb) |     [32-56] |   1.024 (/pb) |
-| 173439 |          764 |  34.360 (/pb) |     [1-756] |  33.036 (/pb) |
-| 173657 |          101 |   2.914 (/pb) |     [59-93] |   1.304 (/pb) |
-| 173658 |          118 |   5.101 (/pb) |     [1-110] |   4.156 (/pb) |
-| 173659 |          327 |  12.816 (/pb) |     [1-317] |  12.178 (/pb) |
-| 173660 |          377 |  13.004 (/pb) |     [1-362] |  12.128 (/pb) |
-| 173661 |          139 |   4.406 (/pb) |     [1-125] |   3.576 (/pb) |
-| 173663 |          132 |   3.969 (/pb) |     [1-120] |   3.461 (/pb) |
-| 173664 |          314 |   7.895 (/pb) |      [5-16] | 345.694 (/nb) |
-| 173692 |         2801 |  84.133 (/pb) |   [50-2754] |  81.955 (/pb) |
-
- ==  =  Total : 
-| Delivered LS | Delivered(/pb) | Selected LS | Recorded(/pb) |
----------------------------------------------------------------
-|        21631 |        713.639 |       12037 |       441.811 |
-
-
-
-----------------------------------
-
-all2011.txt: deprecated ...
-produced by lumiContext.py
-includes information about where HLT_IsoMu17_v* is prescaled in full 2011 SingleMu dataset
+172.764+46.957+163.989+4.291+243.013+139.027+542.731 = 1312.772 (/pb)
