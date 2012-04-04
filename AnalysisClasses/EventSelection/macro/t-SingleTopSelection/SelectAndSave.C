@@ -124,35 +124,35 @@ std::string sin_outFileName_FullSelection;
 void beginJob(){
      sin_n0 = 0;
      sin_nScrapFilter = 0;
-     sin_doScrapFilter = true;
+     sin_doScrapFilter = true;//true;
      sin_nHCALnoiseFilter = 0;
-     sin_doHCALnoiseFilter = true;
+     sin_doHCALnoiseFilter = true;//true;
      sin_nHlt = 0;
-     sin_doHLT = true;
+     sin_doHLT = true;//true;
      sin_nPV = 0;
-     sin_doPV = true;//
+     sin_doPV = true;//true;//
      sin_nMu = 0;
-     sin_doMuon = true;//
+     sin_doMuon = true;//true;//
      sin_nNoLMu = 0;
-     sin_doLMuVeto =  true;//
+     sin_doLMuVeto = true;// true;//
      sin_nNoLE = 0;
-     sin_doLEVeto = true;//
+     sin_doLEVeto = true;//true;//
      sin_doConv = false;// Specific to electron selection.
      sin_nConv_a= 0;
      sin_nConv_b= 0;
      sin_nEcalDriven = 0;
      sin_doEcalDriven =false;// Specific to electron selection.   
      sin_nJet= 0;
-     sin_dojet = true;//
+     sin_dojet = true;//true;//
      sin_nMT = 0;
      sin_doMT = true;//
      sin_nBtag= 0;
      sin_doBtag = true;// Specific to electron selection.  
      sin_verbosity = 0;
-     fillTree = true;//false;
-     pu3D = false;
+     fillTree = true;
+     pu3D = false;//false;
      fillHists = true;
-     saveTypeIMET=true;
+     saveTypeIMET=true;//true;
      MT = new TH1D("MT","W-neutrino transverse mass",100, 0.,200.);
      MT->GetXaxis()->SetTitle("M_{T}(W,#nu)");
      finalMT = new TH1D("finalMT","final-W-neutrino transverse mass",100, 0.,200.);
@@ -299,25 +299,15 @@ int main(int argc, char** argv){
 
     beginJob();
     TApplication theApp("App", &argc, argv);
-//    gSystem->Load("libTree.so");
-//    string tmp = "NadjiehV*";
-//    cout<<tmp.find("*")<<"  "<<tmp.size()<<endl;
-//    cout<<tmp.substr(0,tmp.find("*"))<<endl;
-//    string tmp3 = tmp.substr(0,tmp.find("*"));
-//    string tmp2 = "NadjiehV27";
-//    cout<<tmp3.size()<<endl;
-//    cout<<tmp2.substr(0,tmp.find("*"))<<endl;
-//    cout<<<<endl;
     
     for(unsigned int fNumber = 0; fNumber<sin_inputFileNames.size(); fNumber++){
-        cout<<"RunNumber|\tEventNumber|\tLumiBlock|\tptLepton|\trelIso|\tptjet1|\tptjet2|\tMET|\tMT|\tbtagjet1|\tbtagjet2"<<endl;
+        cout<<"file number "<<fNumber+1<<": "<<sin_inputFileNames.at(fNumber)<<endl;
         f = TFile::Open(sin_inputFileNames.at(fNumber).c_str());
-//        cout<<"nFiles: "<<sin_inputFileNames.size()<<endl;
 
         TTree* runTree = (TTree*) f->Get("runTree");
         TTree* eventTree = (TTree*) f->Get("eventTree");
         
-//        cout<<runTree->GetName()<<"????"<<endl;
+
 
         PracticalEvent * pracEvt = new PracticalEvent(eventTree,runTree);
         pracEvt->eventTree->SetBranchStatus("*", 1);
@@ -345,8 +335,8 @@ int main(int argc, char** argv){
         
 
         while (pracEvt->Next()) {
-            if(ievt > 1)
-                break;
+//            if(ievt > 1)
+//                break;
             if(sin_verbosity > 0){
                 cout<<"JES: "<<doJES<<endl;
             }
@@ -371,7 +361,7 @@ int main(int argc, char** argv){
             std::vector<TRootPFJet>  myJets_;
             myJets_.clear();
 //            cout<<"I am going to Jet Correction "<<isData<<endl;
-            myJets_ = pracEvt->ScaledPFJetCollection(1,false);
+            myJets_ = pracEvt->ScaledPFJetCollection(1,isData);
             Event myEvent_tmp( myJets_, *pracEvt->ElectronCollection()
             ,*pracEvt->METCollection(),*pracEvt->MuonCollection(),*pracEvt->VertexCollection());
             if(sin_verbosity > 0)
@@ -395,11 +385,7 @@ int main(int argc, char** argv){
              * D0 = 0.02, IsoCut = 0.125, drToPV = 10000.,  secondEIso = 0.2, secPt=15 GeV 
              */
             
-            /* if(sin_verbosity > 0)
-             * cout<<"Jet Cleaning  ---------------------------------------------------------------------"<<endl;
-             * myEvent_tmp.JetCleaning();
-            *///not needed for PFToPAT
-            
+                  
             if(sin_verbosity > 0)
                 cout<<"Jet Makers ---------------------------------------------------------------------"<<endl;
             myEvent_tmp.PFJetMaker(/*bTagAlgo*/"TCHP",/*pt*/30.,/*eta*/4.5);
@@ -428,7 +414,7 @@ int main(int argc, char** argv){
             if(sin_doHLT){
                 TopTree::TRootHLTInfo hltInfo = pracEvt->RunInfo()->getHLTinfo(pracEvt->Event()->runId());
                 int trigID = hltInfo.hltPath("HLT_IsoMu17_v*");
-//                cout<<"trigID: "<<trigID<<", hlt: "<<pracEvt->Event()->trigHLT(trigID)<<endl;   
+
                 if(pracEvt->Event()->trigHLT(trigID)){
                     sin_nHlt++;
                     if(sin_verbosity > 0){
@@ -472,9 +458,6 @@ int main(int argc, char** argv){
             }
             TRootMuon myMu = myEvent_tmp.Dmuons.at(0);
             double relIso=(myMu.chargedHadronIso()+myMu.neutralHadronIso()+myMu.photonIso())/myMu.Pt();
-//            cout<<pracEvt->Event()->runId()<<"|\t"<<pracEvt->Event()->eventId()<<"|\t"
-//            <<pracEvt->Event()->lumiBlockId()<<"|\t"<<myMu.Pt()<<"|\t"<<relIso<<" ("<<myMu.neutralHadronIso()
-//            <<", "<<myMu.chargedHadronIso()<<", "<<myMu.photonIso()<<") |\t|\t|\t\t\t\t"<<endl;
             if(sin_doLEVeto){
                 if(myEvent_tmp.Gelectrons.size()==0 && myEvent_tmp.Secondelectrons.size()==0){
                     sin_nNoLE++;
@@ -483,9 +466,6 @@ int main(int argc, char** argv){
                 }else 
                     continue;
             }
-//            cout<<pracEvt->Event()->runId()<<"|\t"<<pracEvt->Event()->eventId()<<"|\t"
-//            <<pracEvt->Event()->lumiBlockId()<<"|\t"<<myMu.Pt()<<"|\t"<<relIso<<" ("<<myMu.neutralHadronIso()
-//            <<", "<<myMu.chargedHadronIso()<<", "<<myMu.photonIso()<<") |\t|\t|\t\t\t\t"<<endl;
 
             if(sin_dojet){
                 if(fillHists)
@@ -507,10 +487,6 @@ int main(int argc, char** argv){
                 if(saveTypeIMET) 
                     (*corrMET).Delete();
             }
-//            cout<<pracEvt->Event()->runId()<<"|\t"<<pracEvt->Event()->eventId()<<"|\t"
-//            <<pracEvt->Event()->lumiBlockId()<<"|\t"<<myMu.Pt()<<"|\t"<<relIso<<" ("<<myMu.neutralHadronIso()
-//            <<", "<<myMu.chargedHadronIso()<<", "<<myMu.photonIso()<<") |\t"<<myEvent_tmp.GPFJets.at(0).Pt()
-//            <<"|\t"<<myEvent_tmp.GPFJets.at(1).Pt()<<"|\t|\t|\t|\t"<<endl;
             double mt = 0;
             if(sin_doMT){
                 double metT = sqrt((myEvent_tmp.mets.at(0).Px()*myEvent_tmp.mets.at(0).Px())+
@@ -529,10 +505,6 @@ int main(int argc, char** argv){
                 }else
                     continue;
             }
-//            cout<<pracEvt->Event()->runId()<<"|\t"<<pracEvt->Event()->eventId()<<"|\t"
-//            <<pracEvt->Event()->lumiBlockId()<<"|\t"<<myMu.Pt()<<"|\t"<<relIso<<" ("<<myMu.neutralHadronIso()
-//            <<", "<<myMu.chargedHadronIso()<<", "<<myMu.photonIso()<<") |\t"<<myEvent_tmp.GPFJets.at(0).Pt()
-//            <<"|\t"<<myEvent_tmp.GPFJets.at(1).Pt()<<"|\t"<<myEvent_tmp.mets.at(0).Pt()<<"|\t"<<mt<<"|\t|\t"<<endl;
             if(sin_doBtag){
                 if(fillHists)
                     sin_BJets.FillPFJets(myEvent_tmp.GPFJets,myEvent_tmp.GPFJets.size(),myEvent_tmp.BPFJets.size(),false,lumiWeight3D);
@@ -544,11 +516,6 @@ int main(int argc, char** argv){
                     continue;
             }
 
-            cout<<pracEvt->Event()->runId()<<"|\t"<<pracEvt->Event()->eventId()<<"|\t"
-            <<pracEvt->Event()->lumiBlockId()<<"|\t"<<myMu.Pt()<<"|\t"<<relIso<<" ("<<myMu.neutralHadronIso()
-            <<", "<<myMu.chargedHadronIso()<<", "<<myMu.photonIso()<<") |\t"<<myEvent_tmp.GPFJets.at(0).Pt()
-            <<"|\t"<<myEvent_tmp.GPFJets.at(1).Pt()<<"|\t"<<myEvent_tmp.mets.at(0).Pt()<<"|\t"<<mt<<"|\t"
-            <<myEvent_tmp.BPFJets.at(0).btag_trackCountingHighPurBJetTags()<<"|\t"<<endl;
             if(fillHists){
                 sin_GoldenFinalMuons.Fill(myEvent_tmp.Dmuons,myEvent_tmp.Dmuons.size(),lumiWeight3D);
                 finalMT->Fill(mt,lumiWeight3D);
