@@ -34,7 +34,7 @@ struct FolderContent{
 
 class HistogramPlotter{
 public:
-    HistogramPlotter(double lumi, bool print = false):Lumi(lumi),doPrint(print){};
+    HistogramPlotter( bool print = false):doPrint(print){};
     ~HistogramPlotter(){};
 
     void StructureFinder_(TDirectory * f){
@@ -112,8 +112,8 @@ public:
 		    h->Scale(weights.at(e));
 		    h->SetStats(kFALSE);
 		    string tmpName(h->GetName());
-		    if((tmpName.find("_Eta") != 0 && tmpName.find("_Eta")<= tmpName.size()) || (tmpName.find("_Pt") != 0 && tmpName.find("_Pt") <= tmpName.size()))
-			h->Rebin(4);
+//		    if((tmpName.find("_Eta") != 0 && tmpName.find("_Eta")<= tmpName.size()) || (tmpName.find("_Pt") != 0 && tmpName.find("_Pt") <= tmpName.size()))
+//			h->Rebin(4);
                     stack.Add(h);
 //		    stack.ls();
                     //delete d;
@@ -131,8 +131,8 @@ public:
                 hdata->SetTitle("data");
 		hdata->SetStats(kFALSE);
                 string datatmpName(hdata->GetName());
-                if((datatmpName.find("_Eta") != 0 && datatmpName.find("_Eta")<= datatmpName.size()) || (datatmpName.find("_Pt") != 0 && datatmpName.find("_Pt") <= datatmpName.size()))
-                    hdata->Rebin(4);
+//                if((datatmpName.find("_Eta") != 0 && datatmpName.find("_Eta")<= datatmpName.size()) || (datatmpName.find("_Pt") != 0 && datatmpName.find("_Pt") <= datatmpName.size()))
+//                    hdata->Rebin(4);
 
 		hdata->SetMarkerStyle(20);
                 TCanvas s;
@@ -174,6 +174,8 @@ public:
             for(unsigned int e = 0; e<files.size(); e++){
 		cout<<" --- "<<files.at(e)->GetName()<<endl;
      	        TH1D * cf = (TH1D*)files.at(e)->Get(directHists.at(g).c_str());
+                if(directHists.at(g) == "topMass")
+                    cf->Rebin(2);
                 cf->SetFillColor(colors.at(e));
                 cf->SetLineColor(colors.at(e));
                 cf->SetTitle(MCnames.at(e).c_str());
@@ -204,14 +206,16 @@ public:
                     cf->GetYaxis()->SetRangeUser(0,100000200);
 		}
                 cf->SetStats(kFALSE);
-		if(directHists.at(g) != "CutFlow")
-		    cf->Rebin(4);
+//		if(directHists.at(g) != "CutFlow")
+//		    cf->Rebin(4);
                 cutFlow.Add(cf);
 	    }
 	    TCanvas s2;
 	    s2.cd();
 	    cutFlow.Draw();
 	    TH1D * cf = (TH1D*)data->Get(directHists.at(g).c_str());
+            if(directHists.at(g) == "topMass")
+                    cf->Rebin(2);
 //	    cf->Sumw2();
 	    if(directHists.at(g) == "CutFlow"){
             //        cout<<"After scaling: "<<endl;
@@ -223,8 +227,8 @@ public:
             cf->SetTitle("data");
             cf->SetStats(kFALSE);
             cf->SetMarkerStyle(20);
-            if(directHists.at(g) != "CutFlow")
-                cf->Rebin(4);
+//            if(directHists.at(g) != "CutFlow")
+//                cf->Rebin(4);
 
 	    s2.cd();
 	    cf->Draw("PE1sames");
@@ -241,11 +245,15 @@ public:
 		cout<<"\t"<<structure.at(i).content.at(j)<<endl;
 	    }
 	}
+	for(unsigned int i = 0; i<directHists.size(); i++){
+	    cout<<"Hist "<<i<<", "<<directHists.at(i)<<endl;
+        }
+	
     }
 private:
     vector<FolderContent> structure;
     vector<string> directHists;
-    double Lumi;
+//    double Lumi;
     bool doPrint;
     double nQCD;
     double erQCD;

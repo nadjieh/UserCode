@@ -13,6 +13,7 @@
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootElectron.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootJet.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootMET.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootPFMET.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootGenEvent.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootEvent.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootRun.h"
@@ -39,11 +40,12 @@ using namespace TopTree;
 class MetHists{
  public:
   MetHists(std::string name):Name(name){ 
-    kinHists = new KinematicHists<TRootMET>(Name);
+    kinHists = new KinematicHists<TRootPFMET>(Name);
   };
   virtual ~MetHists(){};
-  virtual void Fill(TRootMET * MET){
-	kinHists->Fill(MET);
+  
+  virtual void Fill(TRootPFMET * MET,double weight=1){
+	kinHists->Fill(MET,weight);
   };
   virtual void WriteAll(TDirectory * dir){
         if(dir == 0)
@@ -55,7 +57,7 @@ class MetHists{
         dir->cd();
   };
  private:
-  KinematicHists<TRootMET> * kinHists;  
+  KinematicHists<TRootPFMET> * kinHists;  
   std::string Name;
 
 };

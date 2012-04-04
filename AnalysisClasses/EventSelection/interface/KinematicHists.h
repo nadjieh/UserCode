@@ -13,6 +13,7 @@
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootElectron.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootJet.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootMET.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootPFMET.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootGenEvent.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootEvent.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootRun.h"

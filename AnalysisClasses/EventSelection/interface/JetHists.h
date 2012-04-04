@@ -52,13 +52,13 @@ class JetHists{
       } else if(this->jetType == 2) {
         NCaloTowers = new TH1D((Name+"_NCaloTowers").c_str(),(Name+"_NCaloTowers").c_str(),50,0.,100.);
         NCaloTowers->GetXaxis()->SetTitle("NCaloTowers");
-        NEF = new TH1D((Name+"_NEF").c_str(),(Name+"_NEF").c_str(),10,0.,1.);
+        NEF = new TH1D((Name+"_NEF").c_str(),(Name+"_NEF").c_str(),50,0.,1.);
         NEF->GetXaxis()->SetTitle("NEF");
-        NHF = new TH1D((Name+"_NHF").c_str(),(Name+"_NHF").c_str(),10,0.,1.);
+        NHF = new TH1D((Name+"_NHF").c_str(),(Name+"_NHF").c_str(),50,0.,1.);
         NHF->GetXaxis()->SetTitle("NHF");
-        CEF = new TH1D((Name+"_CEF").c_str(),(Name+"_CEF").c_str(),10,0.,1.);
+        CEF = new TH1D((Name+"_CEF").c_str(),(Name+"_CEF").c_str(),50,0.,1.);
         CEF->GetXaxis()->SetTitle("CEF");
-        CHF = new TH1D((Name+"_CHF").c_str(),(Name+"_CHF").c_str(),10,0.,1.);
+        CHF = new TH1D((Name+"_CHF").c_str(),(Name+"_CHF").c_str(),50,0.,1.);
         CHF->GetXaxis()->SetTitle("CHF");
         NCH = new TH1D((Name+"_NCH").c_str(),(Name+"_NCH").c_str(),50,0.,100.);
         NCH->GetXaxis()->SetTitle("NCH");

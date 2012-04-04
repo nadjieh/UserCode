@@ -79,7 +79,7 @@ public:
         if(verbosity > 0)
             cout<<"Info size is "<<runLumiInfo.size()<<endl;
     }
-    
+
     bool isSelectedByJSON(TRootEvent * event){
 
         bool goodEvent = false;
@@ -94,8 +94,18 @@ public:
                     break;
                 }
         }
-
+        if(verbosity > 0 && goodEvent)
+            cout<<"Event selected"<<endl;
+        if(verbosity > 0 && !goodEvent)
+            cout<<"Event rejected"<<endl;
         return goodEvent;
+    }
+    void printJSON(){
+        for(unsigned int k=0; k<runLumiInfo.size(); k++)
+        {
+                        cout<<runLumiInfo[k][0]<<"\t"<<runLumiInfo[k][1]<<"\t"<<runLumiInfo[k][2]<<endl;
+
+        }
     }
 private:
     vector< vector<int> > runLumiInfo;

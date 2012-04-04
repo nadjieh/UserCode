@@ -174,6 +174,25 @@ public:
         verbosity = 0;
 
     };
+    Event(std::vector<TRootPFJet> jets_,TClonesArray electrons_,TRootPFMET mets_,TClonesArray muons_,
+    TClonesArray primaryVertices){
+        this->clear();
+        mets.push_back(mets_);
+        for(unsigned int i = 0; i<jets_.size(); i++)
+            PFJets.push_back(jets_.at(i));
+        for(int i = 0; i<electrons_.GetEntriesFast(); i++)
+            electrons.push_back(*(TRootElectron*)electrons_.At(i));
+        for(int i = 0; i<muons_.GetEntriesFast(); i++)
+            muons.push_back(*(TRootMuon*)muons_.At(i));
+        for(int i = 0; i<primaryVertices.GetEntriesFast(); i++)
+            pvs.push_back(*(TRootVertex*)primaryVertices.At(i));
+
+        GenElec.SetPxPyPzE(0,0,0,0);
+        doMatchElec = false;
+        firstBtagIndex = -1;
+        verbosity = 0;
+
+    };
     Event(TClonesArray jets_,std::vector<TRootElectron> electrons_,
     TClonesArray mets_,TClonesArray muons_, TClonesArray primaryVertices){
         this->clear();
