@@ -11,10 +11,12 @@
 #include "TGraph.h"
 #include "TMath.h"
 #include "TFile.h"
+#include "TVectorD.h"
 #include "TDirectory.h"
 #include <vector>
 #include <string>
 #include <iostream>
+using namespace std;
 class DataPointsChiSquared {
 public:
     DataPointsChiSquared(TH1D data, TH1D mc, std::string type = "Both", int v = 0)
@@ -82,19 +84,59 @@ public:
     DataPointChiSquaredHandler(std::string name, TH1D * data, std::vector<TH1D*> MCs,
                                TGraph* fvars, int nBins = 10, std::string type = "Both", int v = 0)
                                :Name(name),verbosity(v){
+                                   cout<<"in DataPointChiSquaredHandler:\n\t"<<data<<"\t"<<MCs.at(0)
+                                   <<"\t"<<fvars<<endl;
         this->rebinner(data,nBins);
         unsigned int n = MCs.size();
-        double * x_fvar;
-        double * y_chi2;
-        x_fvar = fvars->GetX();
+        cout<<"Size of MC: "<<n<<endl;
+        TVectorD x_fvar(n);
+        TVectorD y_chi2(n);
+        
+        
         for(unsigned int i = 0; i < n; i++){
             if(verbosity > 2)
                 std::cout<<"RW histogram number "<<i<<std::endl;
             this->rebinner(MCs.at(i),nBins);
             DataPointsChiSquared chi2_calc(*data, *MCs.at(i),type,verbosity);
-            y_chi2[i] = chi2_calc.getChi2();            
+            if(verbosity > 2)
+                std::cout<<"------------------- "<<i<<std::endl;
+            std::cout<<"A: "<<y_chi2[i]<<std::endl;
+            cout<<chi2_calc.getChi2()<<endl;
+            y_chi2[i] = chi2_calc.getChi2(); 
+            double tmpY;
+            cout<<fvars->GetN()<<endl;
+            fvars->GetPoint(i,x_fvar[i],tmpY);
+            std::cout<<"B: "<<y_chi2[i]<<std::endl;
         }
-        chiSquareds = new TGraph(n,x_fvar,y_chi2);
+        chiSquareds = new TGraph(x_fvar,y_chi2);
+        chiSquareds->SetName("chiSquared_helicity");
+    };
+    DataPointChiSquaredHandler(std::string name, TH1D * data, std::vector<TH1D*> MCs,
+                               double* fvars, int nBins = 10, std::string type = "Both", int v = 0)
+                               :Name(name),verbosity(v){
+                                   cout<<"in DataPointChiSquaredHandler:\n\t"<<data<<"\t"<<MCs.at(0)
+                                   <<"\t"<<fvars[0]<<endl;
+        this->rebinner(data,nBins);
+        unsigned int n = MCs.size();
+        cout<<"Size of MC: "<<n<<endl;
+        TVectorD x_fvar(n);
+        TVectorD y_chi2(n);
+        
+        
+        for(unsigned int i = 0; i < n; i++){
+            if(verbosity > 2)
+                std::cout<<"RW histogram number "<<i<<std::endl;
+            this->rebinner(MCs.at(i),nBins);
+            DataPointsChiSquared chi2_calc(*data, *MCs.at(i),type,verbosity);
+            if(verbosity > 2)
+                std::cout<<"------------------- "<<i<<std::endl;
+            std::cout<<"A: "<<y_chi2[i]<<std::endl;
+            cout<<chi2_calc.getChi2()<<endl;
+            y_chi2[i] = chi2_calc.getChi2(); 
+            x_fvar[i] =fvars[i];
+            std::cout<<"B: "<<y_chi2[i]<<std::endl;
+        }
+        chiSquareds = new TGraph(x_fvar,y_chi2);
         chiSquareds->SetName("chiSquared_helicity");
     };
     

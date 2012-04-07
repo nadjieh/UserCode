@@ -15,10 +15,12 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+using namespace std;
 class CosThetaWeightHandler{
 public:
     CosThetaWeightHandler(double f0SM, double fminusSM, bool f0Fixed, bool fminusFixed, int n = 100)
     :nStep(n){
+        name = "";
         verbosity = 0;
         weights.clear();
         if(f0Fixed && !fminusFixed){
@@ -28,8 +30,24 @@ public:
         }
         /* for both not fixed, I have to think more*/   
     }
+    CosThetaWeightHandler(std::pair<std::vector<TH1D*>,TGraph* > Weights){
+        name = "";
+        weights.clear();
+        fvarValuesG = (TGraph*)Weights.second;
+        for(unsigned int i = 0; i<Weights.first.size(); i++){
+            if(Weights.first.at(i) == NULL){
+                cout<<"No weights!!!!!  "<<Weights.first.size()<<endl;
+                break;
+            }
+            if(string(((TH1D*)Weights.first.at(i))->GetName()) == "fvarValues"){
+                fvarValues = ((TH1D*)Weights.first.at(i));
+            }else{
+                weights.push_back((TH1D*)Weights.first.at(i));
+            }
+        }
+    }
     ~CosThetaWeightHandler(){
-        TFile * f = new TFile("weightsInfo.root","recreate");
+        TFile * f = new TFile(string("weightsInfo_"+name).c_str(),"recreate");
         f->cd();
         fvarValues->Write();
         fvarValuesG->Write();
@@ -55,6 +73,7 @@ public:
      */
     TH1D * getVariatingFractionHist()const{return fvarValues;}
     TGraph * getVariatingFractionGraph()const{return fvarValuesG;}
+    void setName(string Name){name =  string(Name);}
     
 private:
     
@@ -123,13 +142,13 @@ private:
         fvarValuesG = new TGraph(nStep+1,x,y);
         fvarValuesG->SetName("fvarValuesG");
     }
-    
-    
+    string name;
     int nStep;// default: 100
     std::vector<TH1D*> weights;
     TH1D * fvarValues;
     TGraph * fvarValuesG;
     int verbosity;
+    
     
 };
 
