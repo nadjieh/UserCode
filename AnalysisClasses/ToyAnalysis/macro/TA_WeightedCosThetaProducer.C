@@ -1,6 +1,6 @@
 /*
- * For the moment I use the event selection chain in explicitly
- * It comes from AnalysisClasses/EventSelection/macro/t-SingleTopSelection/SelectAndSave.C
+ * Aimed to run on selected events
+ * 
  */
 /* 
  * File:   SelectAndSave.c
@@ -66,115 +66,7 @@ using namespace std;
 using namespace TopTree;
 
 
-PVHists toy_atLeastOnGPV("before_PV_selection");
-MuonHists toy_MuSelection("before_Mu_selection");
-MuonHists toy_LMuVeto("before_LmuVeto_Selection");
-ElectronHists toy_LEVeto("before_LeVeto_Selection");
-JetHists toy_Jets("before_Jet_selection",2);
-JetHists toy_BJets("before_BJet_selection",2);
-MuonHists toy_AllFinalMuons("before_BJet_AllFinalMu");
-MuonHists toy_GoldenFinalMuons("before_BJet_GoldenFinalMu");
-JetHists toy_GoldenFinalJets("before_BJet_FinalGoldenFinalMu");
 
-
-
-
-
-int toy_n0;
-int toy_nScrapFilter;
-bool toy_doScrapFilter;
-int toy_nHCALnoiseFilter;
-bool toy_doHCALnoiseFilter;
-int toy_nHlt;
-bool toy_doHLT;
-int toy_nPV;
-bool toy_doPV;
-int toy_nMu;
-bool toy_doMuon;
-int toy_nNoLMu;
-bool toy_doLMuVeto;
-int toy_nNoLE;
-bool toy_doLEVeto;
-int toy_nConv_a;
-int toy_nConv_b;
-int  toy_nConv;
-bool toy_doConv;
-bool toy_doEcalDriven;
-int toy_nEcalDriven;
-int toy_nJet;
-bool toy_dojet;
-int toy_nMT ;
-bool toy_doMT;
-int toy_nBtag;
-bool toy_doBtag;
-double XSec;
-double Luminosity;
-double initial;
-bool pu3D;
-bool saveTypeIMET;
-
-double toy_weight;
-
-int toy_verbosity;
-TH1D * MT;
-TH1D * finalMT;
-TH1D * METResolutions;
-
-bool fillTree;
-bool fillHists;
-TFile * toy_out;
-TTree * eventTree_f;
-TTree * runTree_f;
-
-
-std::vector<std::string> toy_inputFileNames;
-std::vector<double> toy_Xsecs;
-std::vector<double> toy_initials;
-std::vector<bool> toy_isData;
-std::vector<bool> toy_realWtb;
-std::string toy_outFileName;
-std::string toy_plotFileName;
-std::string toy_outFileName_FullSelection;
-
-void beginJob(){
-     toy_n0 = 0;
-     toy_nScrapFilter = 0;
-     toy_doScrapFilter = true;
-     toy_nHCALnoiseFilter = 0;
-     toy_doHCALnoiseFilter = true;
-     toy_nHlt = 0;
-     toy_doHLT = false;//true
-     toy_nPV = 0;
-     toy_doPV = true;//
-     toy_nMu = 0;
-     toy_doMuon = true;//
-     toy_nNoLMu = 0;
-     toy_doLMuVeto =  true;//
-     toy_nNoLE = 0;
-     toy_doLEVeto = true;//
-     toy_doConv = false;// Specific to electron selection.
-     toy_nConv_a= 0;
-     toy_nConv_b= 0;
-     toy_nEcalDriven = 0;
-     toy_doEcalDriven =false;// Specific to electron selection.   
-     toy_nJet= 0;
-     toy_dojet = true;//
-     toy_nMT = 0;
-     toy_doMT = true;//
-     toy_nBtag= 0;
-     toy_doBtag = true;// Specific to electron selection.  
-     toy_verbosity = 0 ;
-     fillTree = false;//false;
-     pu3D = false;
-     fillHists = false;
-     saveTypeIMET=false;
-     MT = new TH1D("MT","W-neutrino transverse mass",100, 0.,200.);
-     MT->GetXaxis()->SetTitle("M_{T}(W,#nu)");
-     finalMT = new TH1D("finalMT","final-W-neutrino transverse mass",100, 0.,200.);
-     finalMT->GetXaxis()->SetTitle("M_{T}(W,#nu)");
-     toy_weight = 1;
-     
-}
 
     
 
@@ -204,6 +96,29 @@ int main(int argc, char** argv){
     bool f0Fixed = false;
     bool fminusFixed = true;
     string weightFileName;
+    bool pu3D = false;
+    double toy_weight = 1;
+    double XSec;
+    double Luminosity;
+    double initial;
+
+    int toy_verbosity = 0;
+    TH1D * METResolutions;
+
+    TFile * toy_out;
+    TTree * eventTree_f;
+    TTree * runTree_f;
+
+
+    std::vector<std::string> toy_inputFileNames;
+    std::vector<double> toy_Xsecs;
+    std::vector<double> toy_initials;
+    std::vector<bool> toy_isData;
+    std::vector<bool> toy_realWtb;
+    std::string toy_outFileName;
+    std::string toy_plotFileName;
+    std::string toy_outFileName_FullSelection;
+    
     for (int f = 1; f < argc; f++) {
         std::string arg_fth(*(argv + f));
         if (arg_fth == "out") {
@@ -281,8 +196,6 @@ int main(int argc, char** argv){
 //    cout<<doJES<<endl;
     cout << weightFileName << endl;
     TClonesArray* corrMET = 0;
-
-    beginJob();
     TApplication theApp("App", &argc, argv);
     TH1D * cosTheta = new TH1D("cosTheta","cos(#theta)",1000, -1, 1 );
     cosTheta->Sumw2();
@@ -341,7 +254,7 @@ int main(int argc, char** argv){
 
         while (pracEvt->Next()) {
 
-//            if(ievt > 1000)
+//            if(ievt > 100)
 //                break;
 
             if(pu3D){
@@ -378,119 +291,15 @@ int main(int argc, char** argv){
                     <<"Electron size: "<<myEvent_tmp.electrons.size()<<"\n"
                     <<"Jet size: "<<myEvent_tmp.PFJets.size()<<"\n"<<endl;
             myEvent_tmp.verbose(toy_verbosity);
-            if(toy_verbosity > 0)
-                cout<<"ScrapFilterMaker-------------------------------------------------------------------"<<endl;
-            double scrapFilterer = (double)(pracEvt->Event()->nHighPurityTracks())/(double)(pracEvt->Event()->nTracks());
-            if(toy_verbosity > 0)
-                cout<<"HBHEnoiseFilterMaker-------------------------------------------------------------------"<<endl;//?????
-            if(toy_verbosity > 0)
-                cout<<"Vertex Makers ---------------------------------------------------------------------"<<endl;
-            myEvent_tmp.VertexMaker();
-            if(toy_verbosity > 0)
-                cout<<"Electron Maker ---------------------------------------------------------------------"<<endl;
-            myEvent_tmp.ElectronMaker();
-            
+                        
+                       
             if(toy_verbosity > 0)
                 cout<<"Jet Makers ---------------------------------------------------------------------"<<endl;
             myEvent_tmp.PFJetMaker(/*bTagAlgo*/"TCHP",/*pt*/30.,/*eta*/4.5);
             if(toy_verbosity > 0)
                 cout<<"Muon Maker ---------------------------------------------------------------------"<<endl;
             myEvent_tmp.MuonMaker();
-            if(toy_verbosity > 0)
-                cout<<"START TO SELECT : "<<endl;
-            toy_n0++;
-            if(toy_doScrapFilter){
-                if(scrapFilterer > 0.2){
-                    toy_nScrapFilter++;
-                    if(toy_verbosity>0)
-                        cout<<"\tPassed!! scrapFilterer is "<<scrapFilterer<<endl;
-                }else
-                    continue;
-            }
-            if(toy_doHCALnoiseFilter){
-                if(toy_verbosity>0)
-                    cout<<"no Info in TopTrees for this cut :-("<<endl;
-            }
-            if(toy_doHLT){
-                TopTree::TRootHLTInfo hltInfo = pracEvt->RunInfo()->getHLTinfo(pracEvt->Event()->runId());
-                int trigID = hltInfo.hltPath("HLT_IsoMu17_v*");   
-                if(pracEvt->Event()->trigHLT(trigID)){
-                    toy_nHlt++;
-                    if(toy_verbosity > 0){
-                        cout<<hltInfo.hltNames(trigID)<<"\t"<<hltInfo.hltWasRun(trigID)<<
-                        "\t"<<hltInfo.hltAccept(trigID)<<endl;
-                        cout<<"\tHLT is passed"<<endl;
-                    }
-                }else 
-                    continue;
-            }
-            if(toy_doPV){
-                if(myEvent_tmp.Gpvs.size() > 0){
-                    toy_nPV++;
-                    if(toy_verbosity > 0)
-                        cout<<"\tPVCut Passed"<<endl;
-                } else
-                    continue;
-            }
-
-            if(toy_doMuon){
-                if(myEvent_tmp.Dmuons.size() == 1){
-                    toy_nMu++;
-                    if(toy_verbosity > 0)
-                        cout<<"\tMu selection Passed"<<endl;
-                } else
-                    continue;
-            }
-            if(toy_doLMuVeto){
-                if(myEvent_tmp.looseMuons.size()==0){
-                    toy_nNoLMu++;
-                    if(toy_verbosity > 0)
-                        cout<<"\tlooseMuVeto is passed"<<endl;
-                }else 
-                    continue;
-            }
-            if(toy_doLEVeto){
-                if(myEvent_tmp.Gelectrons.size()==0 && myEvent_tmp.Secondelectrons.size()==0){
-                    toy_nNoLE++;
-                    if(toy_verbosity > 0)
-                        cout<<"\tlooseEVeto is passed"<<endl;
-                }else 
-                    continue;
-            }
-
-            if(toy_dojet){
-                if(myEvent_tmp.GPFJets.size() == 2){		
-                    toy_nJet++;
-                    if(toy_verbosity > 0){
-                        cout<<"\t==2 Jet Passed"<<endl;
-                    }
-                } else
-                    continue;
-            }
-            double mt = 0;
-            if(toy_doMT){
-                double metT = sqrt((myEvent_tmp.mets.at(0).Px()*myEvent_tmp.mets.at(0).Px())+
-                               (myEvent_tmp.mets.at(0).Py()*myEvent_tmp.mets.at(0).Py()));
-                
-                double muT =  sqrt((myEvent_tmp.Dmuons.at(0).Px()*myEvent_tmp.Dmuons.at(0).Px())+
-                              (myEvent_tmp.Dmuons.at(0).Py()*myEvent_tmp.Dmuons.at(0).Py()));
-                mt = sqrt(pow(muT+metT,2) - pow(myEvent_tmp.mets.at(0).Px()+myEvent_tmp.Dmuons.at(0).Px(),2)
-                                                 - pow(myEvent_tmp.mets.at(0).Py()+myEvent_tmp.Dmuons.at(0).Py(),2));
-                if(mt>40){
-                    toy_nMT++;
-                    if(toy_verbosity>0)
-                        cout<<"\tM_T cut is passed"<<endl;
-                }else
-                    continue;
-            }
-            if(toy_doBtag){
-                if(myEvent_tmp.BPFJets.size() == 1){
-                    toy_nBtag++;
-                    if(toy_verbosity > 0)
-                        cout<<"\t== 1bTag Passed"<<endl;
-                } else
-                    continue;
-            }
+ 
             int mySecondJetIndex = 0;
             if(mySecondJetIndex == myEvent_tmp.firstBtagIndex)
                 mySecondJetIndex = 1;
@@ -498,10 +307,8 @@ int main(int argc, char** argv){
             //Reweighting process
             SemiLepTopQuark myLeptonicTop(myEvent_tmp.BPFJets.at(0),myEvent_tmp.mets.at(0),myEvent_tmp.Dmuons.at(0),
                     myEvent_tmp.GPFJets.at(mySecondJetIndex),METResolutions);
-            if(isData){
-                cosTheta->Fill(myLeptonicTop.cosThetaStar(),lumiWeight3D);
-//                cout<<lumiWeight3D<<endl;
-            }else{
+            cosTheta->Fill(myLeptonicTop.cosThetaStar(),lumiWeight3D);
+            if(!isData) {
                 double W = lumiWeight3D;
 //                cout<<W<<endl;
                 for(int step = 0; step <= nSteps; step++){
@@ -524,10 +331,6 @@ int main(int argc, char** argv){
         cosThetaRW.at(step)->Write();
     }
     myFile->cd();
-    cout<<"At the end!!"<<endl;
-    DataPointChiSquaredHandler myChiSquaredHandler("recoChi2",cosTheta,cosThetaRW,
-                               myHandler.getVariatingFractionGraph(), 10, "Both", 5);
-    myChiSquaredHandler.Write(myFile);
     myFile->Write();
     myFile->Close();
     return 0;
