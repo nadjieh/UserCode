@@ -26,11 +26,11 @@ int main(int argc, char** argv) {
         if (arg_fth == "out") {
             f++;
             std::string out(*(argv + f));
-            outFileName = string(out+".root");
+            outFileName = string(out);
         }else if(arg_fth == "input"){
             f++;
             std::string in(*(argv + f));
-            inputs.push_back(string("~/work/samples/"+in));
+            inputs.push_back(string("~/work/AnalysisClasses/EventSelection/macro/t-SingleTopSelection/DONE/"+in));
         }else if(arg_fth == "json"){
             f++;
             std::string in(*(argv + f));
@@ -41,11 +41,8 @@ int main(int argc, char** argv) {
     TFile* f = 0;
     TFile* outFile = 0;
     TApplication theApp("App", &argc, argv);
-    JSONHandler myJSON(0);
+    JSONHandler myJSON;
     myJSON.readJSON(JSONFileName);
-//    myJSON.printJSON();
-    
-//    myJSON.setPrescaledRunLumis();
     TTree * eventTree_f = 0;
     TTree * runTree_f = 0;
     for(unsigned int fNumber = 0; fNumber<inputs.size(); fNumber++){
@@ -69,17 +66,12 @@ int main(int argc, char** argv) {
         int ievt = 0;
         while (pracEvt->Next()) {
             ievt++;
-
-//            if(ievt > 1000)
-//		break;
-//            cout<<"------------------------------ eventNumber "<<ievt<<endl;
-
-            if(!myJSON.isSelectedByJSON(pracEvt->Event())){
-                cout<<"event is rejected:\n\tRunId: "<<pracEvt->Event()->runId()<<
-                      "\tLumiId: "<<pracEvt->Event()->lumiBlockId()<<endl;
-                continue;
-            }
-            eventTree_f->Fill();
+/*
+            if(ievt > 10)
+		break;
+*/
+            if(myJSON.isSelectedByJSON(pracEvt->Event()))
+                eventTree_f->Fill();
         }
         runTree_f->Fill();
         cout<<"before closing file input "<<f->GetName()<<endl;
@@ -89,8 +81,8 @@ int main(int argc, char** argv) {
         outFile->cd();
         outFile->Write();
         outFile->Close();
-    }
 
+    }
     return 0;
 }
 

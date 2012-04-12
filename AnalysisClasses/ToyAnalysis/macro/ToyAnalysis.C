@@ -40,8 +40,6 @@
 #include "../../PhysicsObjects/interface/SemiLepTopQuark.h"
 #include "../interface/GenSingleTopMaker.h"
 #include "../interface/CosThetaWeighter.h"
-#include "../interface/CosThetaWeightHandler.h"
-#include "../interface/DataPointsChiSquared.h"
 #include "../../../TopBrussels/TopTreeAnalysis/MCInformation/interface/Lumi3DReWeighting.h"
 
 
@@ -58,8 +56,6 @@
 #include <TBranch.h>
 #include <TTree.h>
 #include <TSystem.h>
-#include <TGraph.h>
-#include <map>
 #include <vector>
 
 using namespace std;
@@ -109,10 +105,11 @@ int toy_nBtag;
 bool toy_doBtag;
 double XSec;
 double Luminosity;
-double initial;
+double PreSelEff;
 bool pu3D;
 bool saveTypeIMET;
 
+bool isData;
 double toy_weight;
 
 int toy_verbosity;
@@ -128,10 +125,6 @@ TTree * runTree_f;
 
 
 std::vector<std::string> toy_inputFileNames;
-std::vector<double> toy_Xsecs;
-std::vector<double> toy_initials;
-std::vector<bool> toy_isData;
-std::vector<bool> toy_realWtb;
 std::string toy_outFileName;
 std::string toy_plotFileName;
 std::string toy_outFileName_FullSelection;
@@ -143,7 +136,7 @@ void beginJob(){
      toy_nHCALnoiseFilter = 0;
      toy_doHCALnoiseFilter = true;
      toy_nHlt = 0;
-     toy_doHLT = false;//true
+     toy_doHLT = true;
      toy_nPV = 0;
      toy_doPV = true;//
      toy_nMu = 0;
@@ -172,84 +165,110 @@ void beginJob(){
      MT->GetXaxis()->SetTitle("M_{T}(W,#nu)");
      finalMT = new TH1D("finalMT","final-W-neutrino transverse mass",100, 0.,200.);
      finalMT->GetXaxis()->SetTitle("M_{T}(W,#nu)");
-     toy_weight = 1;
      
+     toy_weight = 1;
 }
 
-    
 
 
+void endJob(){
+    TFile * plots = new TFile(toy_plotFileName.c_str(),"recreate");
+    TH1D * CutFlowHist = new TH1D("CutFlow","",12,0,12);
+    CutFlowHist->GetXaxis()->SetBinLabel(1,"Initial");
+    CutFlowHist->GetXaxis()->SetBinLabel(2,"Scrap");
+    CutFlowHist->GetXaxis()->SetBinLabel(3,"HBHE");
+    CutFlowHist->GetXaxis()->SetBinLabel(4,"HLT");
+    CutFlowHist->GetXaxis()->SetBinLabel(5,"primaryVertex");
+    CutFlowHist->GetXaxis()->SetBinLabel(6,"mu-selection");
+    CutFlowHist->GetXaxis()->SetBinLabel(7,"muonVeto");
+    CutFlowHist->GetXaxis()->SetBinLabel(8,"elecVeto");
+    CutFlowHist->GetXaxis()->SetBinLabel(9,"jet-selection");
+    CutFlowHist->GetXaxis()->SetBinLabel(10,"M_{T}");
+    CutFlowHist->GetXaxis()->SetBinLabel(11,"b-tag");
     
-pair <std::vector<TH1D*> , TGraph*>WeightsLoader(TFile * f){
-    std::vector<TH1D*> Ws;
-    TGraph * g;
-    TList * l = f->GetListOfKeys();
-    for(int i = 0; i< l->GetSize(); i++){
-//        if(string(l->At(i)->GetName()) == "fvarValues" || string(l->At(i)->GetName()) == "fvarValuesG")
-//            continue;
-        if( string(l->At(i)->GetName()) == "fvarValuesG")
-            g = (TGraph*)f->Get(l->At(i)->GetName());
-        else
-            Ws.push_back((TH1D*)f->Get(l->At(i)->GetName()));
+
+    CutFlowHist->SetBinContent(1,toy_n0);
+    CutFlowHist->SetBinContent(2,toy_nScrapFilter);
+    CutFlowHist->SetBinContent(3,toy_nHCALnoiseFilter);
+    CutFlowHist->SetBinContent(4,toy_nHlt);
+    CutFlowHist->SetBinContent(5,toy_nPV);
+    CutFlowHist->SetBinContent(6,toy_nMu);
+    CutFlowHist->SetBinContent(7,toy_nNoLMu);
+    CutFlowHist->SetBinContent(8,toy_nNoLE);
+    CutFlowHist->SetBinContent(9,toy_nJet);
+    CutFlowHist->SetBinContent(10,toy_nMT);
+    CutFlowHist->SetBinContent(11,toy_nBtag);
+
+
+    plots->cd();
+    if(toy_doScrapFilter){
+        CutFlowHist->Write();
     }
-    cout<<Ws.size()<<endl;
-    return make_pair(Ws,g);
+    if(fillHists){
+        if(toy_doPV){
+            toy_atLeastOnGPV.WriteAll(plots);
+        }
+    //    cout<<"PV is done"<<endl;
+        if(toy_doMuon)
+            toy_MuSelection.WriteAll(plots);
+    //    cout<<"Musel is done"<<endl;
+        if(toy_doLMuVeto)
+            toy_LMuVeto.WriteAll(plots);
+    //    cout<<"LM is done"<<endl;
+        if(toy_doLEVeto)
+            toy_LEVeto.WriteAll(plots);
+    //    cout<<"LE is done"<<endl;
+        if(toy_dojet)
+            toy_Jets.WriteAll(plots);
+    //    cout<<"jet is done"<<endl;
+
+        if(toy_doMT){
+            plots->cd();
+            MT->Write();
+        }
+    //    cout<<"MT is done"<<endl;
+
+
+        if(toy_doBtag){
+            toy_BJets.WriteAll(plots);
+            toy_AllFinalMuons.WriteAll(plots);
+            toy_GoldenFinalMuons.WriteAll(plots);
+        }
+        plots->cd();
+        finalMT->Write();
+    }
+    plots->Write();
+    plots->Close();
+    
+    
+    double intialBeforePresel = (double)toy_n0/(double)PreSelEff;
+//    double weight = (double)(XSec*Luminosity)/(double)intialBeforePresel;
+    double weight = toy_weight;
+    cout<<"Cut flow in "<<Luminosity<<" pb-1 , Weight is "<<weight<<endl;
+        
+    cout<<"\n\nInitial\tScrap\tHEHB\tTrigger\tPV\tMuon\tLMVeto\tLEVeto\tJet\tMT\tbTag\n"<<endl;
+    cout<<toy_n0*weight<<"\t"<<toy_nScrapFilter*weight<<"\t"<<toy_nHCALnoiseFilter*weight<<"\t"<<toy_nHlt*weight<<"\t"
+            <<toy_nPV*weight<<"\t"<<toy_nMu*weight<<"\t"<<toy_nNoLMu*weight<<"\t"<<toy_nNoLE*weight<<"\t"
+            <<toy_nJet*weight<<"\t"<<toy_nMT*weight<<"\t"<<toy_nBtag*weight<<endl;
+    
+    cout<<toy_n0*weight<<"\n"<<toy_nScrapFilter*weight<<"\n"<<toy_nHCALnoiseFilter*weight<<"\n"<<toy_nHlt*weight<<"\n"
+            <<toy_nPV*weight<<"\n"<<toy_nMu*weight<<"\n"<<toy_nNoLMu*weight<<"\n"<<toy_nNoLE*weight<<"\n"
+            <<toy_nJet*weight<<"\n"<<toy_nMT*weight<<"\n"<<toy_nBtag*weight<<endl;
+    
+
 }
+
 int main(int argc, char** argv){
 //    sleep(60);
     double doJES = 1.;
-    int nSteps;
-    double f0;
-    double fminus;
-    bool f0Fixed = false;
-    bool fminusFixed = true;
-    string weightFileName;
     for (int f = 1; f < argc; f++) {
         std::string arg_fth(*(argv + f));
+
         if (arg_fth == "out") {
           f++;
           std::string out(*(argv + f));
           toy_outFileName_FullSelection = string(out+".root");
 	  toy_plotFileName = out;
-        }else if(arg_fth == "Lumi"){
-          f++;
-          std::string Lumi(*(argv + f));
-          Luminosity = atof(Lumi.c_str());
-        }else if (arg_fth == "METResolFileName") {
-            f++;
-            std::string in(*(argv + f));
-            TFile * METResolFileName = TFile::Open(in.c_str());
-            METResolutions = (TH1D*) METResolFileName->Get("METresolutions");
-        }else if (arg_fth == "nSteps") {
-          f++;
-          std::string in(*(argv + f));
-          nSteps = (int)atof(in.c_str());
-        }else if (arg_fth == "f0") {
-          f++;
-          std::string in(*(argv + f));
-          f0 = atof(in.c_str());
-        }else if (arg_fth == "fminus") {
-          f++;
-          std::string in(*(argv + f));
-          fminus = atof(in.c_str());
-        }else if (arg_fth == "isFixed") {
-          f++;
-          std::string in(*(argv + f));
-          if(in == string("f0")){
-              f0Fixed = true;
-              fminusFixed = false;
-          }else if(in == string("fminus")){
-              f0Fixed = false;
-              fminusFixed = true;
-          }
-        }else if(arg_fth == "WeightFile"){
-          f++;
-          std::string in(*(argv + f));
-          weightFileName = in;            
-        }else if (arg_fth == "JES") {
-            f++;
-            std::string in(*(argv + f));
-           doJES = atof(in.c_str());
         }else if (arg_fth == "input") {
           f++;
           std::string in(*(argv + f));
@@ -257,82 +276,77 @@ int main(int argc, char** argv){
         }else if(arg_fth == "XSec"){
           f++;
           std::string Xsec(*(argv + f));
-          toy_Xsecs.push_back(atof(Xsec.c_str()));
-        }else if(arg_fth == "Initial"){
+          XSec = atof(Xsec.c_str());
+        }else if(arg_fth == "Lumi"){
           f++;
-          std::string in(*(argv + f));
-          toy_initials.push_back(atof(in.c_str()));
+          std::string Lumi(*(argv + f));
+          Luminosity = atof(Lumi.c_str());
+        }else if(arg_fth == "preSelEff"){
+          f++;
+          std::string preSelEff(*(argv + f));
+          PreSelEff = atof(preSelEff.c_str());
+        }else if (arg_fth == "JES") {
+            f++;
+            std::string in(*(argv + f));
+           doJES = atof(in.c_str());
         }else if (arg_fth == "isData") {
             f++;
             std::string in(*(argv + f));
             if(in == "yes" || in == "YES" || in == "Yes" || in == "y" || in == "Y")
-		toy_isData.push_back( true);
+		isData = true;
 	    else
-		toy_isData.push_back( false);
-        }else if (arg_fth == "hasWtb") {
+		isData = false;
+        }else if (arg_fth == "METResolFileName") {
             f++;
             std::string in(*(argv + f));
-            if(in == "yes" || in == "YES" || in == "Yes" || in == "y" || in == "Y")
-		toy_realWtb.push_back( true);
-	    else
-		toy_realWtb.push_back( false);
+            TFile * METResolFileName = TFile::Open(in.c_str());
+            METResolutions = (TH1D*) METResolFileName->Get("METresolutions");
+
         }
     }
 //    cout<<doJES<<endl;
-    cout << weightFileName << endl;
+    cout << toy_inputFileNames.at(0).c_str() << endl;
+
+    TFile* f = 0;
     TClonesArray* corrMET = 0;
 
     beginJob();
     TApplication theApp("App", &argc, argv);
     TH1D * cosTheta = new TH1D("cosTheta","cos(#theta)",1000, -1, 1 );
-    cosTheta->Sumw2();
-    CosThetaWeightHandler myHandler(f0,fminus,f0Fixed,fminusFixed,nSteps);
-    
-//    CosThetaWeightHandler myHandler(WeightsLoader(TFile::Open(weightFileName.c_str())));
-    myHandler.setName(toy_plotFileName);
-    std::vector<TH1D*> cosThetaRW;
-    for(int i = 0; i<=nSteps; i++){
-        stringstream d;
-        d<<"cosThetaRW_"<<i;
-        cosThetaRW.push_back(new TH1D(d.str().c_str(),d.str().c_str(),1000, -1,1));
-        cosThetaRW.at(cosThetaRW.size()-1)->Sumw2();
-    }
-    if(toy_inputFileNames.size() != toy_Xsecs.size()){
-        cout<<"ERROR: Bad file-Xsec assignment!!!"<<endl;
-        return 2;
-    }
-    if(toy_inputFileNames.size() != toy_initials.size()){
-        cout<<"ERROR: Bad file-initial assignment!!!"<<endl;
-        return 2;
-    }
-    if(toy_inputFileNames.size() != toy_isData.size()){
-        cout<<"ERROR: Bad file-isData assignment!!!"<<endl;
-        return 2;
-    }
-    TFile * f = 0;
+    TH1D * cosThetaRW = new TH1D("cosThetaRW","cos(#theta)_{rw}",1000, -1, 1 );
+    TH1D * cosThetaGen = new TH1D("cosThetaGen","cos(#theta)_{gen}",1000, -1, 1 );
+    TH1D * topMass = new TH1D("topMass","m_{top}",150, 0,300);
+    TH1D * Wmass = new TH1D("Wmass","m_{W}",75, 0,150 );
+    CosThetaWeighter myWeighter(8.51588e-01,1.19857e-01);
     for(unsigned int fNumber = 0; fNumber<toy_inputFileNames.size(); fNumber++){
-        bool isData = toy_isData.at(fNumber);
-        bool hasWtb = toy_realWtb.at(fNumber);
+        cout<<"RunNumber|\tEventNumber|\tLumiBlock|\tptLepton|\trelIso|\tptjet1|\tptjet2|\tMET|\tMT|\tbtagjet1|\tbtagjet2"<<endl;
         f = TFile::Open(toy_inputFileNames.at(fNumber).c_str());
-        cout<<"File: "<<toy_inputFileNames.at(fNumber)<<endl;
-        cout<<"\tcross section: "<<toy_Xsecs.at(fNumber)<<endl;
-        cout<<"\tinitial: "<<toy_initials.at(fNumber)<<endl;
-        double lumiWeight3D = (double)(toy_Xsecs.at(fNumber)*Luminosity)/(double)toy_initials.at(fNumber);
-        if(isData)
-            lumiWeight3D = 1;
-        cout<<"\tweight: "<<lumiWeight3D<<endl;
-        
-        if(isData)
-            cout<<"\ta data file"<<endl;
-        else
-            cout<<"\ta mc file"<<endl;
+//        cout<<"nFiles: "<<toy_inputFileNames.size()<<endl;
 
         TTree* runTree = (TTree*) f->Get("runTree");
         TTree* eventTree = (TTree*) f->Get("eventTree");
-
+        
+//        cout<<runTree->GetName()<<"????"<<endl;
 
         PracticalEvent * pracEvt = new PracticalEvent(eventTree,runTree);
         pracEvt->eventTree->SetBranchStatus("*", 1);
+
+
+        if(fillTree ){
+            stringstream s("");
+            s<<(fNumber+1)<<"_"<<toy_outFileName_FullSelection;
+            toy_out = new TFile(s.str().c_str(), "recreate");
+            toy_out->cd();
+            eventTree_f = pracEvt->eventTree->CloneTree(0);
+            runTree_f = pracEvt->runTree->CloneTree(0);
+            if(saveTypeIMET){
+                if(toy_verbosity > 0)
+                    cout<<"corrMET initiating ... "<<endl;
+                corrMET = new TClonesArray("TopTree::TRootPFMET", 1000);
+                eventTree_f->Branch ("PFMET_TypeICorrected", "TClonesArray", &corrMET);
+            }
+                
+        }
 
         std::cout<<"beforeLoop"<<std::endl;
 
@@ -341,9 +355,22 @@ int main(int argc, char** argv){
 
         while (pracEvt->Next()) {
 
-//            if(ievt > 1000)
+//            if(ievt > 10)
 //                break;
+            double lumiWeight3D = 1;
 
+            GenSingleTopMaker myGenStMaker((TRootNPGenEvent*)pracEvt->NPGenEvtCollection()->At(0));
+            if(myGenStMaker.isSemiMuSingleTop){
+                double W = myWeighter.getWeight(myGenStMaker.genSingleTop.cosThetaStar())*lumiWeight3D;
+                cosThetaGen->Fill(myGenStMaker.genSingleTop.cosThetaStar(),W);
+                topMass->Fill(myGenStMaker.genSingleTop.top().M(),W);
+                Wmass->Fill(myGenStMaker.genSingleTop.W().M(),W);
+//                myGenStMaker.genSingleTop.printContent();
+            }
+
+            if(toy_verbosity > 0){
+                cout<<"JES: "<<doJES<<endl;
+            }
             if(pu3D){
                 Lumi3DReWeighting Lumi3DWeights = 
                 Lumi3DReWeighting("../../../TopBrussels/TopTreeAnalysis/macros/PileUpReweighting/pileup_MC_Flat10PlusTail.root",
@@ -363,14 +390,13 @@ int main(int argc, char** argv){
 
             std::vector<TRootPFJet>  myJets_;
             myJets_.clear();
-
-
-//            myJets_ = pracEvt->unCorrectedPFJetVector();
-            myJets_ = pracEvt->ScaledPFJetCollection(doJES,isData);
-//            Event myEvent_tmp( myJets_, *pracEvt->ElectronCollection()
-//            ,*pracEvt->METCollection(),*pracEvt->MuonCollection(),*pracEvt->VertexCollection());
+//            cout<<"I am going to Jet Correction "<<isData<<endl;
+/*
+            myJets_ = pracEvt->ScaledPFJetCollection(1,false);
+*/
+            myJets_ = pracEvt->unCorrectedPFJetVector();
             Event myEvent_tmp( myJets_, *pracEvt->ElectronCollection()
-            ,pracEvt->TypeICorrMET(),*pracEvt->MuonCollection(),*pracEvt->VertexCollection());
+            ,*pracEvt->METCollection(),*pracEvt->MuonCollection(),*pracEvt->VertexCollection());
             
             if(toy_verbosity > 0)
                 cout<<"PV size: "<<myEvent_tmp.pvs.size()<<"\n"
@@ -389,6 +415,14 @@ int main(int argc, char** argv){
             if(toy_verbosity > 0)
                 cout<<"Electron Maker ---------------------------------------------------------------------"<<endl;
             myEvent_tmp.ElectronMaker();
+            /*pt = 30., eta = 2.5,  Exc_Low = 1.4442 , Exc_High = 1.5660, Id = "VBTF70", IdSecond = "VBTF95" (not applied),
+             * D0 = 0.02, IsoCut = 0.125, drToPV = 10000.,  secondEIso = 0.2, secPt=15 GeV 
+             */
+            
+            /* if(toy_verbosity > 0)
+             * cout<<"Jet Cleaning  ---------------------------------------------------------------------"<<endl;
+             * myEvent_tmp.JetCleaning();
+            *///not needed for PFToPAT
             
             if(toy_verbosity > 0)
                 cout<<"Jet Makers ---------------------------------------------------------------------"<<endl;
@@ -396,6 +430,10 @@ int main(int argc, char** argv){
             if(toy_verbosity > 0)
                 cout<<"Muon Maker ---------------------------------------------------------------------"<<endl;
             myEvent_tmp.MuonMaker();
+            /*
+             * pt = 20.,  eta = 2.1, chi2 = 10,  D0 = 0.02,  nvh = 10, isoCut_ = 0.15,  doGL = false,  
+             * nPixWithMeasuredHits = 1,  nSegM = 1
+             */
             if(toy_verbosity > 0)
                 cout<<"START TO SELECT : "<<endl;
             toy_n0++;
@@ -413,7 +451,8 @@ int main(int argc, char** argv){
             }
             if(toy_doHLT){
                 TopTree::TRootHLTInfo hltInfo = pracEvt->RunInfo()->getHLTinfo(pracEvt->Event()->runId());
-                int trigID = hltInfo.hltPath("HLT_IsoMu17_v*");   
+                int trigID = hltInfo.hltPath("HLT_IsoMu17_v*");
+//                cout<<"trigID: "<<trigID<<", hlt: "<<pracEvt->Event()->trigHLT(trigID)<<endl;   
                 if(pracEvt->Event()->trigHLT(trigID)){
                     toy_nHlt++;
                     if(toy_verbosity > 0){
@@ -425,6 +464,8 @@ int main(int argc, char** argv){
                     continue;
             }
             if(toy_doPV){
+                if(fillHists)
+                    toy_atLeastOnGPV.Fill(myEvent_tmp.pvs,myEvent_tmp.Gpvs.size(),lumiWeight3D);
                 if(myEvent_tmp.Gpvs.size() > 0){
                     toy_nPV++;
                     if(toy_verbosity > 0)
@@ -434,6 +475,8 @@ int main(int argc, char** argv){
             }
 
             if(toy_doMuon){
+                if(fillHists)
+                    toy_MuSelection.Fill(myEvent_tmp.muons,myEvent_tmp.Dmuons.size(),lumiWeight3D);
                 if(myEvent_tmp.Dmuons.size() == 1){
                     toy_nMu++;
                     if(toy_verbosity > 0)
@@ -442,6 +485,8 @@ int main(int argc, char** argv){
                     continue;
             }
             if(toy_doLMuVeto){
+                if(fillHists)
+                    toy_LMuVeto.Fill(myEvent_tmp.looseMuons,myEvent_tmp.looseMuons.size(),lumiWeight3D);
                 if(myEvent_tmp.looseMuons.size()==0){
                     toy_nNoLMu++;
                     if(toy_verbosity > 0)
@@ -449,6 +494,11 @@ int main(int argc, char** argv){
                 }else 
                     continue;
             }
+            TRootMuon myMu = myEvent_tmp.Dmuons.at(0);
+            double relIso=(myMu.chargedHadronIso()+myMu.neutralHadronIso()+myMu.photonIso())/myMu.Pt();
+//            cout<<pracEvt->Event()->runId()<<"|\t"<<pracEvt->Event()->eventId()<<"|\t"
+//            <<pracEvt->Event()->lumiBlockId()<<"|\t"<<myMu.Pt()<<"|\t"<<relIso<<" ("<<myMu.neutralHadronIso()
+//            <<", "<<myMu.chargedHadronIso()<<", "<<myMu.photonIso()<<") |\t|\t|\t\t\t\t"<<endl;
             if(toy_doLEVeto){
                 if(myEvent_tmp.Gelectrons.size()==0 && myEvent_tmp.Secondelectrons.size()==0){
                     toy_nNoLE++;
@@ -457,8 +507,13 @@ int main(int argc, char** argv){
                 }else 
                     continue;
             }
+//            cout<<pracEvt->Event()->runId()<<"|\t"<<pracEvt->Event()->eventId()<<"|\t"
+//            <<pracEvt->Event()->lumiBlockId()<<"|\t"<<myMu.Pt()<<"|\t"<<relIso<<" ("<<myMu.neutralHadronIso()
+//            <<", "<<myMu.chargedHadronIso()<<", "<<myMu.photonIso()<<") |\t|\t|\t\t\t\t"<<endl;
 
             if(toy_dojet){
+                if(fillHists)
+                    toy_Jets.FillPFJets(myEvent_tmp.PFJets,myEvent_tmp.GPFJets.size(),myEvent_tmp.BPFJets.size());
                 if(myEvent_tmp.GPFJets.size() == 2){		
                     toy_nJet++;
                     if(toy_verbosity > 0){
@@ -467,6 +522,20 @@ int main(int argc, char** argv){
                 } else
                     continue;
             }
+            
+            if(fillTree){
+                if(saveTypeIMET)
+                    if(toy_verbosity>0) cout << endl << "Analyzing ParticleFlow Missing Et..." << endl;
+                if(saveTypeIMET)
+                    new( (*corrMET)[0] ) TRootPFMET(pracEvt->TypeICorrMET());
+                eventTree_f->Fill();
+                if(saveTypeIMET) 
+                    (*corrMET).Delete();
+            }
+//            cout<<pracEvt->Event()->runId()<<"|\t"<<pracEvt->Event()->eventId()<<"|\t"
+//            <<pracEvt->Event()->lumiBlockId()<<"|\t"<<myMu.Pt()<<"|\t"<<relIso<<" ("<<myMu.neutralHadronIso()
+//            <<", "<<myMu.chargedHadronIso()<<", "<<myMu.photonIso()<<") |\t"<<myEvent_tmp.GPFJets.at(0).Pt()
+//            <<"|\t"<<myEvent_tmp.GPFJets.at(1).Pt()<<"|\t|\t|\t|\t"<<endl;
             double mt = 0;
             if(toy_doMT){
                 double metT = sqrt((myEvent_tmp.mets.at(0).Px()*myEvent_tmp.mets.at(0).Px())+
@@ -476,6 +545,8 @@ int main(int argc, char** argv){
                               (myEvent_tmp.Dmuons.at(0).Py()*myEvent_tmp.Dmuons.at(0).Py()));
                 mt = sqrt(pow(muT+metT,2) - pow(myEvent_tmp.mets.at(0).Px()+myEvent_tmp.Dmuons.at(0).Px(),2)
                                                  - pow(myEvent_tmp.mets.at(0).Py()+myEvent_tmp.Dmuons.at(0).Py(),2));
+                if(fillHists)
+                    MT->Fill(mt,lumiWeight3D);
                 if(mt>40){
                     toy_nMT++;
                     if(toy_verbosity>0)
@@ -483,7 +554,13 @@ int main(int argc, char** argv){
                 }else
                     continue;
             }
+//            cout<<pracEvt->Event()->runId()<<"|\t"<<pracEvt->Event()->eventId()<<"|\t"
+//            <<pracEvt->Event()->lumiBlockId()<<"|\t"<<myMu.Pt()<<"|\t"<<relIso<<" ("<<myMu.neutralHadronIso()
+//            <<", "<<myMu.chargedHadronIso()<<", "<<myMu.photonIso()<<") |\t"<<myEvent_tmp.GPFJets.at(0).Pt()
+//            <<"|\t"<<myEvent_tmp.GPFJets.at(1).Pt()<<"|\t"<<myEvent_tmp.mets.at(0).Pt()<<"|\t"<<mt<<"|\t|\t"<<endl;
             if(toy_doBtag){
+                if(fillHists)
+                    toy_BJets.FillPFJets(myEvent_tmp.GPFJets,myEvent_tmp.GPFJets.size(),myEvent_tmp.BPFJets.size(),false,lumiWeight3D);
                 if(myEvent_tmp.BPFJets.size() == 1){
                     toy_nBtag++;
                     if(toy_verbosity > 0)
@@ -491,44 +568,57 @@ int main(int argc, char** argv){
                 } else
                     continue;
             }
+//            cout<<"Event number "<<ievt<<endl;
             int mySecondJetIndex = 0;
             if(mySecondJetIndex == myEvent_tmp.firstBtagIndex)
                 mySecondJetIndex = 1;
-            
-            //Reweighting process
             SemiLepTopQuark myLeptonicTop(myEvent_tmp.BPFJets.at(0),myEvent_tmp.mets.at(0),myEvent_tmp.Dmuons.at(0),
                     myEvent_tmp.GPFJets.at(mySecondJetIndex),METResolutions);
-            if(isData){
-                cosTheta->Fill(myLeptonicTop.cosThetaStar(),lumiWeight3D);
-//                cout<<lumiWeight3D<<endl;
-            }else{
-                double W = lumiWeight3D;
-//                cout<<W<<endl;
-                for(int step = 0; step <= nSteps; step++){
-                    if(hasWtb)
-                        W = myHandler.getCosThetaWeight(myLeptonicTop.cosThetaStar(),step)*lumiWeight3D;
-//                    cout<<W<<endl;
-                    cosThetaRW.at(step)->Fill(myLeptonicTop.cosThetaStar(),W);
-                }
+            cosTheta->Fill(myLeptonicTop.cosThetaStar(),lumiWeight3D);
+            double W = myWeighter.getWeight(myGenStMaker.genSingleTop.cosThetaStar())*lumiWeight3D;
+            cosThetaRW->Fill(myLeptonicTop.cosThetaStar(),W);
+            
+            
+/*
+            cout<<myLeptonicTop.getMET().Px()<<"\t"<<myLeptonicTop.getMET().Py()<<"\t"<<myLeptonicTop.getMET().Pz()<<endl;
+            cout<<myEvent_tmp.mets.at(0).Px()<<"\t"<<myEvent_tmp.mets.at(0).Py()<<"\t"<<myEvent_tmp.mets.at(0).Pz()<<endl;
+*/
+
+/*
+            cout<<pracEvt->Event()->runId()<<"|\t"<<pracEvt->Event()->eventId()<<"|\t"
+            <<pracEvt->Event()->lumiBlockId()<<"|\t"<<myMu.Pt()<<"|\t"<<relIso<<" ("<<myMu.neutralHadronIso()
+            <<", "<<myMu.chargedHadronIso()<<", "<<myMu.photonIso()<<") |\t"<<myEvent_tmp.GPFJets.at(0).Pt()
+            <<"|\t"<<myEvent_tmp.GPFJets.at(1).Pt()<<"|\t"<<myEvent_tmp.mets.at(0).Pt()<<"|\t"<<mt<<"|\t"
+            <<myEvent_tmp.BPFJets.at(0).btag_trackCountingHighPurBJetTags()<<"|\t"<<endl;
+*/
+            if(fillHists){
+                toy_GoldenFinalMuons.Fill(myEvent_tmp.Dmuons,myEvent_tmp.Dmuons.size(),lumiWeight3D);
+                finalMT->Fill(mt,lumiWeight3D);
             }
         }
+        if(fillTree)
+            runTree_f->Fill();
+        cout<<"before closing file input "<<f->GetName()<<endl;
         f->Close();
         delete f;
+
+        if(fillTree){
+            toy_out->cd();
+            toy_out->Write();
+            toy_out->Close();
+        }
     }
     cout<<"before endjob"<<endl;
-    TFile * myFile = new TFile(string("cosTheta_"+toy_plotFileName).c_str(), "recreate");
+    TFile * myFile = new TFile("cosTheta.root", "recreate");
     myFile->cd();
     cosTheta->Write();
-    myFile->mkdir("CosThetaRW")->cd();
-    for(int step = 0; step <= nSteps; step++){
-        cosThetaRW.at(step)->Write();
-    }
-    myFile->cd();
-    cout<<"At the end!!"<<endl;
-    DataPointChiSquaredHandler myChiSquaredHandler("recoChi2",cosTheta,cosThetaRW,
-                               myHandler.getVariatingFractionGraph(), 10, "Both", 5);
-    myChiSquaredHandler.Write(myFile);
+    cosThetaRW->Write();
+    cosThetaGen->Write();
+    Wmass->Write();
+    topMass->Write();
     myFile->Write();
     myFile->Close();
-    return 0;
+        endJob();
+	return 0;
 }
+

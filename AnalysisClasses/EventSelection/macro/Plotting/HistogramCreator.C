@@ -77,9 +77,7 @@ int main(int argc, char** argv) {
     std::string plotFileName;
     int verbosity = 0;
     TH1D * METResolutions = 0;
-    std::string HLTname = "HLT_IsoMu17_v*";
-    bool pu3D = true;
-    string PUWeightFileName="";
+    
     double XSec = 1; double Luminosity = 1; double PreSelEff = 1; double doJES = 1;
     bool isData = false;
     for (int f = 1; f < argc; f++) {
@@ -121,16 +119,6 @@ int main(int argc, char** argv) {
             std::string in(*(argv + f));
             TFile * METResolFileName = TFile::Open(in.c_str());
             METResolutions = (TH1D*) METResolFileName->Get("METresolutions");
-        }else if (arg_fth == "HLTname") {
-            f++;
-            std::string in(*(argv + f));
-            HLTname = in;
-            std::cout<<HLTname<<endl;
-        }else if (arg_fth == "PUWeightFileName") {
-            f++;
-            std::string in(*(argv + f));
-            PUWeightFileName = in;
-            std::cout<<HLTname<<endl;
         }
     }
     
@@ -138,13 +126,6 @@ int main(int argc, char** argv) {
     TApplication theApp("App", &argc, argv);
     int nInit = 0;
     int nFinal = 0;
-    int nHLTrunB = 0;
-    int nMt = 0;
-    Lumi3DReWeighting Lumi3DWeights = 
-    Lumi3DReWeighting("../../../../TopBrussels/TopTreeAnalysis/macros/PileUpReweighting/pileup_MC_Flat10PlusTail.root",
-    "../../../../TopBrussels/TopTreeAnalysis/macros/PileUpReweighting/pileup_FineBin_2011Data_UpToRun180252.root", "pileup", "pileup");
-    Lumi3DWeights.setWFileName(PUWeightFileName);
-    Lumi3DWeights.weight3D_init(1.0);
     for(unsigned int fNumber = 0; fNumber<inputFileNames.size(); fNumber++){
         cout<<"file number "<<fNumber+1<<": "<<inputFileNames.at(fNumber)<<endl;
         f = TFile::Open(inputFileNames.at(fNumber).c_str());
@@ -160,20 +141,22 @@ int main(int argc, char** argv) {
         int ievt = 0;
         
         while (pracEvt->Next()) {
-            nInit++;
-//
-//            if(ievt > 10)
+//            if(ievt > 1)
 //                break;
             double lumiWeight3D = 1;
-            if(pu3D){
+//            if(pu3D){
+//                Lumi3DReWeighting Lumi3DWeights = 
+//                Lumi3DReWeighting("../../../../TopBrussels/TopTreeAnalysis/macros/PileUpReweighting/pileup_MC_Flat10PlusTail.root",
+//                "../../../../TopBrussels/TopTreeAnalysis/macros/PileUpReweighting/pileup_FineBin_2011Data_UpToRun180252.root", "pileup", "pileup");
+//                Lumi3DWeights.weight3D_init(1.0);
+//
+//
+//                if(!isData){
+//        //            cout<<"here I am ... "<<pracEvt->Event()<<endl;
+//                    lumiWeight3D = Lumi3DWeights.weight3D(pracEvt->Event());
+//                } else lumiWeight3D = 1;
+//            }
 
-
-                if(!isData){
-        //            cout<<"here I am ... "<<pracEvt->Event()<<endl;
-                    lumiWeight3D = Lumi3DWeights.weight3D(pracEvt->Event());
-                } else lumiWeight3D = 1;
-            }
-//            cout<<lumiWeight3D<<endl;
             ievt++;
             if(verbosity > 0)
                 cout<<"*******************************************************************"<<endl;
@@ -181,14 +164,9 @@ int main(int argc, char** argv) {
             std::vector<TRootPFJet>  myJets_;
             myJets_.clear();
 //            cout<<"I am going to Jet Correction "<<isData<<endl;
-            myJets_ = pracEvt->ScaledPFJetCollection(1,isData);
-//            Event myEvent_tmp( myJets_, *pracEvt->ElectronCollection()
-//            ,*pracEvt->METCollection(),*pracEvt->MuonCollection(),*pracEvt->VertexCollection());
-            //Sweitch to typeIMET
-//            cout<<"Bare MET: "<<((TRootMET*)(pracEvt->METCollection()->At(0)))->Pt()<<endl;
-//            cout<<"TypeI Corr MET: "<<pracEvt->TypeICorrMET().Pt()<<endl;
+            myJets_ = pracEvt->ScaledPFJetCollection(1,false);
             Event myEvent_tmp( myJets_, *pracEvt->ElectronCollection()
-            ,pracEvt->TypeICorrMET(),*pracEvt->MuonCollection(),*pracEvt->VertexCollection());
+            ,*pracEvt->METCollection(),*pracEvt->MuonCollection(),*pracEvt->VertexCollection());
             if(verbosity > 0)
                 cout<<"PV size: "<<myEvent_tmp.pvs.size()<<"\n"
                     <<"Muon size: "<<myEvent_tmp.muons.size()<<"\n"
@@ -230,10 +208,9 @@ int main(int argc, char** argv) {
                 continue;
 
             TopTree::TRootHLTInfo hltInfo = pracEvt->RunInfo()->getHLTinfo(pracEvt->Event()->runId());
-            int trigID = hltInfo.hltPath(HLTname);
+            int trigID = hltInfo.hltPath("HLT_IsoMu17_v*");
 
             if(pracEvt->Event()->trigHLT(trigID)){
-		nHLTrunB++;
                 if(verbosity > 0){
                     cout<<hltInfo.hltNames(trigID)<<"\t"<<hltInfo.hltWasRun(trigID)<<
                     "\t"<<hltInfo.hltAccept(trigID)<<endl;
@@ -268,10 +245,11 @@ int main(int argc, char** argv) {
 
             if(myEvent_tmp.GPFJets.size() == 2){		
                 if(verbosity > 0){
-                        cout<<"\t==2 Jet Passed"<<endl;
+                    cout<<"\t==2 Jet Passed"<<endl;
                 }
             } else
                 continue;
+            nInit++;
             double mt = 0;
             double metT = sqrt((myEvent_tmp.mets.at(0).Px()*myEvent_tmp.mets.at(0).Px())+
                             (myEvent_tmp.mets.at(0).Py()*myEvent_tmp.mets.at(0).Py()));
@@ -281,7 +259,6 @@ int main(int argc, char** argv) {
             mt = sqrt(pow(muT+metT,2) - pow(myEvent_tmp.mets.at(0).Px()+myEvent_tmp.Dmuons.at(0).Px(),2)
                                                 - pow(myEvent_tmp.mets.at(0).Py()+myEvent_tmp.Dmuons.at(0).Py(),2));
             if(mt>40){
-                nMt++;
                 if(verbosity>0)
                     cout<<"\tM_T cut is passed"<<endl;
             }else
@@ -335,7 +312,7 @@ int main(int argc, char** argv) {
     fout->Write();
     fout->Close();
     
-    cout<<nInit<<"\n"<<nHLTrunB<<"\n"<<nMt<<"\n"<<nFinal<<endl;
+    cout<<nInit<<"\n"<<nFinal<<endl;
     return 0;
 }
 

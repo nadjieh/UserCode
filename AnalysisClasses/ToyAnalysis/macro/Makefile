@@ -38,28 +38,12 @@ HEADERS 	+=$(PHYSOBJINCS)
 
 all:  sas clean
 
-met: MET clean
-
-sep: SEP clean
-
 sas:
 	@echo "Compiling the ToyAnalysis .... \n"
 	$(CXX) ToyAnalysis.C -c -o ToyAnalysis.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
 	@echo "Linking ...... \n"
 	g++ ToyAnalysis.o -o ToyAnalysis $(ROOTGLIBS) -lEG $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
-
-MET:
-	@echo "Compiling the ToyAnalysis .... \n"
-	$(CXX) ToyAnalysis.C -c -o ToyAnalysis.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
-	@echo "Linking ...... \n"
-	g++ ToyAnalysis.o -o METToyAnalysis $(ROOTGLIBS) -lEG $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
-
-SEP:
-	@echo "Compiling the TA_WeightedCosThetaProducer .... \n"
-	$(CXX) TA_WeightedCosThetaProducer.C -c -o TA_WeightedCosThetaProducer.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
-	@echo "Linking ...... \n"
-	g++ TA_WeightedCosThetaProducer.o -o ProduceWeightedCosTheta $(ROOTGLIBS) -lEG $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)	
-
+	
 tmp:
 	@echo "Compiling the Test ...."
 	g++ Test.C -c -o test.o -O0  -pthread -m64 -I/opt/root/include -fPIC 
@@ -70,5 +54,6 @@ clean:
 	@echo "Cleaning..."
 	@rm -f *.o
 	@rm -f *~
+
 
 

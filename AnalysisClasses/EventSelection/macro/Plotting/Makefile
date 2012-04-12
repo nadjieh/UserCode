@@ -37,20 +37,19 @@ HEADERS 	+=$(PHYSOBJINCS)
 
 all:  hist clean
 
-plot: pl clean	
-
 hist:
 	@echo "Compiling the HistogramCreator .... \n"
 	$(CXX) HistogramCreator.C -c -o HistogramCreator.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
 	@echo "Linking ...... \n"
 	g++ HistogramCreator.o -o CreateHistogram $(ROOTGLIBS) -lEG $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
 
-pl:
-	@echo "Compiling the Plotting .... \n"
-	$(CXX) Plotting.C -c -o Plotting.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
-	@echo "Linking ...... \n"
-	g++ Plotting.o -o Plot $(ROOTGLIBS) -lEG $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS) 
-	
+pl: 
+	@echo "Compiling the Macro ...."
+	$(CXX) $(CXXFLAGS) $(MYHEADERS)  Plotting.C
+	@echo "Linking \n\n\n\t"
+	gcc -o plot $(CLIBS) $(LIBS)  Plotting.o
+	@rm -f *.o
+	@rm -f ../../interface/*.gch
 clean:
 	@echo "Cleaning..."
 	@rm -f *.o

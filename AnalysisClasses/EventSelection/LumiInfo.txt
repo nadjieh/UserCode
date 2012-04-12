@@ -1,15 +1,12 @@
 Total Run A: 2148.216 /pb
 
-Run A, only unPrescaled runs (HLT_IsoMu_17): 1312.772
+RunA - prescaleIsoMu17: 2148.216 - 441.811 = 1706.405
 
 Total Run B: 2480.65 /pb
 
-Whole 2011 Data: 1312.772+2480.65 = 3793.422
+Whole 2011 Data: 1706.405+2480.65 = 4187.055
 
-Original Lumi's.---------------------------------------------------------------------------
-Unprescaled luminosities are in AnalysisClasses/EventSelection/triggerInfo/unPrescaledLumi/
-with ST-Trig-02 CVS tag under ST-TriggerInfo branch.
-
+-----------------------------------------------------------------------------
 RunA: 
 
 PRV4:
