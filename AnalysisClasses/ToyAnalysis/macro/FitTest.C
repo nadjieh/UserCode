@@ -104,12 +104,13 @@ int main(int argc, char** argv){
     }
 
 //    TF3 myLL = LikelihoodFunction::getLLFunction("LL" , bkg , data , signal);
-    TF3 myChi2 = ChiSquaredFunction::getChiSquaredFunction("Chi2" , bkg , data , signal);
+    std::pair<TF3,ChiSquaredFunction*> myChi2 = ChiSquaredFunction::getChiSquaredFunction("Chi2" , bkg , data , signal);
     double x_m = -1.;
     double y_m = -1.;
     double z_m = -1.;
-    myChi2.GetMinimumXYZ(x_m , y_m , z_m);
+    myChi2.first.GetMinimumXYZ(x_m , y_m , z_m);
     
     cout<<x_m<<"  "<<y_m<<"  "<<z_m<<endl;
+    delete myChi2.second;
     return 0;
 }

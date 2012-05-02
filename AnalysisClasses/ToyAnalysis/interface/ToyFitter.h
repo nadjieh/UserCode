@@ -144,12 +144,12 @@ public:
         }
         return chi2;
     }
-    static TF3 getChiSquaredFunction(string name , TH1D nonWtbSum , TH1D hData , TH1D WtbSum){
-//        ChiSquaredFunction * functor = new ChiSquaredFunction(name , nonWtbSum , hData , WtbSum);
-//        TF3 ret(name.c_str(), functor, 0.0 , 1.0 , 0.0 , 0.1 , 0.0 , 2.0 , 0,"ChiSquaredFunction" );
-        TF3 ret(name.c_str(), "(x*x)+(y*y)+(z*z)", 0.0 , 1.0 , 0.0 , 0.1 , 0.0 , 2.0 );
+    static std::pair<TF3,ChiSquaredFunction *> getChiSquaredFunction(string name , TH1D nonWtbSum , TH1D hData , TH1D WtbSum){
+        ChiSquaredFunction * functor = new ChiSquaredFunction(name , nonWtbSum , hData , WtbSum);
+        TF3 ret(name.c_str(), functor, 0.0 , 1.0 , 0.0 , 0.1 , 0.0 , 2.0 , 0,"ChiSquaredFunction" );
+//        TF3 ret(name.c_str(), "(x*x)+(y*y)+(z*z)", 0.0 , 1.0 , 0.0 , 0.1 , 0.0 , 2.0 );
         ret.SetRange( 0.0 , 0.0 , 0.000001 , 1.0 , 1.0 , 2.0);
-        return ret;
+        return make_pair(ret,functor);
     }
 private:
     string Name;
