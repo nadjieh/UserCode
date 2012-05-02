@@ -10,6 +10,7 @@
 #include "TF1.h"
 #include "TH1.h"
 #include "TMath.h"
+#include "TCanvas.h"
 #include "TRandom1.h"
 #include <string>
 #include <iostream>
@@ -17,8 +18,8 @@ using namespace std;
 Double_t Weights(double *x, double *par)
  /*--------------------------------------------------------------------*/
 {
-    //par[0]: F01
-    //par[1]: F-1
+    //par[0]: F01 SM
+    //par[1]: F-1 SM
     //par[2]: F02
     //par[3]: F-2
     //F+ = 1- F-i - F0i
@@ -34,7 +35,7 @@ Double_t Weights(double *x, double *par)
 
     return ((Double_t)Second/(Double_t)First);
 };
-Double_t cosThetaHistMaker(double *x, double *par)
+Double_t ArbitraryCosTheta(double *x, double *par)
  /*--------------------------------------------------------------------*/
 {
     //par[0]: F01
@@ -46,6 +47,8 @@ Double_t cosThetaHistMaker(double *x, double *par)
     Double_t First = (3.0/8.0)*(firstTerm1+secondTerm1)+(3.0/4.0)*thirdTerm1;
     return First;
 };
+
+
 class CosThetaWeighter{
 public:
     CosThetaWeighter(double f0, double fminus, double deviation = 0.25, std::string name = "weighter"){
@@ -82,12 +85,13 @@ public:
         return (histWeights->GetBinContent(histWeights->FindBin(cosThetaStar)));
     };
     TH1D * getWeightHistogram()const{return histWeights;};
+    TF1  * getWeightFunction()const{return weights;};
 private:
     TH1D * histWeights;
     TF1 * weights;
     Double_t pars[4];
     TH1D * histWeightMaker(Double_t f0, Double_t fminus, string name){
-        TF1 * f = new TF1("f",cosThetaHistMaker,-1,1,2);
+        TF1 * f = new TF1("f",ArbitraryCosTheta,-1,1,2);
         f->SetParameter(0,f0);
         f->SetParameter(1,fminus);
         TH1D * res = new TH1D(name.c_str(),name.c_str(), 10, -1, 1);

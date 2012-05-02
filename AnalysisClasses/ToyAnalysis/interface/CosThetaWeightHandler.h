@@ -27,6 +27,8 @@ public:
             this->setWeightHistograms(f0SM,fminusSM,true);
         }else if(!f0Fixed && fminusFixed){
             this->setWeightHistograms(fminusSM,f0SM,false);            
+        }else if(!f0Fixed & !fminusFixed){
+            
         }
         /* for both not fixed, I have to think more*/   
     }
@@ -65,6 +67,16 @@ public:
     }
     double getCosThetaWeight(double cosTheta, int step){
         return (weights.at(step)->GetBinContent(weights.at(step)->FindBin(cosTheta)));
+    }
+    double getCosThetaWeightFunc(double cosTheta, int step){
+        return (weightFuncs.at(step)->Eval(cosTheta));
+    }
+    void CosThetaReweigherFunc(TH1D * cosTheta , int step){
+        if(cosTheta == NULL){
+            cout<<"NULL histogram ...."<<endl;
+            return;
+        }
+        cosTheta->Multiply(weightFuncs.at(step));
     }
     void setVerbosity(int v){verbosity = v;}
     
@@ -129,22 +141,27 @@ private:
             x[i] = fvar;
             y[i] = (double)(i+1);
 //            fvarValues->Fill(fvar);
+
             if(Default){
                 CosThetaWeighter tmpWeighter(f1, f2, f1, fvar,std::string("weight"+s.str()));
                 weights.push_back(new TH1D(*tmpWeighter.getWeightHistogram()));
+                weightFuncs.push_back(new TF1(*tmpWeighter.getWeightFunction()));
             }
             else{
                 CosThetaWeighter tmpWeighter(f1, f2, fvar, f2,std::string("weight"+s.str()));
                 weights.push_back(new TH1D(*tmpWeighter.getWeightHistogram()));
+                weightFuncs.push_back(new TF1(*tmpWeighter.getWeightFunction()));
             }
             fvar += StepSize;
         }
         fvarValuesG = new TGraph(nStep+1,x,y);
         fvarValuesG->SetName("fvarValuesG");
     }
+
     string name;
     int nStep;// default: 100
     std::vector<TH1D*> weights;
+    std::vector<TF1*> weightFuncs;
     TH1D * fvarValues;
     TGraph * fvarValuesG;
     int verbosity;

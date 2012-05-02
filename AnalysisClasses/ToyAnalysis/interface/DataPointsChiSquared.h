@@ -161,6 +161,8 @@ public:
     
 private:
     void rebinner(TH1D* histo, int nFinalBins){
+        if((histo->GetXaxis()->GetNbins() == nFinalBins))
+            return;
         if((histo->GetXaxis()->GetNbins() % nFinalBins) == 0){
             if(verbosity > 0)
                 std::cout<<"Before Rebinning: "<<histo->GetXaxis()->GetNbins()<<std::endl;

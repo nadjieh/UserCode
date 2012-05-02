@@ -23,9 +23,8 @@ class METResolutionSingleTop:public GenSingleTopMaker{
 public:
     METResolutionSingleTop(TRootNPGenEvent * genEvents, TLorentzVector * met):GenSingleTopMaker(genEvents){
         if(GenSingleTopMaker::isSemiMuSingleTop){
-//            double res = (double)fabs(met->Pt() - GenSingleTopMaker::genSingleTop.neutrino().Pt())
-            double res = (double)(met->Pt() - GenSingleTopMaker::genSingleTop.neutrino().Pt())
-            /(double)(GenSingleTopMaker::genSingleTop.neutrino().Pt());
+            double res = (double)(met->Pt() - GenSingleTopMaker::genSingleTop.getMET(3).Pt())
+            /(double)(GenSingleTopMaker::genSingleTop.getMET(3).Pt());
             met_res = make_pair(met->Pt(),res);
         }
     };
