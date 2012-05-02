@@ -96,7 +96,7 @@ int main(int argc, char** argv){
     bool f0Fixed = false;
     bool fminusFixed = true;
     string weightFileName;
-    bool pu3D = false;
+    bool pu3D = false;//true;
     double toy_weight = 1;
     double XSec;
     double Luminosity;
@@ -108,7 +108,7 @@ int main(int argc, char** argv){
     TFile * toy_out;
     TTree * eventTree_f;
     TTree * runTree_f;
-
+    std::string PUWeightFileName;
 
     std::vector<std::string> toy_inputFileNames;
     std::vector<double> toy_Xsecs;
@@ -118,7 +118,7 @@ int main(int argc, char** argv){
     std::string toy_outFileName;
     std::string toy_plotFileName;
     std::string toy_outFileName_FullSelection;
-    
+    int SmearingSkim = 1;
     for (int f = 1; f < argc; f++) {
         std::string arg_fth(*(argv + f));
         if (arg_fth == "out") {
@@ -191,6 +191,14 @@ int main(int argc, char** argv){
 		toy_realWtb.push_back( true);
 	    else
 		toy_realWtb.push_back( false);
+        }else if (arg_fth == "PUWeightFileName") {
+            f++;
+            std::string in(*(argv + f));
+            PUWeightFileName = in;
+        }else if (arg_fth == "SmearingSkim") {
+            f++;
+            std::string in(*(argv + f));
+            SmearingSkim = atof(in.c_str());
         }
     }
 //    cout<<doJES<<endl;
@@ -200,7 +208,16 @@ int main(int argc, char** argv){
     TH1D * cosTheta = new TH1D("cosTheta","cos(#theta)",1000, -1, 1 );
     cosTheta->Sumw2();
     CosThetaWeightHandler myHandler(f0,fminus,f0Fixed,fminusFixed,nSteps);
-    
+    Lumi3DReWeighting Lumi3DWeights;
+    if(pu3D){
+////        Lumi3DWeights.weight3D_set("../../../../TopBrussels/TopTreeAnalysis/macros/PileUpReweighting//MC_Fall11.root",
+////    "../../../../TopBrussels/TopTreeAnalysis/macros/PileUpReweighting/RunAB.root", "pileup", "pileup");
+//        Lumi3DWeights.weight3D_set("../../../../TopBrussels/TopTreeAnalysis/macros/PileUpReweighting//MC_Fall11.root",
+//    "../../../../TopBrussels/TopTreeAnalysis/macros/PileUpReweighting/pileup_2011Data_finebin_true.root", "pileup", "pileup");
+//        Lumi3DWeights.setWFileName(PUWeightFileName);
+//        Lumi3DWeights.weight3D_init(1.0);
+        Lumi3DWeights.weight3D_init(PUWeightFileName);
+    }
 //    CosThetaWeightHandler myHandler(WeightsLoader(TFile::Open(weightFileName.c_str())));
     myHandler.setName(toy_plotFileName);
     std::vector<TH1D*> cosThetaRW;
@@ -258,15 +275,9 @@ int main(int argc, char** argv){
 //                break;
 
             if(pu3D){
-                Lumi3DReWeighting Lumi3DWeights = 
-                Lumi3DReWeighting("../../../TopBrussels/TopTreeAnalysis/macros/PileUpReweighting/pileup_MC_Flat10PlusTail.root",
-                "../../../TopBrussels/TopTreeAnalysis/macros/PileUpReweighting/pileup_FineBin_2011Data_UpToRun180252.root", "pileup", "pileup");
-                Lumi3DWeights.weight3D_init(1.0);
-
-
                 if(!isData){
         //            cout<<"here I am ... "<<pracEvt->Event()<<endl;
-                    lumiWeight3D = Lumi3DWeights.weight3D(pracEvt->Event());
+                    lumiWeight3D *= Lumi3DWeights.weight3D(pracEvt->Event());
                 } else lumiWeight3D = 1;
             }
 
@@ -307,15 +318,16 @@ int main(int argc, char** argv){
             //Reweighting process
             SemiLepTopQuark myLeptonicTop(myEvent_tmp.BPFJets.at(0),myEvent_tmp.mets.at(0),myEvent_tmp.Dmuons.at(0),
                     myEvent_tmp.GPFJets.at(mySecondJetIndex),METResolutions);
-            cosTheta->Fill(myLeptonicTop.cosThetaStar(),lumiWeight3D);
+            cosTheta->Fill(myLeptonicTop.cosThetaStar(SmearingSkim),lumiWeight3D);
             if(!isData) {
                 double W = lumiWeight3D;
 //                cout<<W<<endl;
                 for(int step = 0; step <= nSteps; step++){
                     if(hasWtb)
-                        W = myHandler.getCosThetaWeight(myLeptonicTop.cosThetaStar(),step)*lumiWeight3D;
+//                        W = myHandler.getCosThetaWeight(myLeptonicTop.cosThetaStar(),step)*lumiWeight3D;
+                        W = myHandler.getCosThetaWeightFunc(myLeptonicTop.cosThetaStar(SmearingSkim),step)*lumiWeight3D;
 //                    cout<<W<<endl;
-                    cosThetaRW.at(step)->Fill(myLeptonicTop.cosThetaStar(),W);
+                    cosThetaRW.at(step)->Fill(myLeptonicTop.cosThetaStar(SmearingSkim),W);
                 }
             }
         }

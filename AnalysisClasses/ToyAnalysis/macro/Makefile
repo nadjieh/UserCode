@@ -42,6 +42,12 @@ met: MET clean
 
 sep: SEP clean
 
+plot: PLOT clean
+
+test: TEST clean
+
+ll: LLTEST clean
+
 sas:
 	@echo "Compiling the ToyAnalysis .... \n"
 	$(CXX) ToyAnalysis.C -c -o ToyAnalysis.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
@@ -65,6 +71,24 @@ tmp:
 	g++ Test.C -c -o test.o -O0  -pthread -m64 -I/opt/root/include -fPIC 
 	@echo "Linking \n\n\n\t"
 	g++ test.o -o Test $(ROOTGLIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread 
+
+PLOT:
+	@echo "Compiling the ChiSquaredPlotter .... \n"
+	$(CXX) ChiSquaredPlotter.C -c -o ChiSquaredPlotter.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
+	@echo "Linking ...... \n"
+	g++ ChiSquaredPlotter.o -o PlotChiSquared $(ROOTGLIBS) -lEG $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
+
+TEST:
+	@echo "Compiling the TA_HistogramOnly .... \n"
+	$(CXX) TA_HistogramOnly.C -c -o TA_HistogramOnly.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
+	@echo "Linking ...... \n"
+	g++ TA_HistogramOnly.o -o doTest $(ROOTGLIBS) -lEG $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
+
+LLTEST:
+	@echo "Compiling the FitTest .... \n"
+	$(CXX) FitTest.C -c -o FitTest.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
+	@echo "Linking ...... \n"
+	g++ FitTest.o -o doLL $(ROOTGLIBS) -lEG $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
 	
 clean:
 	@echo "Cleaning..."

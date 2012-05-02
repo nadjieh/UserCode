@@ -370,7 +370,7 @@ int main(int argc, char** argv){
 //            Event myEvent_tmp( myJets_, *pracEvt->ElectronCollection()
 //            ,*pracEvt->METCollection(),*pracEvt->MuonCollection(),*pracEvt->VertexCollection());
             Event myEvent_tmp( myJets_, *pracEvt->ElectronCollection()
-            ,pracEvt->TypeICorrMET(),*pracEvt->MuonCollection(),*pracEvt->VertexCollection());
+            ,*pracEvt->METCollection(),*pracEvt->MuonCollection(),*pracEvt->VertexCollection());
             
             if(toy_verbosity > 0)
                 cout<<"PV size: "<<myEvent_tmp.pvs.size()<<"\n"

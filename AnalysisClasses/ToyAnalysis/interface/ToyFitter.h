@@ -41,7 +41,7 @@ public:
         smCosTheta = new TF1(string("smCosTheta_"+Name).c_str(),CosTheta,-1.,1.,2);
         smCosTheta->SetParName(0, "f_{0}");
         smCosTheta->SetParName(1, "f_{neg}");
-        smCosTheta->SetParameters(0.7,0.3);
+        smCosTheta->SetParameters(6.64263e-01,3.03734e-01);
         smCosTheta->SetParLimits(0,0.,1.);
         smCosTheta->SetParLimits(1,0.,1.);
     }
@@ -73,7 +73,7 @@ private:
     TH1D signal;
     TF1 * smCosTheta;
 
-    std::pair<double, double> getNdataNmc(int bin, double f0 = 0.7, double f_ = 0.3, double rec_gen = 1.){
+    std::pair<double, double> getNdataNmc(int bin, double f0 = 6.64263e-01, double f_ = 3.03734e-01, double rec_gen = 1.){
         int nbins = data.GetXaxis()->GetNbins();
         if(bin > nbins || nbins < 0){
             cout<<"No value for this cos(theta) bin"<<endl;
@@ -87,9 +87,9 @@ private:
         return make_pair(nData,nMC);        
     }
     
-    double getWeight(double costheta,double f0 = 0.7, double f_= 0.3){
-        this->smCosTheta->SetParameter("f_{0}",0.7);
-        this->smCosTheta->SetParameter("f_{neg}",0.3);
+    double getWeight(double costheta,double f0 = 6.64263e-01, double f_= 3.03734e-01){
+        this->smCosTheta->SetParameter("f_{0}",6.64263e-01);
+        this->smCosTheta->SetParameter("f_{neg}",3.03734e-01);
         double SM = smCosTheta->Eval(costheta);
         this->smCosTheta->SetParameter("f_{0}",f0);
         this->smCosTheta->SetParameter("f_{neg}",f_);
@@ -124,7 +124,7 @@ public:
         smCosTheta = new TF1(string("smCosTheta_"+Name).c_str(),CosTheta,-1.,1.,2);
         smCosTheta->SetParName(0, "f_{0}");
         smCosTheta->SetParName(1, "f_{neg}");
-        smCosTheta->SetParameters(0.7,0.3);
+        smCosTheta->SetParameters(6.64263e-01,3.03734e-01);
         smCosTheta->SetParLimits(0,0.,1.);
         smCosTheta->SetParLimits(1,0.,1.);
     }
@@ -145,8 +145,9 @@ public:
         return chi2;
     }
     static TF3 getChiSquaredFunction(string name , TH1D nonWtbSum , TH1D hData , TH1D WtbSum){
-        ChiSquaredFunction * functor = new ChiSquaredFunction(name , nonWtbSum , hData , WtbSum);
-        TF3 ret(name.c_str(), functor, 0.0 , 1.0 , 0.0 , 0.1 , 0.0 , 2.0 , 0,"ChiSquaredFunction" );
+//        ChiSquaredFunction * functor = new ChiSquaredFunction(name , nonWtbSum , hData , WtbSum);
+//        TF3 ret(name.c_str(), functor, 0.0 , 1.0 , 0.0 , 0.1 , 0.0 , 2.0 , 0,"ChiSquaredFunction" );
+        TF3 ret(name.c_str(), "(x*x)+(y*y)+(z*z)", 0.0 , 1.0 , 0.0 , 0.1 , 0.0 , 2.0 );
         ret.SetRange( 0.0 , 0.0 , 0.000001 , 1.0 , 1.0 , 2.0);
         return ret;
     }
@@ -158,7 +159,7 @@ private:
     TH1D smMC;
     TF1 * smCosTheta;
 
-    std::pair<double, std::pair<double,double> > getNdataNmc(int bin, double f0 = 0.7, double f_ = 0.3, double rec_gen = 1.){
+    std::pair<double, std::pair<double,double> > getNdataNmc(int bin, double f0 = 6.64263e-01, double f_ = 3.03734e-01, double rec_gen = 1.){
         int nbins = data.GetXaxis()->GetNbins();
         if(bin > nbins || nbins < 0){
             cout<<"No value for this cos(theta) bin"<<endl;
@@ -168,14 +169,15 @@ private:
         double costheta = data.GetBinCenter(bin);
         double weight = getWeight(costheta,f0,f_)*rec_gen;
         double nSignal = weight*signal.GetBinContent(bin);
+        double sigErr = weight*signal.GetBinError(bin);
         double nMC = bkg.GetBinContent(bin) + nSignal;
-        double errMC = smMC.GetBinError(bin)*weight;
+        double errMC = sqrt((sigErr*sigErr) + (bkg.GetBinError(bin)*bkg.GetBinError(bin)));
         return make_pair(nData,make_pair(nMC,errMC));        
     }
     
-    double getWeight(double costheta,double f0 = 0.7, double f_= 0.3){
-        this->smCosTheta->SetParameter("f_{0}",0.7);
-        this->smCosTheta->SetParameter("f_{neg}",0.3);
+    double getWeight(double costheta,double f0 = 6.64263e-01, double f_= 3.03734e-01){
+        this->smCosTheta->SetParameter("f_{0}",6.64263e-01);
+        this->smCosTheta->SetParameter("f_{neg}",3.03734e-01);
         double SM = smCosTheta->Eval(costheta);
         this->smCosTheta->SetParameter("f_{0}",f0);
         this->smCosTheta->SetParameter("f_{neg}",f_);
