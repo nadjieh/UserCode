@@ -66,15 +66,8 @@
 #include <vector>
 
 using namespace std;
-using namespace TopTree;
 
-
-
-
-    
-
-
-    
+ 
 
 int main(int argc, char** argv){
 //    sleep(60);
@@ -103,14 +96,21 @@ int main(int argc, char** argv){
         }
     }
 
-//    TF3 myLL = LikelihoodFunction::getLLFunction("LL" , bkg , data , signal);
-    std::pair<TF3,ChiSquaredFunction*> myChi2 = ChiSquaredFunction::getChiSquaredFunction("Chi2" , bkg , data , signal);
-    double x_m = -1.;
-    double y_m = -1.;
-    double z_m = -1.;
-    myChi2.first.GetMinimumXYZ(x_m , y_m , z_m);
+    std::pair<TF3,LikelihoodFunction*>  myLL = LikelihoodFunction::getLLFunction("LL" , bkg , data , signal);
+//    std::pair<TF3,ChiSquaredFunction*> myChi2 = ChiSquaredFunction::getChiSquaredFunction("Chi2" , bkg , data , signal);
+    double x[3] = {-1.,-1.,-1};
+    double xerr[3] = {-1.,-1.,-1};
+//    myChi2.first.GetMinimumXYZ(x_m , y_m , z_m);
+    myLL.first.GetMinimumXYZ(x[0] , x[1] , x[2]);
     
-    cout<<x_m<<"  "<<y_m<<"  "<<z_m<<endl;
-    delete myChi2.second;
+    cout<<"simple getMin: "<<x[0]<<"  "<<x[1]<<"  "<<x[2]<<endl;
+    
+    GetMinimum(myLL.first,x,xerr);
+    cout<<"my getMin-vals: "<<x[0]<<"  "<<x[1]<<"  "<<x[2]<<endl;
+    cout<<"my getMin-err: "<<xerr[0]<<"  "<<xerr[1]<<"  "<<xerr[2]<<endl;
+    
+    
+//    delete myChi2.second;
+    delete myLL.second;
     return 0;
 }
