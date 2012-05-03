@@ -13,8 +13,10 @@
 #include "TMath.h"
 #include "TCanvas.h"
 #include "TRandom1.h"
+#include "TVirtualFitter.h"
 #include <string>
 #include <iostream>
+
 using namespace std;
 
 
@@ -60,11 +62,11 @@ public:
         }
         return LL;
     }
-    static TF3 getLLFunction(string name , TH1D nonWtbSum , TH1D hData , TH1D WtbSum){
+    static std::pair<TF3,LikelihoodFunction*> getLLFunction(string name , TH1D nonWtbSum , TH1D hData , TH1D WtbSum){
         LikelihoodFunction * functor = new LikelihoodFunction(name , nonWtbSum , hData , WtbSum);
         TF3 ret(name.c_str(), functor, 0.0 , 1.0 , 0.0 , 0.1 , 0.0 , 2.0 , 0,"LikelihoodFunction" );
         ret.SetRange( 0.0 , 0.0 , 0.000001 , 1.0 , 1.0 , 2.0);
-        return ret;
+        return make_pair(ret, functor);
     }
 private:
     string Name;
@@ -197,6 +199,48 @@ private:
     }    
 };
 
+void GetMinimum(TF3 F,double * x, double * xerr, bool CalcError = true){
+    //    based on the documentation of TF3::GetMinimumXYZ from
+    //    http://root.cern.ch/root/html532/src/TF3.cxx.html#QUjxjE
 
+    F.GetMinimumXYZ(x[0] , x[1] , x[2]);
+    if(!CalcError)
+        return;
+    //    go to minuit for the final minimization
+    
+    TVirtualFitter * minuit = TVirtualFitter::Fitter(&F,3);
+    minuit->Clear();
+    minuit->SetFitMethod("F3Minimizer");
+    double arg_list[10] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+    int nNargs = 1;
+    minuit->ExecuteCommand("SET PRINT" , arg_list, nNargs);
+    double xl = 0.0;    double xu = 0.0;
+    double yl = 0.0;    double yu = 0.0;
+    double zl = 0.0;    double zu = 0.0;
+    minuit->SetParameter(0, "x", x[0], 0.1, xl , xu );
+    minuit->SetParameter(1, "y", x[1], 0.1, yl , yu );
+    minuit->SetParameter(2, "z", x[2], 0.1, zl , zu );
+    for(int i = 0; i<10; i++)
+        arg_list[i] = 1.;
+    Int_t fitResult = minuit->ExecuteCommand("MIGRAD", arg_list, 0);
+    if (fitResult != 0){
+        cout<< "Abnormal termination of minimization"<<endl;
+        x[0] = -1.0;
+        x[1] = -1.0;
+        x[2] = -1.0;
+        delete minuit;
+        return;
+    }
+
+    x[0] = minuit->GetParameter(0);
+    x[1] = minuit->GetParameter(1);
+    x[2] = minuit->GetParameter(2);
+
+    double globcc = 0.0;
+    minuit->GetErrors( 0 , xu , xl , xerr[0] , globcc );
+    minuit->GetErrors( 1 , yu , yl , xerr[1] , globcc );
+    minuit->GetErrors( 2 , zu , zl , xerr[2] , globcc );
+    delete minuit;
+}
 #endif	/* LikelihoodFunction_H */
 
