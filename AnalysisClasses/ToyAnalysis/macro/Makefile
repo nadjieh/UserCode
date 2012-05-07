@@ -48,6 +48,8 @@ test: TEST clean
 
 ll: LLTEST clean
 
+val: VALTEST clean
+
 sas:
 	@echo "Compiling the ToyAnalysis .... \n"
 	$(CXX) ToyAnalysis.C -c -o ToyAnalysis.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
@@ -89,7 +91,11 @@ LLTEST:
 	$(CXX) FitTest.C -c -o FitTest.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
 	@echo "Linking ...... \n"
 	g++ FitTest.o -o doLL $(ROOTGLIBS) -lEG $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
-	
+VALTEST:
+	@echo "Compiling the FitValidationTest .... \n"
+	$(CXX) FitValidationTest.C -c -o FitValidationTest.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
+	@echo "Linking ...... \n"
+	g++ FitValidationTest.o -o doValidation $(ROOTGLIBS) -lEG $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
 clean:
 	@echo "Cleaning..."
 	@rm -f *.o
