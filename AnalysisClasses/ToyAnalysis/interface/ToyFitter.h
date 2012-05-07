@@ -209,7 +209,7 @@ private:
 void GetMinimum(TF3 F,double * x, double * xerr, bool CalcError = true){
     //    based on the documentation of TF3::GetMinimumXYZ from
     //    http://root.cern.ch/root/html532/src/TF3.cxx.html#QUjxjE
-    F.Print("all");
+//    F.Print("all");
     F.GetMinimumXYZ(x[0] , x[1] , x[2]);
     if(!CalcError)
         return;

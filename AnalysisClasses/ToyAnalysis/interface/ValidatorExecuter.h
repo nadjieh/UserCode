@@ -173,7 +173,7 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull , int LPEXPull, d
 //            for(int mybin = 0; mybin < SIGinPEX.GetXaxis()->GetNbins(); mybin++)
 //                cout<<"SIGinPEX: "<<SIGinPEX.GetBinContent(mybin+1)<<endl;
             SIGinPEX.Multiply(&WtbWeightor.first,1);
-            cout<<"-----------------"<<endl;
+//            cout<<"-----------------"<<endl;
 //            for(int mybin = 0; mybin < SIGinPEX.GetXaxis()->GetNbins(); mybin++)
 //                cout<<"SIGinPEX: "<<SIGinPEX.GetBinContent(mybin+1)<<endl;
             SIGinPEX.Add(&hSumBGPartial);
