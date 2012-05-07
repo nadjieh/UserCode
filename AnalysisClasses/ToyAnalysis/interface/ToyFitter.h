@@ -35,7 +35,7 @@ Double_t CosTheta(double *x, double *par)
 
 class LikelihoodFunction{
 public:
-    LikelihoodFunction(string name , TH1D nonWtbSum , TH1D hData , TH1D WtbSum)
+    LikelihoodFunction(string name , TH1F nonWtbSum , TH1F hData , TH1F WtbSum)
     :Name(name), bkg(nonWtbSum), data(hData), signal(WtbSum){
         data.Sumw2();
         bkg.Sumw2();
@@ -49,7 +49,7 @@ public:
     }
     ~LikelihoodFunction(){ delete smCosTheta;}
     Double_t operator()(double * x, double * par = 0){
-        //        x[0] = f_0
+//        x[0] = f_0
 //        x[1] = f_Neg
 //        x[2] = rec_gen factor
 //        no parameter is needed
@@ -58,21 +58,24 @@ public:
         int nbins = data.GetXaxis()->GetNbins();
         for(int i = 0; i<nbins; i++){
             std::pair<double, double>  numbers = this->getNdataNmc(i+1, x[0],x[1],x[2]);
+//            cout<<"in LL: "<<numbers.first << "\t"<<numbers.second<<endl;
             LL += this->logLikelihood(numbers.first, numbers.second);
         }
+//        cout<<"LL: "<<LL<<endl;
         return LL;
     }
-    static std::pair<TF3,LikelihoodFunction*> getLLFunction(string name , TH1D nonWtbSum , TH1D hData , TH1D WtbSum){
+    static std::pair<TF3,LikelihoodFunction*> getLLFunction(string name , TH1F nonWtbSum , TH1F hData , TH1F WtbSum){
         LikelihoodFunction * functor = new LikelihoodFunction(name , nonWtbSum , hData , WtbSum);
         TF3 ret(name.c_str(), functor, 0.0 , 1.0 , 0.0 , 0.1 , 0.0 , 2.0 , 0,"LikelihoodFunction" );
         ret.SetRange( 0.0 , 0.0 , 0.000001 , 1.0 , 1.0 , 2.0);
+//        cout<<ret.Eval(0.249,0.75,1)<<endl;
         return make_pair(ret, functor);
     }
 private:
     string Name;
-    TH1D bkg;
-    TH1D data;
-    TH1D signal;
+    TH1F bkg;
+    TH1F data;
+    TH1F signal;
     TF1 * smCosTheta;
 
     std::pair<double, double> getNdataNmc(int bin, double f0 = 6.64263e-01, double f_ = 3.03734e-01, double rec_gen = 1.){
@@ -86,10 +89,12 @@ private:
         double weight = getWeight(costheta,f0,f_)*rec_gen;
         double nSignal = weight*signal.GetBinContent(bin);
         double nMC = bkg.GetBinContent(bin) + nSignal;
+//        cout<<"****** "<<nData<<"\t"<<nMC<<endl;
         return make_pair(nData,nMC);        
     }
     
     double getWeight(double costheta,double f0 = 6.64263e-01, double f_= 3.03734e-01){
+//        cout<<smCosTheta<< " in getWeightFunc"<<endl;
         this->smCosTheta->SetParameter("f_{0}",6.64263e-01);
         this->smCosTheta->SetParameter("f_{neg}",3.03734e-01);
         double SM = smCosTheta->Eval(costheta);
@@ -104,6 +109,8 @@ private:
         double x = nData;
         if (x_mean <= 0.0)
             return 0.0;
+        if (x <= 0.0)
+            return 0.0;
         double log_pow_1 = x*log(x_mean);
         double log_exp_1 = -x_mean;
         double log_factoral =  x*log(x) - x + ( log(x*(1+4*x*(1+2*x))) / 6 ) + log(M_PI)/2 ;
@@ -115,12 +122,12 @@ private:
 
 class ChiSquaredFunction{
 public:
-    ChiSquaredFunction(string name , TH1D nonWtbSum , TH1D hData , TH1D WtbSum)
+    ChiSquaredFunction(string name , TH1F nonWtbSum , TH1F hData , TH1F WtbSum)
     :Name(name), bkg(nonWtbSum), data(hData), signal(WtbSum){
         data.Sumw2();
         bkg.Sumw2();
         signal.Sumw2();
-        smMC = *((TH1D*)signal.Clone("smMC"));
+        smMC = *((TH1F*)signal.Clone("smMC"));
         smMC.Sumw2();
         smMC.Add(&bkg);
         smCosTheta = new TF1(string("smCosTheta_"+Name).c_str(),CosTheta,-1.,1.,2);
@@ -146,7 +153,7 @@ public:
         }
         return chi2;
     }
-    static std::pair<TF3,ChiSquaredFunction *> getChiSquaredFunction(string name , TH1D nonWtbSum , TH1D hData , TH1D WtbSum){
+    static std::pair<TF3,ChiSquaredFunction *> getChiSquaredFunction(string name , TH1F nonWtbSum , TH1F hData , TH1F WtbSum){
         ChiSquaredFunction * functor = new ChiSquaredFunction(name , nonWtbSum , hData , WtbSum);
         TF3 ret(name.c_str(), functor, 0.0 , 1.0 , 0.0 , 0.1 , 0.0 , 2.0 , 0,"ChiSquaredFunction" );
 //        TF3 ret(name.c_str(), "(x*x)+(y*y)+(z*z)", 0.0 , 1.0 , 0.0 , 0.1 , 0.0 , 2.0 );
@@ -155,10 +162,10 @@ public:
     }
 private:
     string Name;
-    TH1D bkg;
-    TH1D data;
-    TH1D signal;
-    TH1D smMC;
+    TH1F bkg;
+    TH1F data;
+    TH1F signal;
+    TH1F smMC;
     TF1 * smCosTheta;
 
     std::pair<double, std::pair<double,double> > getNdataNmc(int bin, double f0 = 6.64263e-01, double f_ = 3.03734e-01, double rec_gen = 1.){
@@ -202,7 +209,7 @@ private:
 void GetMinimum(TF3 F,double * x, double * xerr, bool CalcError = true){
     //    based on the documentation of TF3::GetMinimumXYZ from
     //    http://root.cern.ch/root/html532/src/TF3.cxx.html#QUjxjE
-
+    F.Print("all");
     F.GetMinimumXYZ(x[0] , x[1] , x[2]);
     if(!CalcError)
         return;
@@ -242,5 +249,39 @@ void GetMinimum(TF3 F,double * x, double * xerr, bool CalcError = true){
     minuit->GetErrors( 2 , zu , zl , xerr[2] , globcc );
     delete minuit;
 }
+class WeightFunctionCreator{
+public:
+    WeightFunctionCreator(double std_f0 = 6.64263e-01, double std_fneg = 3.03734e-01):
+    f0Std(std_f0),f_Std(std_fneg){
+        func = new TF1("WeightFunctionCreator", CosTheta, -1,1,2);
+    }
+    Double_t operator()(double * x, double * par ){
+        func->SetParameters(f0Std,f_Std);
+        double stdVal = func->Eval(x[0]);
+        func->SetParameters(par);
+        double nonstdVal = func->Eval(x[0]);
+        return ((double)nonstdVal/(double)stdVal);
+    }
+    static std::pair<TF1,WeightFunctionCreator*> getWeightFunction(string name,double std_f0 = 6.64263e-01, double std_fneg = 3.03734e-01){
+        WeightFunctionCreator * functor = new WeightFunctionCreator(std_fneg, std_f0);
+        TF1 ret( name.c_str() , functor , -1.0 , 1.0 , 2);
+
+        ret.SetParName(0 , "F0" );
+        ret.SetParName(1 , "FNeg" );
+
+        ret.SetParLimits(0 , 0.0 , 1.0);
+        ret.SetParLimits(1 , 0.0 , 1.0);
+            
+        ret.SetParameters( 6.64263e-01, 3.03734e-01);
+            
+        return make_pair(ret,functor);
+    }
+private:
+    TF1 * func;
+    double f0Std;
+    double f_Std;
+        
+    
+};
 #endif	/* LikelihoodFunction_H */
 

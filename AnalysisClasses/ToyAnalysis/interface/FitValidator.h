@@ -33,16 +33,16 @@ TRandom SeedGeneratorLumiEQ = TRandom( 874546620 );
 class SamplesInfo{
 public:
     SamplesInfo(){
-        Xsections["t"]= 41.9;
-        Xsections["tbar"]= 22.6;
-        Xsections["tW"]= 7.9;
-        Xsections["tWbar"]= 7.9;
-        Xsections["tt"]= 165;
-        Xsections["s"]= 3.19;
-        Xsections["sbar"]= 1.44;
-        Xsections["w"]= 31314;
-        Xsections["dy"]= 3048;
-        Xsections["qcd"]= 84679;
+        Xsections["t"]= 41.9;//0
+        Xsections["tbar"]= 22.6;//1
+        Xsections["tW"]= 7.9;//2
+        Xsections["tWbar"]= 7.9;//3
+        Xsections["tt"]= 165;//4
+        Xsections["s"]= 3.19;//5
+        Xsections["sbar"]= 1.44;//6
+        Xsections["w"]= 31314;//7
+        Xsections["dy"]= 3048;//8
+        Xsections["qcd"]= 84679;//9
         N0["t"]= 3857900;
         N0["tbar"]= 1943627;
         N0["tW"]= 813134;
@@ -77,13 +77,16 @@ public:
 //CHECK for max_size
 class DistributionProducerFromSelected{
 public:
-    DistributionProducerFromSelected(TH1D hSelected , string MCName , double lumi):
+    DistributionProducerFromSelected(TH1F hSelected , string MCName , double lumi):
     hInput(hSelected), mcName(MCName), Lumi(lumi){
         
         TRandom RandomGenerator( SeedGenerator.Integer(10000000) );
         for(int iBin = 0; iBin<hSelected.GetXaxis()->GetNbins(); iBin++){
             double cosTheta = hSelected.GetBinCenter(iBin+1);
-            for(int eventID = 0; eventID < hSelected.GetBinContent( iBin ); eventID++){
+//            double cosTheta = hSelected.GetBinCenter(iBin);
+//            cout<<"cosTheta is "<<cosTheta<<endl;
+//            cout<<"BinContents of "<<iBin<<" is "<<hSelected.GetBinContent( iBin+1 )<<endl;
+            for(int eventID = 0; eventID < hSelected.GetBinContent( iBin+1 ); eventID++){
                 int evtRndId = RandomGenerator.Integer( 1000000000  );
                 while (sampleContent.count(evtRndId) > 0){
                     evtRndId = RandomGenerator.Integer( 1000000000  );    
@@ -106,9 +109,14 @@ public:
             if (RandomGenerator.Uniform() < fraction)
                 selectedValues.push_back( evtIter->second );
         }
+//        cout<<"------------ "<<selectedValues.size()<<endl;
+//        cout<<"------------ "<<selectedValues.at(0)<<endl;
+//        cout<<"------------ "<<selectedValues.at(1)<<endl;
         double Weight = 0.0;
-        if (selectedValues.size() !=0)            
+        if (selectedValues.size() !=0) {           
             Weight = (double)(Lumi*Xsec) / (double)(fraction*N0);
+//            cout<<"Weight: "<<Weight<<endl;
+        }
         stringstream s;
         s<<mcName<<"_"<<hInput.GetName()<<"_"<<nPEX;
         string hName = s.str();
@@ -120,7 +128,7 @@ public:
                    , hInput.GetXaxis()->GetXmin() , hInput.GetXaxis()->GetXmax() );
         hRet.Sumw2();
         for ( unsigned int i = 0; i < selectedValues.size(); i++)
-            hRet.Fill( i , Weight );
+            hRet.Fill( selectedValues.at(i) , Weight );
 
         return hRet;
     }
@@ -151,19 +159,18 @@ public:
                    , hInput.GetXaxis()->GetXmin() , hInput.GetXaxis()->GetXmax() );
         hRet.Sumw2();
         for ( unsigned int i = 0; i < selectedValues.size(); i++)
-            hRet.Fill( i );
+            hRet.Fill( selectedValues.at(i) );
 
         return hRet;
     }
 private:
-    TH1D hInput;
+    TH1F hInput;
     string mcName;
     double Lumi;
     std::map<int,double> sampleContent;
     double Xsec;
     int N0;
     double selEff;
-
 };
 #endif	/* FITVALIDATOR_H */
 
