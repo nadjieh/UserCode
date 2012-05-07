@@ -12,6 +12,8 @@
 #include "TRandom1.h"
 #include "TVector3.h"
 #include "TH1.h"
+#include "TMath.h"
+#include "Math/GenVector/VectorUtil.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootMuon.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootMET.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootPFMET.h"
@@ -19,29 +21,28 @@
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootJet.h"
 using namespace TopTree;
 using namespace std;
+using namespace ROOT;
+
 class SemiLepTopQuark{
 public:
     
     SemiLepTopQuark(TRootPFJet b, TRootPFMET mis, TRootMuon Mu, TRootPFJet b2,TH1D * res ,int v = 0):
     bJet(b),lightJet(b2),met(mis),mu(Mu),resolutions(res),verbosity(v){        
-//        cout<<"MET: "<<met.Px()<<"\t"<<met.Py()<<endl;
-//        cout<<"Muon: "<<mu.Px()<<"\t"<<mu.Py()<<"\t"<<mu.Pz()<<endl;
-//        cout<<"bjet: "<<bJet.Px()<<"\t"<<bJet.Py()<<"\t"<<bJet.Pz()<<endl;
-//        cout<<"bjet: "<<lightJet.Px()<<"\t"<<lightJet.Py()<<"\t"<<lightJet.Pz()<<endl;
-        TLorentzVector nu = this->neutrino();
-        met.SetPxPyPzE(nu.Px(),nu.Py(),nu.Pz(),sqrt(nu.Px()*nu.Px()+nu.Py()*nu.Py()+nu.Pz()*nu.Pz()));    
+        met_W = this->neutrino_W();
+        met_MET = this->neutrino_MET();
+//        met.SetPxPyPzE(nu.Px(),nu.Py(),nu.Pz(),sqrt(nu.Px()*nu.Px()+nu.Py()*nu.Py()+nu.Pz()*nu.Pz()));    
     };
     SemiLepTopQuark(TLorentzVector b, TLorentzVector mis, TLorentzVector Mu, TLorentzVector b2, TH1D * res ,int v = 0):
     bJet(b),lightJet(b2),met(mis),mu(Mu),resolutions(res),verbosity(v){
-        TLorentzVector nu = this->neutrino();
-        met.SetPxPyPzE(nu.Px(),nu.Py(),nu.Pz(),sqrt(nu.Px()*nu.Px()+nu.Py()*nu.Py()+nu*nu));    
+        met_W = this->neutrino_W();
+        met_MET = this->neutrino_MET();
+//        met.SetPxPyPzE(nu.Px(),nu.Py(),nu.Pz(),sqrt(nu.Px()*nu.Px()+nu.Py()*nu.Py()+nu*nu));    
     };
     SemiLepTopQuark():
     bJet(-1,-1,-1,-1),lightJet(-1,-1,-1,-1),met(-1,-1,-1,-1),mu(-1,-1,-1,-1),resolutions(0),verbosity(0){};
-    ~SemiLepTopQuark(){};
-    
-   
-    TLorentzVector neutrino(){
+    ~SemiLepTopQuark(){//delete resolutions;
+    };
+    TLorentzVector neutrino_MET(){
         double mw = 80.44;
         float solution = -10000;
         double Delta = delta(mw,mu,met);
@@ -62,21 +63,55 @@ public:
         for(int i =0; i < 1000; i++)
         {
             mw = 80.44;
-//            TLorentzVector tmpMet = smearedMET();
-//            if(verbosity > 0)
-//                cout<<"after MET smearing\n\t"<<tmpMet.Px()<<"\t"<<tmpMet.Py()<<endl;
-//            Delta = delta(mw,mu,tmpMet);
-//            if(verbosity > 0)
-//                cout<<"after MET smearing\n\tDelta: "<<Delta<<endl;
-//            if(Delta >= 0.0){
-//                if(verbosity > 0)
-//                    cout<<"The delta from MET smearing becomes "<<Delta<<endl;
-//                solution = pZNeutrino(mw,mu,tmpMet);
-//                if(verbosity > 0)
-//                    cout<<"\n\tsolution = "<<solution<<endl;
-//                nut.SetPxPyPzE(tmpMet.Px(),tmpMet.Py(),solution,sqrt(tmpMet.Px()*tmpMet.Px()+tmpMet.Py()*tmpMet.Py()+solution*solution));
-//                break;
-//            }
+            TLorentzVector tmpMet = smearedMET();
+            if(verbosity > 0)
+                cout<<"after MET smearing\n\t"<<tmpMet.Px()<<"\t"<<tmpMet.Py()<<endl;
+            Delta = delta(mw,mu,tmpMet);
+            if(verbosity > 0)
+                cout<<"after MET smearing\n\tDelta: "<<Delta<<endl;
+            if(Delta >= 0.0){
+                if(verbosity > 0)
+                    cout<<"The delta from MET smearing becomes "<<Delta<<endl;
+                solution = pZNeutrino(mw,mu,tmpMet);
+                if(verbosity > 0)
+                    cout<<"\n\tsolution = "<<solution<<endl;
+                nut.SetPxPyPzE(tmpMet.Px(),tmpMet.Py(),solution,sqrt(tmpMet.Px()*tmpMet.Px()+tmpMet.Py()*tmpMet.Py()+solution*solution));
+                break;
+            }                        
+            if(verbosity > 0)
+                cout<<"MET smearing did not help. Once again ..."<<endl;
+//                
+        }
+        if(solution == -10000){
+            std::cout<<"MET does not have solution even after MET smearing.\n";
+            std::cout<<"The solution is returned as if Delta was zero ..."<<std::endl;
+            mw = 80.44;
+            solution = (A(mw,mu,met)*mu.Pz())/pow(mu.Pt(),2);
+            nut.SetPxPyPzE(met.Px(),met.Py(),solution,sqrt(met.Px()*met.Px()+met.Py()*met.Py()+solution*solution));
+        }
+        return nut;
+    }
+   
+    TLorentzVector neutrino_W(){
+        double mw = 80.44;
+        float solution = -10000;
+        double Delta = delta(mw,mu,met);
+        TLorentzVector nut;
+        if(verbosity > 0)
+            cout<<"The first delta value is "<<Delta<<endl;
+        if(Delta >= 0.0){
+            if(verbosity > 0)
+                cout<<"so I immediately calculate pz.";
+            solution = pZNeutrino(mw,mu,met);
+            if(verbosity > 0)
+                cout<<"\n\tsolution = "<<solution<<endl;
+            nut.SetPxPyPzE(met.Px(),met.Py(),solution,sqrt(met.Px()*met.Px()+met.Py()*met.Py()+solution*solution));
+            return nut;
+        }
+//        if(verbosity > 0)
+//            cout<<"so I try first the MET smearing ..."<<endl;
+        for(int i =0; i < 1000; i++)
+        {
             mw = smearedWmass();
             Delta = delta(mw,mu,met);
             if(verbosity > 0)
@@ -90,13 +125,13 @@ public:
                 nut.SetPxPyPzE(met.Px(),met.Py(),solution,sqrt(met.Px()*met.Px()+met.Py()*met.Py()+solution*solution));
                 break;
             }
-            
+
             if(verbosity > 0)
-                cout<<"mW smearing did not help either. Once again ..."<<endl;
-                
+                cout<<"mW smearing did not help. Once again ..."<<endl;
+    //                
         }
         if(solution == -10000){
-            std::cout<<"MET does not have solution event after MET and mW smearing.\n";
+            std::cout<<"MET does not have solution even after mW smearing.\n";
             std::cout<<"The solution is returned as if Delta was zero ..."<<std::endl;
             mw = 80.44;
             solution = (A(mw,mu,met)*mu.Pz())/pow(mu.Pt(),2);
@@ -104,19 +139,22 @@ public:
         }
         return nut;
     }
-    TLorentzVector W(){
-        return (met + mu);
+
+    TLorentzVector W(int skim = 1){
+        if(skim == 2)
+            return (met_MET + mu);
+        return (met_W + mu);
     }
-    TLorentzVector top(){
-        return (this->W()+bJet);
+    TLorentzVector top(int skim = 1){
+        return (this->W(skim)+bJet);
     }
-    double cosThetaStar(){
-        TLorentzVector w = this->W();
+    double cosThetaStar(int skim = 1){
+        TLorentzVector w = this->W(skim);
         if(verbosity>0){
             cout<<"W boson:"<<w.Px()<<", "<<w.Py()<<", "<<w.Pz()<<endl;
         }
         TLorentzVector muClone = mu;
-        TLorentzVector Top = this->top();
+        TLorentzVector Top = this->top(skim);
         if(verbosity>0){
             cout<<"top quark:"<<Top.Px()<<", "<<Top.Py()<<", "<<Top.Pz()<<endl;
         }
@@ -135,7 +173,13 @@ public:
     }
 
     //May be N and T directions ....
-    TLorentzVector getMET()const{return met;}
+    TLorentzVector getMET(int skim = 1)const{
+        if(skim == 2)
+            return met_MET;
+        else if(skim == 1)
+            return met_W;
+        return met;
+    }
     TLorentzVector getbJet()const{return bJet;}
     TLorentzVector getlightJet()const{return lightJet;}
     TLorentzVector getMuon()const{return mu;}
@@ -163,6 +207,7 @@ private:
         return (muon.E()*muon.E()*A(mw,muon,Emis)*A(mw,muon,Emis)
                 -muon.Pt()*muon.Pt()*Emis.Pt()*Emis.Pt()*muon.E()*muon.E());
     }
+
     double pZ(double mw, TLorentzVector muon, TLorentzVector Emis, bool plusSolution){
         double a = A(mw,muon,Emis);
         double Delta = delta(mw,muon,Emis);
@@ -239,9 +284,10 @@ private:
     TLorentzVector mu;
     TH1D * resolutions;
     int verbosity;
+    TLorentzVector met_MET;
+    TLorentzVector met_W;
 };
 
 
 #endif	/* SEMILEPTOPQUARK_H */
 
-	
