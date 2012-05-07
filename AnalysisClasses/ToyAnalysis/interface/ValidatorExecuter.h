@@ -49,7 +49,7 @@ TH1F GetCosThetaPlot(string name, int nFinalBin = 10){
 //    cout<<"Nbins after rebinning: "<<h.GetXaxis()->GetNbins()<<endl;
     return h;
 }
-void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull , int LPEXPull, double Lumi){
+void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull , int LPEXPull, double Lumi = 3793){
     stringstream outName;
     outName<<"Linearity_start-"<<StartPEX<<"-length-"<<LPEX<<"_Pull_start-"<<StartPEXPull<<
             "-length-"<<LPEXPull<<".root";
@@ -106,8 +106,8 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull , int LPEXPull, d
     TH2D hFinalFNeg("hFinalFNeg","Linearirty Check for F_{-};F_{-} input;F_{-} output",300,0.,1.,300,0.,1.);
     TH2D hFinalF0("hFinalF0","Linearirty Check for F_{0};F_{0} input;F_{0} output",300,0.,1.,300,0.,1.);
     TH2D hFinalFPos("hFinalFPos","Linearirty Check for F_{+};nPEX;F_{+} output",300,0.,300., 1000 , -0.5 , 0.5);
-//    int nFSteps = 300;
-    int nFSteps = 5;
+    int nFSteps = 300;
+
     double FNegValueSteps[nFSteps];
     for(int i = 0; i<nFSteps; i++){
         FNegValueSteps[i] = float(i)/(float)nFSteps;
