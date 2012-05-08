@@ -72,9 +72,9 @@ using namespace std;
 int main(int argc, char** argv){
 //    sleep(60);
 
-    TH1D  data;
-    TH1D  signal;
-    TH1D  bkg;
+    TH1*  data;
+    TH1*  signal;
+    TH1*  bkg;
     TFile * file = 0;
     for (int f = 1; f < argc; f++) {
         std::string arg_fth(*(argv + f));
@@ -82,20 +82,20 @@ int main(int argc, char** argv){
           f++;
           std::string out(*(argv + f));
           file = new TFile(out.c_str(),"read");
-          signal = *((TH1D*)file->Get("cosTheta"));
+          signal = ((TH1*)file->Get("cosTheta"));
         }else if(arg_fth == "data"){
           f++;
           std::string out(*(argv + f));
           file = new TFile(out.c_str(),"read");
-          data = *((TH1D*)file->Get("cosTheta"));
+          data = ((TH1*)file->Get("cosTheta"));
         }else if (arg_fth == "bkg") {
             f++;
             std::string out(*(argv + f));
             file = new TFile(out.c_str(),"read");
-            bkg = *((TH1D*)file->Get("cosTheta"));
+            bkg = ((TH1*)file->Get("cosTheta"));
         }
     }
-
+    cout<<bkg <<"\t"<<signal<<"\t"<<data<<endl;
     std::pair<TF3,LikelihoodFunction*>  myLL = LikelihoodFunction::getLLFunction("LL" , bkg , data , signal);
 //    std::pair<TF3,ChiSquaredFunction*> myChi2 = ChiSquaredFunction::getChiSquaredFunction("Chi2" , bkg , data , signal);
     double x[3] = {-1.,-1.,-1};

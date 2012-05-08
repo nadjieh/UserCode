@@ -7,6 +7,8 @@
 
 #ifndef FITVALIDATOR_H
 #define	FITVALIDATOR_H
+
+//#define TEST
 #include "TF1.h"
 #include "TF3.h"
 #include "TH1.h"
@@ -77,23 +79,35 @@ public:
 //CHECK for max_size
 class DistributionProducerFromSelected{
 public:
-    DistributionProducerFromSelected(TH1F hSelected , string MCName , double lumi):
+    DistributionProducerFromSelected(TH1* hSelected , string MCName , double lumi):
     hInput(hSelected), mcName(MCName), Lumi(lumi){
         
         TRandom RandomGenerator( SeedGenerator.Integer(10000000) );
-        for(int iBin = 0; iBin<hSelected.GetXaxis()->GetNbins(); iBin++){
-            double cosTheta = hSelected.GetBinCenter(iBin+1);
-//            double cosTheta = hSelected.GetBinCenter(iBin);
+        for(int iBin = 0; iBin<hSelected->GetXaxis()->GetNbins(); iBin++){
+            double cosTheta = hSelected->GetBinCenter(iBin+1);
+//            double cosTheta = hSelected->GetBinCenter(iBin);
 //            cout<<"cosTheta is "<<cosTheta<<endl;
-//            cout<<"BinContents of "<<iBin<<" is "<<hSelected.GetBinContent( iBin+1 )<<endl;
-            for(int eventID = 0; eventID < hSelected.GetBinContent( iBin+1 ); eventID++){
+//            cout<<"BinContents of "<<iBin<<" is "<<hSelected->GetBinContent( iBin+1 )<<endl;
+            for(int eventID = 0; eventID < hSelected->GetBinContent( iBin+1 ); eventID++){
                 int evtRndId = RandomGenerator.Integer( 1000000000  );
                 while (sampleContent.count(evtRndId) > 0){
-                    evtRndId = RandomGenerator.Integer( 1000000000  );    
+                    evtRndId = RandomGenerator.Integer( 1000000000  );                       
                 }
                 sampleContent[evtRndId] = cosTheta;
             }
         }
+#ifdef TEST
+        TH1* h2 = (TH1*)hSelected->Clone(string("second_"+string(hSelected->GetName())).c_str());
+        std::map<int, double>::iterator tmpItr = sampleContent.begin();
+        cout<<"***** "<<mcName<<endl;
+        for(; tmpItr != sampleContent.end(); tmpItr++)
+            h2->Fill(tmpItr->second);
+        TFile * test = new TFile (string(mcName+"_test.root").c_str(),"recreate");
+        test->cd();
+        hSelected->Write();
+        h2->Write();
+        test->Close();
+#endif /*TEST*/
         SamplesInfo mySampleInfo;
         Xsec = mySampleInfo.Xsections[MCName];
         N0 = mySampleInfo.N0[MCName];
@@ -101,7 +115,7 @@ public:
     }
     ~DistributionProducerFromSelected(){}
         
-    TH1F GeneratePartialSample(double fraction, int nPEX){
+    TH1* GeneratePartialSample(double fraction, int nPEX){
         TRandom RandomGenerator( SeedGenerator.Integer(10000000) );
         std::vector<double> selectedValues;
         std::map<int,double>::iterator evtIter = sampleContent.begin();  
@@ -118,21 +132,21 @@ public:
 //            cout<<"Weight: "<<Weight<<endl;
         }
         stringstream s;
-        s<<mcName<<"_"<<hInput.GetName()<<"_"<<nPEX;
+        s<<mcName<<"_"<<hInput->GetName()<<"_"<<nPEX;
         string hName = s.str();
         s.str("");
-        s<<mcName<<"_"<<hInput.GetTitle()<<"_"<<nPEX;
+        s<<mcName<<"_"<<hInput->GetTitle()<<"_"<<nPEX;
         string hTitle = s.str();
         gROOT->cd();
-        TH1F hRet( hName.c_str() , hTitle.c_str() , hInput.GetXaxis()->GetNbins()
-                   , hInput.GetXaxis()->GetXmin() , hInput.GetXaxis()->GetXmax() );
-        hRet.Sumw2();
+        TH1* hRet = new TH1D( hName.c_str() , hTitle.c_str() , hInput->GetXaxis()->GetNbins()
+                   , hInput->GetXaxis()->GetXmin() , hInput->GetXaxis()->GetXmax() );
+        hRet->Sumw2();
         for ( unsigned int i = 0; i < selectedValues.size(); i++)
-            hRet.Fill( selectedValues.at(i) , Weight );
+            hRet->Fill( selectedValues.at(i) , Weight );
 
         return hRet;
     }
-    TH1F GeneratePartialSampleLumiEQ(int nPEX){        
+    TH1* GeneratePartialSampleLumiEQ(int nPEX){        
         TRandom RandomGenerator( SeedGeneratorLumiEQ.Integer(10000000) );
         double nSelectedEventsInLumi_ = Lumi*Xsec*selEff;
         double nSelectedEventsInLumi = RandomGenerator.Gaus(nSelectedEventsInLumi_, sqrt(nSelectedEventsInLumi_));
@@ -149,22 +163,22 @@ public:
         }
               
         stringstream s;
-        s<<mcName<<"_"<<hInput.GetName()<<"_"<<nPEX;
+        s<<mcName<<"_"<<hInput->GetName()<<"_"<<nPEX;
         string hName = s.str();
         s.str("");
-        s<<mcName<<"_"<<hInput.GetTitle()<<"_"<<nPEX;
+        s<<mcName<<"_"<<hInput->GetTitle()<<"_"<<nPEX;
         string hTitle = s.str();
         gROOT->cd();
-        TH1F hRet( hName.c_str() , hTitle.c_str() , hInput.GetXaxis()->GetNbins()
-                   , hInput.GetXaxis()->GetXmin() , hInput.GetXaxis()->GetXmax() );
-        hRet.Sumw2();
+        TH1* hRet = new TH1D( hName.c_str() , hTitle.c_str() , hInput->GetXaxis()->GetNbins()
+                   , hInput->GetXaxis()->GetXmin() , hInput->GetXaxis()->GetXmax() );
+        hRet->Sumw2();
         for ( unsigned int i = 0; i < selectedValues.size(); i++)
-            hRet.Fill( selectedValues.at(i) );
+            hRet->Fill( selectedValues.at(i) );
 
         return hRet;
     }
 private:
-    TH1F hInput;
+    TH1* hInput;
     string mcName;
     double Lumi;
     std::map<int,double> sampleContent;

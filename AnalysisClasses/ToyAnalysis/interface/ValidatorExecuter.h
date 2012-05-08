@@ -28,25 +28,25 @@ using namespace std;
 #include <vector>
 
 
-TH1F GetCosThetaPlot(string name, int nFinalBin = 10){
+TH1* GetCosThetaPlot(string name, int nFinalBin = 10){
     TFile * f = TFile::Open(string("bareFilesFromEvesel/TypeIMET_"+name+"_plots.root").c_str());
-    TH1F h = *((TH1F*)f->Get("cosTheta"));
+    TH1* h = ((TH1*)f->Get("cosTheta"));
         
-    if((h.GetXaxis()->GetNbins()) == nFinalBin)
+    if((h->GetXaxis()->GetNbins()) == nFinalBin)
         return h;
-    if((h.GetXaxis()->GetNbins() % nFinalBin) == 0){
-        h.Rebin(((h.GetXaxis()->GetNbins())/nFinalBin));
+    if((h->GetXaxis()->GetNbins() % nFinalBin) == 0){
+        h->Rebin(((h->GetXaxis()->GetNbins())/nFinalBin));
     }else{
-        std::cout<<nFinalBin<<" does not count "<<h.GetXaxis()->GetNbins()<<std::endl;
+        std::cout<<nFinalBin<<" does not count "<<h->GetXaxis()->GetNbins()<<std::endl;
         std::cout<<"I will take the biggest number less than "<<nFinalBin<<"that counts it .."<<std::endl;
         int n = 1;
         for(int i = 2; i<nFinalBin; i++){
-            if((h.GetXaxis()->GetNbins() % i) == 0)
+            if((h->GetXaxis()->GetNbins() % i) == 0)
                 n = i;
         }
-        h.Rebin(((h.GetXaxis()->GetNbins())/n));
+        h->Rebin(((h->GetXaxis()->GetNbins())/n));
     }
-//    cout<<"Nbins after rebinning: "<<h.GetXaxis()->GetNbins()<<endl;
+//    cout<<"Nbins after rebinning: "<<h->GetXaxis()->GetNbins()<<endl;
     return h;
 }
 void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull , int LPEXPull, double Lumi = 3793){
@@ -60,9 +60,9 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull , int LPEXPull, d
     std::map<string,DistributionProducerFromSelected*> bkg_samples;
     std::map<string,DistributionProducerFromSelected*> signal_samples;
     std::map<string, double>::iterator sampleItr = mySampleInfo.Xsections.begin();
-    TH1F signal;
-    TH1F signalMC;
-    TH1F bkg;
+    TH1* signal = 0;
+    TH1* signalMC = 0;
+    TH1* bkg = 0;
     int sampleIndex = 0;
     for(; sampleItr != mySampleInfo.Xsections.end(); sampleItr++){
         if(sampleItr->first == "qcd"){
@@ -71,33 +71,33 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull , int LPEXPull, d
         }
         if(sampleItr->first == "w" || sampleItr->first == "dy"){
 //            cout<<sampleItr->first<<endl;
-            TH1F hist = GetCosThetaPlot(sampleItr->first,10);
-            hist.Sumw2();
+            TH1* hist = GetCosThetaPlot(sampleItr->first,10);
+            hist->Sumw2();
             DistributionProducerFromSelected *myDist = new DistributionProducerFromSelected(hist,string(sampleItr->first),Lumi);
             bkg_samples[sampleItr->first] = myDist;
-            hist.Scale(float(Lumi*sampleItr->second)/float(mySampleInfo.N0[sampleItr->first]));
+            hist->Scale(float(Lumi*sampleItr->second)/float(mySampleInfo.N0[sampleItr->first]));
 //           if(sampleItr == mySampleInfo.Xsections.begin())
            if(sampleIndex == 0)
-                bkg = *((TH1F*)hist.Clone(string("bkg_"+string(hist.GetName())).c_str()));
+                bkg = ((TH1*)hist->Clone(string("bkg_"+string(hist->GetName())).c_str()));
             else{
-                bkg.Add(&hist);                
-//                cout<<"Adding bkg with nbins = "<<bkg.GetXaxis()->GetNbins()<<
-//                        " and hist with nbins = "<<hist.GetXaxis()->GetNbins()<<endl;
+                bkg->Add(hist);                
+//                cout<<"Adding bkg with nbins = "<<bkg->GetXaxis()->GetNbins()<<
+//                        " and hist with nbins = "<<hist->GetXaxis()->GetNbins()<<endl;
             }
         }else{
 //            cout<<sampleItr->first<<endl;
-            TH1F hist = GetCosThetaPlot(sampleItr->first,10);
-            hist.Sumw2();
+            TH1* hist = GetCosThetaPlot(sampleItr->first,10);
+            hist->Sumw2();
             DistributionProducerFromSelected* myDist = new DistributionProducerFromSelected(hist,string(sampleItr->first),Lumi);
             signal_samples[sampleItr->first] = myDist;
-            hist.Scale(float(Lumi*sampleItr->second)/float(mySampleInfo.N0[sampleItr->first]));            
+            hist->Scale(float(Lumi*sampleItr->second)/float(mySampleInfo.N0[sampleItr->first]));            
 //            if(sampleItr == mySampleInfo.Xsections.begin())
             if(sampleIndex == 2)
-                signalMC = *((TH1F*)hist.Clone(string("signal_"+string(hist.GetName())).c_str()));
+                signalMC = ((TH1*)hist->Clone(string("signal_"+string(hist->GetName())).c_str()));
             else{
-                signalMC.Add(&hist);
-//                cout<<"Adding signal with nbins = "<<signalMC.GetXaxis()->GetNbins()<<
-//                " and hist with nbins = "<<hist.GetXaxis()->GetNbins()<<endl;
+                signalMC->Add(hist);
+//                cout<<"Adding signal with nbins = "<<signalMC->GetXaxis()->GetNbins()<<
+//                " and hist with nbins = "<<hist->GetXaxis()->GetNbins()<<endl;
             }
         }
         sampleIndex++;
@@ -132,28 +132,30 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull , int LPEXPull, d
         name__<<"CosTheta_bkg_"<<nPEX;
         stringstream title__;
         title__ << "noWtb cos(#theta) : PEX="<<nPEX;               
-        TH1F hSumBGPartial( name__.str().c_str() , title__.str().c_str() , signalMC.GetXaxis()->GetNbins()
-                    , signalMC.GetXaxis()->GetXmin() , signalMC.GetXaxis()->GetXmax() );
-        hSumBGPartial.Sumw2();
+        TH1* hSumBGPartial = new TH1D( name__.str().c_str() , title__.str().c_str() , signalMC->GetXaxis()->GetNbins()
+                    , signalMC->GetXaxis()->GetXmin() , signalMC->GetXaxis()->GetXmax() );
+        hSumBGPartial->Sumw2();
         std::map<string,DistributionProducerFromSelected*>::iterator bkgItr = bkg_samples.begin();
         for (; bkgItr != bkg_samples.end(); bkgItr++){
 //            cout<< "..." << bkgItr->first << "..." <<endl;
-            TH1F tmp = bkgItr->second->GeneratePartialSample( 1.0/3.0 , nPEX );
-            hSumBGPartial.Add( &tmp );
+            TH1* tmp = bkgItr->second->GeneratePartialSample( 1.0/3.0 , nPEX );
+            hSumBGPartial->Add( tmp );
+            delete tmp;
         }
-//        for(int mybin = 0; mybin < hSumBGPartial.GetXaxis()->GetNbins(); mybin++)
-//            cout<<"hSumBGPartial: "<<hSumBGPartial.GetBinContent(mybin+1)<<endl;
+//        for(int mybin = 0; mybin < hSumBGPartial->GetXaxis()->GetNbins(); mybin++)
+//            cout<<"hSumBGPartial: "<<hSumBGPartial->GetBinContent(mybin+1)<<endl;
         name__.str(""); title__.str("");
         name__<<"CosTheta_signal_"<<nPEX;
         title__ << "Wtb cos(#theta) : PEX="<<nPEX;                    
-        TH1F hSumSIGPartial( name__.str().c_str() , title__.str().c_str() , signalMC.GetXaxis()->GetNbins()
-                    , signalMC.GetXaxis()->GetXmin() , signalMC.GetXaxis()->GetXmax() );
-        hSumSIGPartial.Sumw2();
+        TH1* hSumSIGPartial = new TH1D( name__.str().c_str() , title__.str().c_str() , signalMC->GetXaxis()->GetNbins()
+                    , signalMC->GetXaxis()->GetXmin() , signalMC->GetXaxis()->GetXmax() );
+        hSumSIGPartial->Sumw2();
         std::map<string,DistributionProducerFromSelected*> ::iterator sigItr = signal_samples.begin();
         for (; sigItr != signal_samples.end(); sigItr++){
 //            cout<< "..." << sigItr->first << "..." <<endl;
-            TH1F tmp = sigItr->second->GeneratePartialSample( 1.0/3.0 , nPEX );
-            hSumSIGPartial.Add(&tmp);
+            TH1* tmp = sigItr->second->GeneratePartialSample( 1.0/3.0 , nPEX );
+            hSumSIGPartial->Add(tmp);
+            delete tmp;
         }
 
         for ( int i = 0; i< nFSteps; i++){
@@ -164,22 +166,30 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull , int LPEXPull, d
 
             double F0Value = 1.0 - FposFixed - FNegValueSteps[i];
 
-            WtbWeightor.first.SetParameters( FNegValueSteps[i] , F0Value );
+            WtbWeightor.first.SetParameters(  F0Value, FNegValueSteps[i]  );
             
-            name__.str(""); name__<< hSumBGPartial.GetName()<<"_"<<FNegValueSteps[i];
-            title__.str("");title__<< hSumBGPartial.GetTitle()<<" for F_ = "<<FNegValueSteps[i];
-            TH1F SIGinPEX = *((TH1F*)hSumSIGPartial.Clone(name__.str().c_str()));
-            SIGinPEX.SetTitle(title__.str().c_str());
-//            for(int mybin = 0; mybin < SIGinPEX.GetXaxis()->GetNbins(); mybin++)
-//                cout<<"SIGinPEX: "<<SIGinPEX.GetBinContent(mybin+1)<<endl;
-            SIGinPEX.Multiply(&WtbWeightor.first,1);
+            name__.str(""); name__<< hSumBGPartial->GetName()<<"_"<<FNegValueSteps[i];
+            title__.str("");title__<< hSumBGPartial->GetTitle()<<" for F_ = "<<FNegValueSteps[i];
+            TH1* SIGinPEX = ((TH1*)hSumSIGPartial->Clone(name__.str().c_str()));
+            SIGinPEX->SetTitle(title__.str().c_str());
+//            for(int mybin = 0; mybin < SIGinPEX->GetXaxis()->GetNbins(); mybin++)
+//                cout<<"SIGinPEX: "<<SIGinPEX->GetBinContent(mybin+1)<<endl;
+            SIGinPEX->Multiply(&WtbWeightor.first,1);
+#ifdef TEST
+            TCanvas c;
+            c.cd();
+            WtbWeightor.first.Draw();
+            stringstream canvNme;
+            canvNme<<FNegValueSteps[i]<<"_"<<F0Value<<"_";
+            c.SaveAs(string(canvNme.str()+string(WtbWeightor.first.GetName())+".C").c_str());
+#endif /*TEST*/
 //            cout<<"-----------------"<<endl;
-//            for(int mybin = 0; mybin < SIGinPEX.GetXaxis()->GetNbins(); mybin++)
-//                cout<<"SIGinPEX: "<<SIGinPEX.GetBinContent(mybin+1)<<endl;
-            SIGinPEX.Add(&hSumBGPartial);
+//            for(int mybin = 0; mybin < SIGinPEX->GetXaxis()->GetNbins(); mybin++)
+//                cout<<"SIGinPEX: "<<SIGinPEX->GetBinContent(mybin+1)<<endl;
+            SIGinPEX->Add(hSumBGPartial);
 //            cout<<"After addition:"<<endl;
-//            for(int mybin = 0; mybin < SIGinPEX.GetXaxis()->GetNbins(); mybin++)
-//                cout<<"SIGinPEX: "<<SIGinPEX.GetBinContent(mybin+1)<<endl;
+//            for(int mybin = 0; mybin < SIGinPEX->GetXaxis()->GetNbins(); mybin++)
+//                cout<<"SIGinPEX: "<<SIGinPEX->GetBinContent(mybin+1)<<endl;
             std::pair<TF3,LikelihoodFunction*> LLinPEXforFNegValueArray= LikelihoodFunction::getLLFunction(
                     string("F_"+name__.str()) , bkg , SIGinPEX, signalMC);
             TF3 LLinPEXforFNegValue = LLinPEXforFNegValueArray.first;
@@ -191,10 +201,14 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull , int LPEXPull, d
             GetMinimum(LLinPEXforFNegValue, x, xerr,false);
             hFinalFNeg.Fill(FNegValueSteps[i],x[1]);
             hFinalF0.Fill(F0Value,x[0]);
+//            hFinalFNeg.Fill(FNegValueSteps[i],x[0]);
+//            hFinalF0.Fill(F0Value,x[1]);
             hFinalFPos.Fill(nPEX,1.0-x[0]-x[1]);
-
+            delete SIGinPEX;
             delete LLinPEXforFNegValueArray.second;
         }
+        delete hSumBGPartial;
+        delete hSumSIGPartial;
     }
     TH1D hPullFNeg("hPullFNeg","Pull distribution for F_{-}",1000,-5,5);
     TH1D hPullF0("hPullF0","Pull distribution for F_{0}",1000,-5,5);
@@ -226,20 +240,22 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull , int LPEXPull, d
         stringstream name__; name__<< "CosTheta_Pull_"<<nPEXPull;
         stringstream title__; title__<< "cos(#theta) : PEXPull="<<nPEXPull;
                
-        TH1F hData( name__.str().c_str() , title__.str().c_str() , signalMC.GetXaxis()->GetNbins() , 
-                signalMC.GetXaxis()->GetXmin() , signalMC.GetXaxis()->GetXmax() );
-        hData.Sumw2();
+        TH1* hData = new TH1D( name__.str().c_str() , title__.str().c_str() , signalMC->GetXaxis()->GetNbins() , 
+                signalMC->GetXaxis()->GetXmin() , signalMC->GetXaxis()->GetXmax() );
+        hData->Sumw2();
         std::map<string,DistributionProducerFromSelected*>::iterator bkgItr = bkg_samples.begin();
         for( ; bkgItr != bkg_samples.end(); bkgItr++){
 //            cout<< "..." << bkgItr->first<< "..." <<endl;
-            TH1F tmp = bkgItr->second->GeneratePartialSampleLumiEQ(  nPEXPull );
-            hData.Add( &tmp );
+            TH1* tmp = bkgItr->second->GeneratePartialSampleLumiEQ(  nPEXPull );
+            hData->Add( tmp );
+            delete tmp;
         }
         std::map<string,DistributionProducerFromSelected*>::iterator sigItr = signal_samples.begin();
         for( ; sigItr != signal_samples.end(); sigItr++){
 //            cout<< "..." << sigItr->first<< "..." <<endl;
-            TH1F tmp = sigItr->second->GeneratePartialSampleLumiEQ(  nPEXPull );
-            hData.Add( &tmp );
+            TH1* tmp = sigItr->second->GeneratePartialSampleLumiEQ(  nPEXPull );
+            hData->Add( tmp );
+            delete tmp;
         }
 
         std::pair<TF3,LikelihoodFunction*> LLinPEXforFNegValueArray= LikelihoodFunction::getLLFunction(
@@ -275,8 +291,8 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull , int LPEXPull, d
         hResFNeg.Fill( resneg );
         hResF0.Fill( resf0 );
 
+        delete hData;
         delete LLinPEXforFNegValueArray.second;
-        
     }
     delete WtbWeightor.second;
     TFile * outFile= new TFile(outName.str().c_str(),"recreate");

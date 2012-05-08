@@ -108,6 +108,6 @@ int main(int argc, char** argv){
         }
     }
 
-    RunFitValidation(StartPEX, LPEX, StartPEXPull, LPEXPull,Lumi);
+    RunFitValidation(StartPEX, LPEX, StartPEXPull, LPEXPull);
     return 0;
 }

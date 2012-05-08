@@ -35,19 +35,27 @@ Double_t CosTheta(double *x, double *par)
 
 class LikelihoodFunction{
 public:
-    LikelihoodFunction(string name , TH1F nonWtbSum , TH1F hData , TH1F WtbSum)
+    LikelihoodFunction(string name , TH1* nonWtbSum , TH1* hData , TH1* WtbSum)
     :Name(name), bkg(nonWtbSum), data(hData), signal(WtbSum){
-        data.Sumw2();
-        bkg.Sumw2();
-        signal.Sumw2();
+//        bkg = nonWtbSum; 
+//        data = hData; 
+//        signal = WtbSum;
+        data->Sumw2();
+        bkg->Sumw2();
+        signal->Sumw2();
         smCosTheta = new TF1(string("smCosTheta_"+Name).c_str(),CosTheta,-1.,1.,2);
         smCosTheta->SetParName(0, "f_{0}");
         smCosTheta->SetParName(1, "f_{neg}");
         smCosTheta->SetParameters(6.64263e-01,3.03734e-01);
-        smCosTheta->SetParLimits(0,0.,1.);
-        smCosTheta->SetParLimits(1,0.,1.);
+//        smCosTheta->SetParLimits(0,0.,1.);
+//        smCosTheta->SetParLimits(1,0.,1.);
     }
-    ~LikelihoodFunction(){ delete smCosTheta;}
+    ~LikelihoodFunction(){
+//        delete bkg;
+//        delete signal;
+//        delete data;
+//        delete smCosTheta;
+    }
     Double_t operator()(double * x, double * par = 0){
 //        x[0] = f_0
 //        x[1] = f_Neg
@@ -55,7 +63,7 @@ public:
 //        no parameter is needed
 
         double LL = 0.0;
-        int nbins = data.GetXaxis()->GetNbins();
+        int nbins = data->GetXaxis()->GetNbins();
         for(int i = 0; i<nbins; i++){
             std::pair<double, double>  numbers = this->getNdataNmc(i+1, x[0],x[1],x[2]);
 //            cout<<"in LL: "<<numbers.first << "\t"<<numbers.second<<endl;
@@ -64,7 +72,7 @@ public:
 //        cout<<"LL: "<<LL<<endl;
         return LL;
     }
-    static std::pair<TF3,LikelihoodFunction*> getLLFunction(string name , TH1F nonWtbSum , TH1F hData , TH1F WtbSum){
+    static std::pair<TF3,LikelihoodFunction*> getLLFunction(string name , TH1* nonWtbSum , TH1* hData , TH1* WtbSum){
         LikelihoodFunction * functor = new LikelihoodFunction(name , nonWtbSum , hData , WtbSum);
         TF3 ret(name.c_str(), functor, 0.0 , 1.0 , 0.0 , 0.1 , 0.0 , 2.0 , 0,"LikelihoodFunction" );
         ret.SetRange( 0.0 , 0.0 , 0.000001 , 1.0 , 1.0 , 2.0);
@@ -73,22 +81,22 @@ public:
     }
 private:
     string Name;
-    TH1F bkg;
-    TH1F data;
-    TH1F signal;
+    TH1* bkg;
+    TH1* data;
+    TH1* signal;
     TF1 * smCosTheta;
 
     std::pair<double, double> getNdataNmc(int bin, double f0 = 6.64263e-01, double f_ = 3.03734e-01, double rec_gen = 1.){
-        int nbins = data.GetXaxis()->GetNbins();
+        int nbins = data->GetXaxis()->GetNbins();
         if(bin > nbins || nbins < 0){
             cout<<"No value for this cos(theta) bin"<<endl;
             return make_pair(-100,-100);
         }
-        double nData = data.GetBinContent(bin);
-        double costheta = data.GetBinCenter(bin);
+        double nData = data->GetBinContent(bin);
+        double costheta = data->GetBinCenter(bin);
         double weight = getWeight(costheta,f0,f_)*rec_gen;
-        double nSignal = weight*signal.GetBinContent(bin);
-        double nMC = bkg.GetBinContent(bin) + nSignal;
+        double nSignal = weight*signal->GetBinContent(bin);
+        double nMC = bkg->GetBinContent(bin) + nSignal;
 //        cout<<"****** "<<nData<<"\t"<<nMC<<endl;
         return make_pair(nData,nMC);        
     }
@@ -122,29 +130,36 @@ private:
 
 class ChiSquaredFunction{
 public:
-    ChiSquaredFunction(string name , TH1F nonWtbSum , TH1F hData , TH1F WtbSum)
-    :Name(name), bkg(nonWtbSum), data(hData), signal(WtbSum){
-        data.Sumw2();
-        bkg.Sumw2();
-        signal.Sumw2();
-        smMC = *((TH1F*)signal.Clone("smMC"));
-        smMC.Sumw2();
-        smMC.Add(&bkg);
+    ChiSquaredFunction(string name , TH1* nonWtbSum , TH1* hData , TH1* WtbSum)
+    :Name(name){ 
+        bkg= new TH1(*nonWtbSum); data= new TH1(*hData); signal= new TH1(*WtbSum);
+        data->Sumw2();
+        bkg->Sumw2();
+        signal->Sumw2();
+        smMC = (TH1*)signal->Clone("smMC");
+        smMC->Sumw2();
+        smMC->Add(bkg);
         smCosTheta = new TF1(string("smCosTheta_"+Name).c_str(),CosTheta,-1.,1.,2);
         smCosTheta->SetParName(0, "f_{0}");
         smCosTheta->SetParName(1, "f_{neg}");
         smCosTheta->SetParameters(6.64263e-01,3.03734e-01);
-        smCosTheta->SetParLimits(0,0.,1.);
-        smCosTheta->SetParLimits(1,0.,1.);
+//        smCosTheta->SetParLimits(0,0.,1.);
+//        smCosTheta->SetParLimits(1,0.,1.);
     }
-    ~ChiSquaredFunction(){ delete smCosTheta;}
+    ~ChiSquaredFunction(){ 
+        delete bkg;
+        delete signal;
+        delete data;
+        delete smMC;
+        delete smCosTheta;
+    }
     Double_t operator()(double * x, double * par = 0){
 //        x[0] = f_0
 //        x[1] = f_Neg
 //        x[2] = rec_gen factor
 //        no parameter is needed
         double chi2 = 0.0;
-        int nbins = data.GetXaxis()->GetNbins();
+        int nbins = data->GetXaxis()->GetNbins();
         for(int i = 0; i<nbins; i++){
             std::pair<double,pair<double,double> > numbers = this->getNdataNmc(i+1, x[0],x[1],x[2]);
             double Data[2]={numbers.first, sqrt(numbers.first)};
@@ -153,7 +168,7 @@ public:
         }
         return chi2;
     }
-    static std::pair<TF3,ChiSquaredFunction *> getChiSquaredFunction(string name , TH1F nonWtbSum , TH1F hData , TH1F WtbSum){
+    static std::pair<TF3,ChiSquaredFunction *> getChiSquaredFunction(string name , TH1* nonWtbSum , TH1* hData , TH1* WtbSum){
         ChiSquaredFunction * functor = new ChiSquaredFunction(name , nonWtbSum , hData , WtbSum);
         TF3 ret(name.c_str(), functor, 0.0 , 1.0 , 0.0 , 0.1 , 0.0 , 2.0 , 0,"ChiSquaredFunction" );
 //        TF3 ret(name.c_str(), "(x*x)+(y*y)+(z*z)", 0.0 , 1.0 , 0.0 , 0.1 , 0.0 , 2.0 );
@@ -162,25 +177,25 @@ public:
     }
 private:
     string Name;
-    TH1F bkg;
-    TH1F data;
-    TH1F signal;
-    TH1F smMC;
+    TH1* bkg;
+    TH1* data;
+    TH1* signal;
+    TH1* smMC;
     TF1 * smCosTheta;
 
     std::pair<double, std::pair<double,double> > getNdataNmc(int bin, double f0 = 6.64263e-01, double f_ = 3.03734e-01, double rec_gen = 1.){
-        int nbins = data.GetXaxis()->GetNbins();
+        int nbins = data->GetXaxis()->GetNbins();
         if(bin > nbins || nbins < 0){
             cout<<"No value for this cos(theta) bin"<<endl;
             return make_pair(-100,make_pair(-100,-100));
         }
-        double nData = data.GetBinContent(bin);
-        double costheta = data.GetBinCenter(bin);
+        double nData = data->GetBinContent(bin);
+        double costheta = data->GetBinCenter(bin);
         double weight = getWeight(costheta,f0,f_)*rec_gen;
-        double nSignal = weight*signal.GetBinContent(bin);
-        double sigErr = weight*signal.GetBinError(bin);
-        double nMC = bkg.GetBinContent(bin) + nSignal;
-        double errMC = sqrt((sigErr*sigErr) + (bkg.GetBinError(bin)*bkg.GetBinError(bin)));
+        double nSignal = weight*signal->GetBinContent(bin);
+        double sigErr = weight*signal->GetBinError(bin);
+        double nMC = bkg->GetBinContent(bin) + nSignal;
+        double errMC = sqrt((sigErr*sigErr) + (bkg->GetBinError(bin)*bkg->GetBinError(bin)));
         return make_pair(nData,make_pair(nMC,errMC));        
     }
     
@@ -211,6 +226,7 @@ void GetMinimum(TF3 F,double * x, double * xerr, bool CalcError = true){
     //    http://root.cern.ch/root/html532/src/TF3.cxx.html#QUjxjE
 //    F.Print("all");
     F.GetMinimumXYZ(x[0] , x[1] , x[2]);
+//    cout<<x[0]<<"\t"<<x[1]<<"\t"<<x[2]<<endl;
     if(!CalcError)
         return;
     //    go to minuit for the final minimization
@@ -254,25 +270,31 @@ public:
     WeightFunctionCreator(double std_f0 = 6.64263e-01, double std_fneg = 3.03734e-01):
     f0Std(std_f0),f_Std(std_fneg){
         func = new TF1("WeightFunctionCreator", CosTheta, -1,1,2);
+       func->SetParameters(f0Std,f_Std);
+    }
+    ~WeightFunctionCreator(){
+        delete func;
     }
     Double_t operator()(double * x, double * par ){
         func->SetParameters(f0Std,f_Std);
+//	cout<<"SM: "<< func->GetParameter(0)<<"  "<<func->GetParameter(1)<<endl;
         double stdVal = func->Eval(x[0]);
         func->SetParameters(par);
+//	cout<<func->GetParameter(0)<<"  "<<func->GetParameter(1)<<endl;
         double nonstdVal = func->Eval(x[0]);
         return ((double)nonstdVal/(double)stdVal);
     }
     static std::pair<TF1,WeightFunctionCreator*> getWeightFunction(string name,double std_f0 = 6.64263e-01, double std_fneg = 3.03734e-01){
-        WeightFunctionCreator * functor = new WeightFunctionCreator(std_fneg, std_f0);
+        WeightFunctionCreator * functor = new WeightFunctionCreator(6.64263e-01, 3.03734e-01);
         TF1 ret( name.c_str() , functor , -1.0 , 1.0 , 2);
 
         ret.SetParName(0 , "F0" );
         ret.SetParName(1 , "FNeg" );
 
-        ret.SetParLimits(0 , 0.0 , 1.0);
-        ret.SetParLimits(1 , 0.0 , 1.0);
+//        ret.SetParLimits(0 , 0.0 , 1.0);
+//        ret.SetParLimits(1 , 0.0 , 1.0);
             
-        ret.SetParameters( 6.64263e-01, 3.03734e-01);
+        ret.SetParameters(std_f0, std_fneg );
             
         return make_pair(ret,functor);
     }
