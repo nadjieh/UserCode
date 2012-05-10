@@ -1,0 +1,17 @@
+<use   name="DataFormats/MuonReco"/>
+<use   name="DataFormats/METReco"/>
+<use   name="DataFormats/JetReco"/>
+<use   name="DataFormats/Common"/>
+<use   name="DataFormats/HepMCCandidate"/>
+<use   name="FWCore/MessageLogger"/>
+<use   name="FWCore/Utilities"/>
+<use   name="FWCore/Framework"/>
+<use   name="FWCore/ParameterSet"/>
+<use   name="hepmc"/>
+<use   name="clhep"/>
+<use   name="root"/>
+<export>
+</export>
+<library   file="*.cc" name="SingleTopGenCheckerPlugins">
+</library>
+
