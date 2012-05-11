@@ -15,7 +15,7 @@
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
-
+#include "DataFormats/Candidate/interface/CompositeRefCandidateT.h"
 #include <string>
 #include <vector>
 #include "TMath.h"
@@ -165,6 +165,8 @@ SingleTopGenChecker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	int pdgId = fabs(mcIter->pdgId());
 	int motherId = fabs(mcIter->mother()->pdgId());
 	int motherIdII = -1;
+	//mothers Mothers=mcItr->motherRefVector();
+	cout<<"0: "<<bool(mcIter->motherRef() == mcIter->motherRefVector().at(0))<<", 1: "<<bool(mcIter->motherRef(1)== mcIter->motherRefVector().at(1))<<endl;
 	if(mcIter->numberOfMothers() > 1 )
 	        motherIdII=fabs(mcIter->mother(1)->pdgId());
 	if(pdgId == 6){
@@ -192,13 +194,7 @@ SingleTopGenChecker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		q_y->Fill(mcIter->rapidity());	
 
 	}
-	if(pdgId == 5 /*&& some condition*/){ 
-		qasso_pt->Fill(mcIter->pt());
 
-		qasso_y->Fill(mcIter->rapidity());
-		asso_index = myIndex;			
-
-	}
 	if(motherId == 24 || motherIdII == 24){
 
 		W_daughters.push_back(pdgId);
@@ -232,7 +228,21 @@ SingleTopGenChecker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 		if(W_daughters[0]==3 && W_daughters[1]==2) us++;
 
 	}
+	myIndex = 0;
+	for(reco::GenParticleCollection::const_iterator mcIter=genParticles->begin(); mcIter != genParticles->end(); mcIter++, myIndex++){
+		int associated_quark_flavor = 5;
+		if(top_charge>0) associated_quark_flavor*=-1;
 
+		bool motherCond = bool(bool(mcIter->motherRef() == mcIter->motherRefVector().at(0)) && 
+		bool(mcIter->motherRef(1)== mcIter->motherRefVector().at(1)));
+
+		if(mcIter->pdgId() == associated_quark_flavor && motherCond){ 
+			qasso_pt->Fill(mcIter->pt());
+			qasso_y->Fill(mcIter->rapidity());
+			asso_index = myIndex;			
+		}
+
+	}
 
 
 	//finde leichtes Quark fuer Ereignisse mit second "b"
@@ -246,9 +256,10 @@ SingleTopGenChecker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	  if(myIndex==asso_index) continue;
 
+	  bool motherCond = bool(bool(mcIter->motherRef() == mcIter->motherRefVector().at(0)) && 
+	  bool(mcIter->motherRef(1)== mcIter->motherRefVector().at(1)));
 
-
-	  if(abs(mcIter->pdgId())<6 /*&& some condition*/){
+	  if(abs(mcIter->pdgId())<6 && motherCond){
 
 	    qlight_pt->Fill(mcIter->pt());
 
@@ -271,8 +282,9 @@ SingleTopGenChecker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 			for(reco::GenParticleCollection::const_iterator mcIter=genParticles->begin(); 
 			mcIter != genParticles->end(); mcIter++, myIndex++){
-
-				if(abs(mcIter->pdgId())<6 /*&& some condition*/){
+				bool motherCond = bool(bool(mcIter->motherRef() == mcIter->motherRefVector().at(0)) && 
+				bool(mcIter->motherRef(1)== mcIter->motherRefVector().at(1)));
+				if(abs(mcIter->pdgId())<6 && motherCond){
 
 					qlight_pt->Fill(mcIter->pt());
 
