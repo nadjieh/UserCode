@@ -104,11 +104,11 @@ int main(int argc, char** argv){
     myLL.first.GetMinimumXYZ(x[0] , x[1] , x[2]);
     
     cout<<"simple getMin: "<<x[0]<<"  "<<x[1]<<"  "<<x[2]<<endl;
-    
-    GetMinimum(myLL.first,x,xerr);
+    double correlation;
+    GetMinimum(myLL.first,x,xerr,correlation);
     cout<<"my getMin-vals: "<<x[0]<<"  "<<x[1]<<"  "<<x[2]<<endl;
     cout<<"my getMin-err: "<<xerr[0]<<"  "<<xerr[1]<<"  "<<xerr[2]<<endl;
-    
+    cout<<"F0_FNeg correlation: "<<correlation/(double)(xerr[0]*xerr[1])<<endl;
     
 //    delete myChi2.second;
     delete myLL.second;

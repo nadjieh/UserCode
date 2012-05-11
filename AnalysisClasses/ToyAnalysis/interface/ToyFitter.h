@@ -221,7 +221,7 @@ private:
     }    
 };
 
-void GetMinimum(TF3 F,double * x, double * xerr, bool CalcError = true){
+void GetMinimum(TF3 F,double * x, double * xerr,double & corr12 ,bool CalcError = true){
     //    based on the documentation of TF3::GetMinimumXYZ from
     //    http://root.cern.ch/root/html532/src/TF3.cxx.html#QUjxjE
 //    F.Print("all");
@@ -263,6 +263,7 @@ void GetMinimum(TF3 F,double * x, double * xerr, bool CalcError = true){
     minuit->GetErrors( 0 , xu , xl , xerr[0] , globcc );
     minuit->GetErrors( 1 , yu , yl , xerr[1] , globcc );
     minuit->GetErrors( 2 , zu , zl , xerr[2] , globcc );
+    corr12 = minuit->GetCovarianceMatrixElement(0,1);
     delete minuit;
 }
 class WeightFunctionCreator{

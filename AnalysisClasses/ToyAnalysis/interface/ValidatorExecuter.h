@@ -54,7 +54,8 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull , int LPEXPull, d
     outName<<"Linearity_start-"<<StartPEX<<"-length-"<<LPEX<<"_Pull_start-"<<StartPEXPull<<
             "-length-"<<LPEXPull<<".root";
     
-    double FposFixed = 0.0009;
+//    double FposFixed = 0.0009;
+    double FposFixed = 1-(6.64263e-01)-(3.03734e-01);
     std::pair<TF1,WeightFunctionCreator*> WtbWeightor = WeightFunctionCreator::getWeightFunction("WtbWeightor");
     SamplesInfo mySampleInfo;
     std::map<string,DistributionProducerFromSelected*> bkg_samples;
@@ -198,7 +199,8 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull , int LPEXPull, d
             
             double x[3]={-1.,-1.,-1.};
             double xerr[3]={-1.,-1.,-1.};
-            GetMinimum(LLinPEXforFNegValue, x, xerr,false);
+            double correlation12 = -1000;
+            GetMinimum(LLinPEXforFNegValue, x, xerr,correlation12,false);
             hFinalFNeg.Fill(FNegValueSteps[i],x[1]);
             hFinalF0.Fill(F0Value,x[0]);
 //            hFinalFNeg.Fill(FNegValueSteps[i],x[0]);
@@ -263,7 +265,8 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull , int LPEXPull, d
         TF3 LLinPEXforFNegValue = LLinPEXforFNegValueArray.first;
         double x[3]={-1.,-1.,-1.};
         double xerr[3]={-1.,-1.,-1.};
-        GetMinimum(LLinPEXforFNegValue, x, xerr);
+        double correlation12 = -1000;
+        GetMinimum(LLinPEXforFNegValue, x, xerr,correlation12);
         double fneg = x[1];
         double f0 = x[0];
         double fpos = 1.0 - x[1] - x[0];
@@ -277,7 +280,7 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull , int LPEXPull, d
         
         double errfneg = xerr[1];
         double errf0 = xerr[0];
-        double errfpos = sqrt( errf0*errf0 + errfneg * errfneg);
+        double errfpos = sqrt( errf0*errf0 + errfneg * errfneg + (2*correlation12));
 
         double resneg = fneg- (3.03734e-01);
         double respos = fpos - FposFixed;
