@@ -35,11 +35,12 @@ SingleTopGenChecker::SingleTopGenChecker(const edm::ParameterSet& conf)
   outputFile_ = conf.getParameter<std::string>("outputFile");
   histfile_ = new TFile(outputFile_.c_str(),"RECREATE");
   mcTruthCollection_ = conf.getParameter<edm::InputTag>("mcTruthCollection");
-
+  cout<<"the constructor is fine ...."<<endl;
  }
 
 void SingleTopGenChecker::beginJob(){
 
+  cout<<"the beginJob is started ...."<<endl;
   histfile_->cd();
 
   // mc truth
@@ -93,6 +94,7 @@ void SingleTopGenChecker::beginJob(){
 
   n_ev=0;
 
+  cout<<"the beginJob is finished ...."<<endl;
 }
 
 void
@@ -152,10 +154,12 @@ SingleTopGenChecker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 {
 
 
- 
+  cout<<"In event loop to analyze ..."<<endl;
+  n_ev++;
+  cout<<"Event number: "<<n_ev<<endl;
   edm::Handle<GenParticleCollection> genParticles;
   iEvent.getByLabel(mcTruthCollection_, genParticles);
-
+  cout<<"genParticle size: "<<genParticles.product()->size()<<endl;
   int top_charge=0;
 
   std::vector<int> W_daughters;
@@ -163,12 +167,17 @@ SingleTopGenChecker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   int myIndex = 0;
   for (reco::GenParticleCollection::const_iterator mcIter=genParticles->begin(); mcIter != genParticles->end(); mcIter++, myIndex++ ) {
 	int pdgId = fabs(mcIter->pdgId());
-	int motherId = fabs(mcIter->mother()->pdgId());
+        int motherId = -1;
+	if(mcIter->numberOfMothers() > 0)
+		motherId = fabs(mcIter->mother()->pdgId());
 	int motherIdII = -1;
-	//mothers Mothers=mcItr->motherRefVector();
-	cout<<"0: "<<bool(mcIter->motherRef() == mcIter->motherRefVector().at(0))<<", 1: "<<bool(mcIter->motherRef(1)== mcIter->motherRefVector().at(1))<<endl;
 	if(mcIter->numberOfMothers() > 1 )
 	        motherIdII=fabs(mcIter->mother(1)->pdgId());
+
+//	cout<<motherId<<"\t"<<motherIdII<<endl;//mothers Mothers=mcItr->motherRefVector();
+//	if(motherId != -1 && motherIdII != -1)
+//		cout<<"0: "<<bool(mcIter->motherRef() == mcIter->motherRefVector().at(0))<<", 1: "<<bool(mcIter->motherRef(1)== mcIter->motherRefVector().at(1))<<endl;
+
 	if(pdgId == 6){
 		top_pt->Fill(mcIter->pt());
 
@@ -181,9 +190,8 @@ SingleTopGenChecker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	  	else top_charge=-1;
 	}
 	if(pdgId == 24 && (motherId == 6 || motherIdII == 6)){ 
-
+//		cout<<"**************** W found :-)"<<endl;
 	  	W_pt->Fill(mcIter->pt());
-
 	  	W_y->Fill(mcIter->rapidity());	
 
 	}
@@ -196,12 +204,13 @@ SingleTopGenChecker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	}
 
 	if(motherId == 24 || motherIdII == 24){
-
+//		cout<<"W Doughter -----------------------------------"<<endl;
 		W_daughters.push_back(pdgId);
 
 	}
 
-  } // loop over mc particle
+  } 
+//  cout<<"// loop over mc particle"<<endl;
 
       //zaehle W-Toechter
 
@@ -232,16 +241,16 @@ SingleTopGenChecker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	for(reco::GenParticleCollection::const_iterator mcIter=genParticles->begin(); mcIter != genParticles->end(); mcIter++, myIndex++){
 		int associated_quark_flavor = 5;
 		if(top_charge>0) associated_quark_flavor*=-1;
+		if(mcIter->numberOfMothers() > 1){
+			bool motherCond = bool(bool(mcIter->motherRef() == mcIter->motherRefVector().at(0)) && 
+			bool(mcIter->motherRef(1)== mcIter->motherRefVector().at(1)));
 
-		bool motherCond = bool(bool(mcIter->motherRef() == mcIter->motherRefVector().at(0)) && 
-		bool(mcIter->motherRef(1)== mcIter->motherRefVector().at(1)));
-
-		if(mcIter->pdgId() == associated_quark_flavor && motherCond){ 
-			qasso_pt->Fill(mcIter->pt());
-			qasso_y->Fill(mcIter->rapidity());
-			asso_index = myIndex;			
+			if(mcIter->pdgId() == associated_quark_flavor && motherCond){ 
+				qasso_pt->Fill(mcIter->pt());
+				qasso_y->Fill(mcIter->rapidity());
+				asso_index = myIndex;			
+			}
 		}
-
 	}
 
 
@@ -256,17 +265,18 @@ SingleTopGenChecker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 	  if(myIndex==asso_index) continue;
 
-	  bool motherCond = bool(bool(mcIter->motherRef() == mcIter->motherRefVector().at(0)) && 
-	  bool(mcIter->motherRef(1)== mcIter->motherRefVector().at(1)));
+	  if(mcIter->numberOfMothers() > 1){
+	  	bool motherCond = bool(bool(mcIter->motherRef() == mcIter->motherRefVector().at(0)) && 
+	  	bool(mcIter->motherRef(1)== mcIter->motherRefVector().at(1)));
 
-	  if(abs(mcIter->pdgId())<6 && motherCond){
+	  	if(abs(mcIter->pdgId())<6 && motherCond){
 
-	    qlight_pt->Fill(mcIter->pt());
+	    		qlight_pt->Fill(mcIter->pt());
 
-	    qlight_y->Fill(mcIter->rapidity());	
+	    		qlight_y->Fill(mcIter->rapidity());	
 
+	  	}
 	  }
-
 	}
 
       }
@@ -282,16 +292,14 @@ SingleTopGenChecker::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 			for(reco::GenParticleCollection::const_iterator mcIter=genParticles->begin(); 
 			mcIter != genParticles->end(); mcIter++, myIndex++){
-				bool motherCond = bool(bool(mcIter->motherRef() == mcIter->motherRefVector().at(0)) && 
-				bool(mcIter->motherRef(1)== mcIter->motherRefVector().at(1)));
-				if(abs(mcIter->pdgId())<6 && motherCond){
-
-					qlight_pt->Fill(mcIter->pt());
-
-					qlight_y->Fill(mcIter->rapidity());	
-
+	  			if(mcIter->numberOfMothers() > 1){
+					bool motherCond = bool(bool(mcIter->motherRef() == mcIter->motherRefVector().at(0)) && 
+					bool(mcIter->motherRef(1)== mcIter->motherRefVector().at(1)));
+					if(abs(mcIter->pdgId())<6 && motherCond){
+						qlight_pt->Fill(mcIter->pt());
+						qlight_y->Fill(mcIter->rapidity());	
+					}	
 				}
-
 			}
 
 	      	}else{
