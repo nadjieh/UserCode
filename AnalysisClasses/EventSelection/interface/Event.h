@@ -33,6 +33,9 @@
 
 
 using namespace TopTree;
+struct SortByEta{
+    bool operator() (TLorentzVector comb1, TLorentzVector comb2) { return (fabs(comb1.Eta()) > fabs(comb2.Eta()));}
+} mySortByEta;
 class Event{
 public:
     Event(TRootEvent Evt, TRootRun Run, TClonesArray jets_,TClonesArray electrons_,TClonesArray mets_,TClonesArray muons_, TClonesArray primaryVertices):evt(Evt), run(Run){
@@ -488,6 +491,11 @@ public:
 	}
       }
       return( !inRange );
+    }
+    std::vector<TRootPFJet> SortedJetsByEta(){
+        std::vector<TRootPFJet> res = this->GPFJets;
+        std::sort(res.begin(), res.end(), mySortByEta);
+        return res;
     }
     TRootEvent evt;
     TRootRun run;

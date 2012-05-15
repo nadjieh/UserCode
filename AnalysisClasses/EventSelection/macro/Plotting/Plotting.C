@@ -5,7 +5,8 @@
  * Created on February 10, 2011, 1:31 PM
  */
 
-#include "../interface/HistogramPlotter.h"
+#include "../../interface/HistogramPlotter.h"
+#include "../../interface/HistogramAdder.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
@@ -73,7 +74,11 @@ int main(int argc, char** argv) {
           else if(Xsec == "qcd")
                 Colors.push_back(kOrange+3);
           
-          Xsec = "./IsoMu17/TypeIMET/TypeIMET_"+Xsec+"_plots.root";
+//          Xsec = "./IsoMu17/TypeIMET/TypeIMET_"+Xsec+"_plots.root";
+//          Xsec = "./IsoMu17/PU3TypeIMET/vNotFlatMC/PU3TypeIMET_"+Xsec+"_plots.root";
+//          Xsec = "./WmassSmeared/CorrPU3TypeIMET/PU3Corr_TypeIMET_"+Xsec+"_plots.root";
+//          Xsec = "./both_newMassPlot/TypeIMETII_"+Xsec+"_plots.root";
+          Xsec ="./Wshape/Wshape_" + Xsec + "_plots.root";
           TFile * tmp = TFile::Open(Xsec.c_str());
           MCfiles.push_back(tmp);
 	}else if(arg_fth == "beta"){
@@ -90,7 +95,9 @@ int main(int argc, char** argv) {
         }else if(arg_fth == "data"){
           f++;
           std::string preSelEff(*(argv + f));
-          preSelEff ="./IsoMu17/" + preSelEff + ".root";
+//          preSelEff ="./IsoMu17/TypeIMET/TypeIMET_" + preSelEff + ".root";
+//          preSelEff ="./both_newMassPlot/TypeIMETII_" + preSelEff + "_plots.root";
+          preSelEff ="./Wshape/Wshape_" + preSelEff + "_plots.root";
           data = TFile::Open(preSelEff.c_str());
         }else if(arg_fth == "xsec"){
 	  f++;
@@ -122,11 +129,18 @@ int main(int argc, char** argv) {
     cout<<"LumiA: "<<LumiA<<endl;
     cout<<"LumiB: "<<LumiB<<endl;
 //    HistogramPlotter histPlot(Lumi,true);
-    HistogramPlotter histPlot(true);
+//    HistogramPlotter histPlot(true);
+//    histPlot.StructureFinder(data);
+//    histPlot.printStructure();
+//    TFile * out = new TFile(outFileName.c_str(),"recreate");
+//    histPlot.plot(MCfiles,weights,Colors,MCnames,out,data);
+    
+//    HistogramAdder histPlot(Lumi,true);
+    HistogramAdder histPlot(false);
     histPlot.StructureFinder(data);
     histPlot.printStructure();
     TFile * out = new TFile(outFileName.c_str(),"recreate");
-    histPlot.plot(MCfiles,weights,Colors,MCnames,out,data);
+    histPlot.plot(MCfiles,weights,out);
     
 
 

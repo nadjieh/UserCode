@@ -6,7 +6,7 @@
  */
 //same as SelectAndSave with less complexities. Aimed to run on selected samples.
 
-#include "TDirectory.h"
+
 #include "../../interface/ElectronSelector.h"
 
 #include "../../interface/Event.h"
@@ -39,6 +39,8 @@
 #include "../../../../AnalysisClasses/EventSelection/interface/PracticalEvent.h"
 #include "../../../../AnalysisClasses/ToyAnalysis/interface/GenSingleTopMaker.h"
 #include "../../../../TopBrussels/TopTreeAnalysis/MCInformation/interface/Lumi3DReWeighting.h"
+#include "../../../../Base/BaseAnalysis/interface/EfficiencyHandler.h"
+#include "../../../ToyAnalysis/interface/MyObjectProperties.h"
 
 
 
@@ -60,51 +62,31 @@ using namespace TopTree;
 /*
  * 
  */
-class SingleTopHistograms{
-public:
-    SingleTopHistograms(string name):Name(name){
-        Wmass = new TH1D(string(name+"_Wmass").c_str(),string(name+": final-W-mass").c_str(),50, 0.,200.);
-        Wmass->GetXaxis()->SetTitle("M_{W}");
-        WmassII = new TH1D(string(name+"_WmassMET").c_str(),string(name+": final-W-mass (MET)").c_str(),50, 0.,200.);
-        WmassII->GetXaxis()->SetTitle("M_{W}");
-        topMass = new TH1D(string(name+"_topMass").c_str(),string(name+": final-top-mass").c_str(),50, 50.,500.);
-        topMass->GetXaxis()->SetTitle("M_{top}");
-        topMassII = new TH1D(string(name+"_topMassMET").c_str(),string(name+": final-top-mass (MET)").c_str(),50, 50.,500.);
-        topMassII->GetXaxis()->SetTitle("M_{top}");
-        cosTheta = new TH1D(string(name+"cosTheta").c_str(),string(name+": cos(#theta)").c_str(),50, -1.,1.);
-        cosTheta->GetXaxis()->SetTitle("cos(#theta*)");
-        cosThetaII = new TH1D(string(name+"cosTheta_MET").c_str(),string(name+": cos(#theta) (MET)").c_str(),50, -1.,1.);
-        cosThetaII->GetXaxis()->SetTitle("cos(#theta*)");
-    };
-    ~SingleTopHistograms(){};
-    void Fill(SemiLepTopQuark myLeptonicTop, double  lumiWeight3D = 1){
-        cosTheta->Fill(myLeptonicTop.cosThetaStar(),lumiWeight3D);
-        cosThetaII->Fill(myLeptonicTop.cosThetaStar(2),lumiWeight3D);
-        Wmass->Fill(myLeptonicTop.W().M(),lumiWeight3D);
-        topMass->Fill(myLeptonicTop.top().M(),lumiWeight3D);
-        WmassII->Fill(myLeptonicTop.W(2).M(),lumiWeight3D);
-        topMassII->Fill(myLeptonicTop.top(2).M(),lumiWeight3D);
-    }
-    void Write(TDirectory * dir){
-        (dir->mkdir(Name.c_str()))->cd();
-        cosTheta->Write();
-        Wmass->Write();
-        topMass->Write();
-        cosThetaII->Write();
-        WmassII->Write();
-        topMassII->Write();
-        dir->cd();
-    }
-    string Name;
-    TH1D * Wmass;
-    TH1D * WmassII;
-    TH1D * topMass;
-    TH1D * topMassII;
-    TH1D * cosTheta;
-    TH1D * cosThetaII;
-};
+bool TrueCondition(const TRootPFJet * e){/*cout<<"I am here in all"<<endl;*/ return(true);}
+
 int main(int argc, char** argv) {
 
+    EfficiencyHandler<TRootPFJet> nonB("nonBEff");
+    nonB.setVerbosity(0);
+    nonB.AllCondition = 0;
+    nonB.Condition = TrueCondition;
+    nonB.setSelfEff();
+    nonB.AddProp(new JetEta());
+
+    EfficiencyHandler<TRootPFJet> B("BEff");
+    B.setVerbosity(0);
+    B.AllCondition = 0;
+    B.Condition = TrueCondition;
+    B.setSelfEff();
+    B.AddProp(new JetEta());
+    
+    EfficiencyHandler<TRootPFJet> FwD("FwDEff");
+    FwD.setVerbosity(0);
+    FwD.AllCondition = 0;
+    FwD.Condition = TrueCondition;
+    FwD.setSelfEff();
+    FwD.AddProp(new JetEta());
+    
     PVHists atLeastOnGPV("final_PV");
     JetHists Jets("final_Jet",2);
     JetHists BJets("final_BJet",2);
@@ -112,17 +94,33 @@ int main(int argc, char** argv) {
     JetHists Light("final_Light",2);
     MuonHists GoldenFinalMuons("final_Muon");
     MetHists MetHist("finalMet");
-    
-    SingleTopHistograms Default("Default");
-    SingleTopHistograms EtaFwDCut("EtaFwDCut");
-    SingleTopHistograms HtCut("HtCut");
-    
     TH1D * finalMT = new TH1D("finalMT","final-W-neutrino transverse mass",100, 0.,200.);
     finalMT->GetXaxis()->SetTitle("M_{T}(W,#nu)");
+    TH1D * Wmass = new TH1D("Wmass","final-W-mass",50, 0.,200.);
+    Wmass->GetXaxis()->SetTitle("M_{W}");
+    TH1D * WmassII = new TH1D("WmassMET","final-W-mass",50, 0.,200.);
+    WmassII->GetXaxis()->SetTitle("M_{W}");
+    TH1D * topMass = new TH1D("topMass","final-top-mass",50, 50.,500.);
+    topMass->GetXaxis()->SetTitle("M_{top}");
+    TH1D * topMassII = new TH1D("topMassMET","final-top-mass",50, 50.,500.);
+    topMassII->GetXaxis()->SetTitle("M_{top}");
     TH1D * delNu = new TH1D("delNu","delNu",100, 0.,100.);
     delNu->GetXaxis()->SetTitle("#Delta#nu");
     TH1D * delNuII = new TH1D("delNuMET","delNuMET",100, 0.,100.);
     delNuII->GetXaxis()->SetTitle("#Delta#nu");
+    TH1D * cosTheta = new TH1D("cosTheta","cos(#theta)",50, -1.,1.);
+    cosTheta->GetXaxis()->SetTitle("cos(#theta*)");
+    TH1D * cosThetaII = new TH1D("cosTheta_MET","cos(#theta)",50, -1.,1.);
+    cosThetaII->GetXaxis()->SetTitle("cos(#theta*)");
+    TH2D * cosTheta_EtaFwd = new TH2D("cosTheta_EtaFwd","cos(#theta*_{l}) vs. #eta_{Jet}^{Fwd}",500, 0.,5.,50, -1.,1. );
+    cosTheta_EtaFwd->GetXaxis()->SetTitle("#eta_{Jet}^{Fwd}");
+    cosTheta_EtaFwd->GetYaxis()->SetTitle("cos(#theta*_{l})");
+    TH2D * cosTheta_EtaLight = new TH2D("cosTheta_EtaLight","cos(#theta*_{l}) vs. #eta_{Jet}^{Light}",500, 0.,5.,50, -1.,1. );
+    cosTheta_EtaLight->GetXaxis()->SetTitle("#eta_{Jet}^{Light}");
+    cosTheta_EtaLight->GetYaxis()->SetTitle("cos(#theta*_{l})");
+    TH2D * cosTheta_Ht = new TH2D("cosTheta_Ht","cos(#theta*_{l}) vs. H_{T}(GeV)",500, 0.,500.,50, -1.,1. );
+    cosTheta_Ht->GetXaxis()->SetTitle("H_{T}(GeV)");
+    cosTheta_Ht->GetYaxis()->SetTitle("cos(#theta*_{l})");
     std::vector<std::string> inputFileNames;
     std::string plotFileName;
     int verbosity = 0;
@@ -292,19 +290,19 @@ int main(int argc, char** argv) {
             }else
                 continue;
 
-//            TopTree::TRootHLTInfo hltInfo = pracEvt->RunInfo()->getHLTinfo(pracEvt->Event()->runId());
-//            int trigID = hltInfo.hltPath(HLTname);
-//
-//            if(pracEvt->Event()->trigHLT(trigID)){
-////		nHLTrunB++;
-//		nHLTrunB+=lumiWeight3D;
-//                if(verbosity > 0){
-//                    cout<<hltInfo.hltNames(trigID)<<"\t"<<hltInfo.hltWasRun(trigID)<<
-//                    "\t"<<hltInfo.hltAccept(trigID)<<endl;
-//                    cout<<"\tHLT is passed"<<endl;
-//                }
-//            }else 
-//                continue;
+            TopTree::TRootHLTInfo hltInfo = pracEvt->RunInfo()->getHLTinfo(pracEvt->Event()->runId());
+            int trigID = hltInfo.hltPath(HLTname);
+
+            if(pracEvt->Event()->trigHLT(trigID)){
+//		nHLTrunB++;
+		nHLTrunB+=lumiWeight3D;
+                if(verbosity > 0){
+                    cout<<hltInfo.hltNames(trigID)<<"\t"<<hltInfo.hltWasRun(trigID)<<
+                    "\t"<<hltInfo.hltAccept(trigID)<<endl;
+                    cout<<"\tHLT is passed"<<endl;
+                }
+            }else 
+                continue;
             
             if(myEvent_tmp.Gpvs.size() > 0){
                 if(verbosity > 0)
@@ -363,29 +361,37 @@ int main(int argc, char** argv) {
             int mySecondJetIndex = 0;
             if(mySecondJetIndex == myEvent_tmp.firstBtagIndex)
                 mySecondJetIndex = 1;
-            std::vector<TRootPFJet> nonBs ; nonBs.push_back(myEvent_tmp.GPFJets.at(mySecondJetIndex));
-            std::vector<TRootPFJet> sortedJetsbyEta; sortedJetsbyEta.push_back(myEvent_tmp.SortedJetsByEta().at(0));
+            
+            double ht = myEvent_tmp.GPFJets.at(0).Pt()+ myEvent_tmp.GPFJets.at(1).Pt();
+            ht+=myEvent_tmp.Dmuons.at(0).Pt();
+            ht+=myEvent_tmp.mets.at(0).Pt();
             //Reweighting process
             SemiLepTopQuark myLeptonicTop(myEvent_tmp.BPFJets.at(0),myEvent_tmp.mets.at(0),myEvent_tmp.Dmuons.at(0),
                     myEvent_tmp.GPFJets.at(mySecondJetIndex),METResolutions);
             
-            Default.Fill(myLeptonicTop,lumiWeight3D);
-            if(fabs(sortedJetsbyEta.at(0).Eta()) > 1.5)
-                EtaFwDCut.Fill(myLeptonicTop,lumiWeight3D);
-            double ht = myEvent_tmp.GPFJets.at(0).Pt()+ myEvent_tmp.GPFJets.at(1).Pt();
-            ht+=myEvent_tmp.Dmuons.at(0).Pt();
-            ht+=myEvent_tmp.mets.at(0).Pt();
-            if(ht >= 180)
-                HtCut.Fill(myLeptonicTop,lumiWeight3D);
-//            atLeastOnGPV.Fill(myEvent_tmp.Gpvs,myEvent_tmp.Gpvs.size(),lumiWeight3D);
-//            GoldenFinalMuons.Fill(myEvent_tmp.Dmuons,myEvent_tmp.Dmuons.size(),lumiWeight3D);
-//            Jets.FillPFJets(myEvent_tmp.GPFJets,myEvent_tmp.GPFJets.size(),myEvent_tmp.BPFJets.size(),false,lumiWeight3D);
-//            BJets.FillPFJets(myEvent_tmp.BPFJets,myEvent_tmp.BPFJets.size(),myEvent_tmp.BPFJets.size(),false,lumiWeight3D);
+            
+            std::vector<TRootPFJet> nonBs ; nonBs.push_back(myEvent_tmp.GPFJets.at(mySecondJetIndex));
+            std::vector<TRootPFJet> sortedJetsbyEta; sortedJetsbyEta.push_back(myEvent_tmp.SortedJetsByEta().at(0));
+            atLeastOnGPV.Fill(myEvent_tmp.Gpvs,myEvent_tmp.Gpvs.size(),lumiWeight3D);
+            GoldenFinalMuons.Fill(myEvent_tmp.Dmuons,myEvent_tmp.Dmuons.size(),lumiWeight3D);
+            Jets.FillPFJets(myEvent_tmp.GPFJets,myEvent_tmp.GPFJets.size(),myEvent_tmp.BPFJets.size(),false,lumiWeight3D);
+            BJets.FillPFJets(myEvent_tmp.BPFJets,myEvent_tmp.BPFJets.size(),myEvent_tmp.BPFJets.size(),false,lumiWeight3D);
             nonBJets.FillPFJets(nonBs,nonBs.size(),myEvent_tmp.BPFJets.size(),false,lumiWeight3D);
             Light.FillPFJets(sortedJetsbyEta,sortedJetsbyEta.size(),myEvent_tmp.BPFJets.size(),false,lumiWeight3D);
-//            MetHist.Fill(&myEvent_tmp.mets.at(0),lumiWeight3D);
-//            finalMT->Fill(mt,lumiWeight3D);
-
+            MetHist.Fill(&myEvent_tmp.mets.at(0),lumiWeight3D);
+            finalMT->Fill(mt,lumiWeight3D);
+            nonB.Fill(&nonBs.at(0),lumiWeight3D);
+            B.Fill(&myEvent_tmp.BPFJets.at(0),lumiWeight3D);
+            FwD.Fill(&sortedJetsbyEta.at(0),lumiWeight3D);
+            cosTheta->Fill(myLeptonicTop.cosThetaStar(),lumiWeight3D);
+            cosThetaII->Fill(myLeptonicTop.cosThetaStar(2),lumiWeight3D);
+            cosTheta_EtaFwd->Fill(fabs(sortedJetsbyEta.at(0).Eta()),myLeptonicTop.cosThetaStar(),lumiWeight3D);
+            cosTheta_EtaLight->Fill(fabs(nonBs.at(0).Eta()),myLeptonicTop.cosThetaStar(),lumiWeight3D);
+            cosTheta_Ht->Fill(ht,myLeptonicTop.cosThetaStar(),lumiWeight3D);
+            Wmass->Fill(myLeptonicTop.W().M(),lumiWeight3D);
+            topMass->Fill(myLeptonicTop.top().M(),lumiWeight3D);
+            WmassII->Fill(myLeptonicTop.W(2).M(),lumiWeight3D);
+            topMassII->Fill(myLeptonicTop.top(2).M(),lumiWeight3D);
 //            delNu->Fill((fabs(myGenSingleTop.genSingleTop.getMET(0).Pt()-myLeptonicTop.getMET().Pt())/(double)
 //            myGenSingleTop.genSingleTop.getMET(0).Pt()),lumiWeight3D);
 //            delNuII->Fill((fabs(myGenSingleTop.genSingleTop.getMET(0).Pt()-myLeptonicTop.getMET(2).Pt())/(double)
@@ -402,19 +408,29 @@ int main(int argc, char** argv) {
     cout<<"before endjob"<<endl;
     TFile * fout = new TFile(plotFileName.c_str(),"recreate");
     fout->cd();
-//    atLeastOnGPV.WriteAll(fout);
-//    GoldenFinalMuons.WriteAll(fout);
-//    Jets.WriteAll(fout);
-//    BJets.WriteAll(fout);
+    atLeastOnGPV.WriteAll(fout);
+    GoldenFinalMuons.WriteAll(fout);
+    Jets.WriteAll(fout);
+    BJets.WriteAll(fout);
     Light.WriteAll(fout);
     nonBJets.WriteAll(fout);
-//    MetHist.WriteAll(fout);  
-//    finalMT->Write();
-//    delNu->Write();
-//    delNuII->Write();
-    Default.Write(fout);
-    EtaFwDCut.Write(fout);
-    HtCut.Write(fout);
+    MetHist.WriteAll(fout);  
+    finalMT->Write();
+    cosTheta->Write();
+    Wmass->Write();
+    topMass->Write();
+    cosThetaII->Write();
+    WmassII->Write();
+    topMassII->Write();
+    delNu->Write();
+    delNuII->Write();
+    cosTheta_EtaFwd->Write();
+    cosTheta_EtaLight->Write();
+    cosTheta_Ht->Write();
+    nonB.WriteAll(fout);
+    B.WriteAll(fout);
+    FwD.WriteAll(fout);
+    
     fout->Write();
     fout->Close();
     

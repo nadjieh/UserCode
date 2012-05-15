@@ -114,6 +114,11 @@ public:
 		    string tmpName(h->GetName());
 //		    if((tmpName.find("_Eta") != 0 && tmpName.find("_Eta")<= tmpName.size()) || (tmpName.find("_Pt") != 0 && tmpName.find("_Pt") <= tmpName.size()))
 //			h->Rebin(4);
+                    if(tmpName.find("topMass") != 0 &&  tmpName.find("topMass") <tmpName.size())
+                    	h->Rebin(2);
+                    if(tmpName.find("cosTheta") != 0 &&  tmpName.find("cosTheta") <tmpName.size())
+                    	h->Rebin(5);
+
                     stack.Add(h);
 //		    stack.ls();
                     //delete d;
@@ -133,6 +138,10 @@ public:
                 string datatmpName(hdata->GetName());
 //                if((datatmpName.find("_Eta") != 0 && datatmpName.find("_Eta")<= datatmpName.size()) || (datatmpName.find("_Pt") != 0 && datatmpName.find("_Pt") <= datatmpName.size()))
 //                    hdata->Rebin(4);
+                if(datatmpName.find("topMass") != 0 &&  datatmpName.find("topMass") <datatmpName.size())
+                    hdata->Rebin(2);
+                if(datatmpName.find("cosTheta") != 0 &&  datatmpName.find("cosTheta") <datatmpName.size())
+                    hdata->Rebin(5);
 
 		hdata->SetMarkerStyle(20);
                 TCanvas s;
@@ -174,8 +183,10 @@ public:
             for(unsigned int e = 0; e<files.size(); e++){
 		cout<<" --- "<<files.at(e)->GetName()<<endl;
      	        TH1D * cf = (TH1D*)files.at(e)->Get(directHists.at(g).c_str());
-                if(directHists.at(g) == "topMass")
+                if(directHists.at(g).find("topMass") != 0 &&  directHists.at(g).find("topMass") <directHists.at(g).size())
                     cf->Rebin(2);
+                if(directHists.at(g).find("cosTheta") != 0 &&  directHists.at(g).find("cosTheta") <directHists.at(g).size())
+                    cf->Rebin(5);
                 cf->SetFillColor(colors.at(e));
                 cf->SetLineColor(colors.at(e));
                 cf->SetTitle(MCnames.at(e).c_str());
@@ -214,8 +225,10 @@ public:
 	    s2.cd();
 	    cutFlow.Draw();
 	    TH1D * cf = (TH1D*)data->Get(directHists.at(g).c_str());
-            if(directHists.at(g) == "topMass")
+            if(directHists.at(g).find("topMass") != 0 &&  directHists.at(g).find("topMass") <directHists.at(g).size())
                     cf->Rebin(2);
+            if(directHists.at(g).find("cosTheta") != 0 &&  directHists.at(g).find("cosTheta") <directHists.at(g).size())
+                    cf->Rebin(5);
 //	    cf->Sumw2();
 	    if(directHists.at(g) == "CutFlow"){
             //        cout<<"After scaling: "<<endl;

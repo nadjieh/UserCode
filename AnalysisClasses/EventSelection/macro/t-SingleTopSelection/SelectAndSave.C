@@ -152,7 +152,7 @@ void beginJob(){
      fillTree = true;
      pu3D = false;//false;
      fillHists = true;
-     saveTypeIMET=true;//true;
+     saveTypeIMET=false;//true;
      MT = new TH1D("MT","W-neutrino transverse mass",100, 0.,200.);
      MT->GetXaxis()->SetTitle("M_{T}(W,#nu)");
      finalMT = new TH1D("finalMT","final-W-neutrino transverse mass",100, 0.,200.);
@@ -253,18 +253,19 @@ void endJob(){
 int main(int argc, char** argv){
 //    sleep(60);
     double doJES = 1.;
-    for (int f = 1; f < argc; f++) {
+    std::string HLTname="HLT_IsoMu17_v*";//"HLT_Mu17_eta2p1_CentralJet30_BTagIP_v1";//
+        for (int f = 1; f < argc; f++) {
         std::string arg_fth(*(argv + f));
 
         if (arg_fth == "out") {
           f++;
           std::string out(*(argv + f));
-          sin_outFileName_FullSelection = string(out+".root");
-	  sin_plotFileName = out;
+          sin_outFileName_FullSelection = string("FullSelection_TypeIMET_"+out+".root");
+	  sin_plotFileName = string(out+".root");
         }else if (arg_fth == "input") {
           f++;
           std::string in(*(argv + f));
-          sin_inputFileNames.push_back(string("~/"+in));
+          sin_inputFileNames.push_back(string("~/work/samples/"+in));
         }else if(arg_fth == "XSec"){
           f++;
           std::string Xsec(*(argv + f));
@@ -289,6 +290,11 @@ int main(int argc, char** argv){
 	    else
 		isData = false;
 
+        }else if (arg_fth == "HLTname") {
+            f++;
+            std::string in(*(argv + f));
+            HLTname = in;
+            std::cout<<HLTname<<endl;
         }
     }
 //    cout<<doJES<<endl;
@@ -362,8 +368,10 @@ int main(int argc, char** argv){
             myJets_.clear();
 //            cout<<"I am going to Jet Correction "<<isData<<endl;
             myJets_ = pracEvt->ScaledPFJetCollection(1,isData);
+//            Event myEvent_tmp( myJets_, *pracEvt->ElectronCollection()
+//            ,*pracEvt->METCollection(),*pracEvt->MuonCollection(),*pracEvt->VertexCollection());
             Event myEvent_tmp( myJets_, *pracEvt->ElectronCollection()
-            ,*pracEvt->METCollection(),*pracEvt->MuonCollection(),*pracEvt->VertexCollection());
+            ,pracEvt->TypeICorrMET(),*pracEvt->MuonCollection(),*pracEvt->VertexCollection());
             if(sin_verbosity > 0)
                 cout<<"PV size: "<<myEvent_tmp.pvs.size()<<"\n"
                     <<"Muon size: "<<myEvent_tmp.muons.size()<<"\n"
@@ -413,7 +421,8 @@ int main(int argc, char** argv){
             }
             if(sin_doHLT){
                 TopTree::TRootHLTInfo hltInfo = pracEvt->RunInfo()->getHLTinfo(pracEvt->Event()->runId());
-                int trigID = hltInfo.hltPath("HLT_IsoMu17_v*");
+                int trigID = hltInfo.hltPath(HLTname);
+//                int trigID = hltInfo.hltPath("");
 
                 if(pracEvt->Event()->trigHLT(trigID)){
                     sin_nHlt++;
@@ -478,15 +487,15 @@ int main(int argc, char** argv){
                 } else
                     continue;
             }
-            if(fillTree){
-                if(saveTypeIMET)
-                    if(sin_verbosity>0) cout << endl << "Analyzing ParticleFlow Missing Et..." << endl;
-                if(saveTypeIMET)
-                    new( (*corrMET)[0] ) TRootPFMET(pracEvt->TypeICorrMET());
-                eventTree_f->Fill();
-                if(saveTypeIMET) 
-                    (*corrMET).Delete();
-            }
+//            if(fillTree){
+//                if(saveTypeIMET)
+//                    if(sin_verbosity>0) cout << endl << "Analyzing ParticleFlow Missing Et..." << endl;
+//                if(saveTypeIMET)
+//                    new( (*corrMET)[0] ) TRootPFMET(pracEvt->TypeICorrMET());
+//                eventTree_f->Fill();
+//                if(saveTypeIMET) 
+//                    (*corrMET).Delete();
+//            }
             double mt = 0;
             if(sin_doMT){
                 double metT = sqrt((myEvent_tmp.mets.at(0).Px()*myEvent_tmp.mets.at(0).Px())+
@@ -515,7 +524,15 @@ int main(int argc, char** argv){
                 } else
                     continue;
             }
-
+            if(fillTree){
+                if(saveTypeIMET)
+                    if(sin_verbosity>0) cout << endl << "Analyzing ParticleFlow Missing Et..." << endl;
+                if(saveTypeIMET)
+                    new( (*corrMET)[0] ) TRootPFMET(pracEvt->TypeICorrMET());
+                eventTree_f->Fill();
+                if(saveTypeIMET) 
+                    (*corrMET).Delete();
+            }
             if(fillHists){
                 sin_GoldenFinalMuons.Fill(myEvent_tmp.Dmuons,myEvent_tmp.Dmuons.size(),lumiWeight3D);
                 finalMT->Fill(mt,lumiWeight3D);
