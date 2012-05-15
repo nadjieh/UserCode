@@ -12,6 +12,7 @@ ROOTGLIBS	=$(shell root-config --glibs) -lMinuit
 HOMELIB		= $(HOME)/lib
 TROOTINC	=-I../../../../TopBrussels/TopTreeProducer/interface
 PHYSOBJINC	=-I../../../PhysicsObjects/interface
+BASEINC		=-I../../../../Base/BaseAnalysis/interface
 
 MYHEADERS=-I../interface
 MYSOURCES= ../src
@@ -24,7 +25,7 @@ SOFLAGS 	= -shared
 CXXFLAGS	+= $(ROOTCFLAGS)
 TROOTLIB	=-L$(HOMELIB) -lToto
 PHYSOBJLIB	=-L$(HOMELIB) -lPhysObj
-
+BASELIB		=-L$(HOMELIB) -lBaseBaseAnalysis
 
 HEADERS 	=$(MYHEADERS)
 
@@ -38,11 +39,13 @@ CXXFLAGS	+= $(ROOTCFLAGS)
 #CXXFLAGS	+= $(MYHEADERS)
 CXXFLAGS	+= $(TROOTINC)
 CXXFLAGS	+= $(PHYSOBJINC)
+CXXFLAGS	+= $(BASEINC)
 
 LIBS		=$(ROOTGLIBS) 
 LIBS		+= $(ROOTLIBS) 
 LIBS		+=$(TROOTLIB)
 LIBS		+=$(PHYSOBJLIB)
+LIBS		+=$(BASELIB)
 #------------------------------------------------------------------------------
 SOURCES 	= $(wildcard $(MYSOURCES)/*.cc)
 HEADERS 	= $(wildcard ../interface/*.h)

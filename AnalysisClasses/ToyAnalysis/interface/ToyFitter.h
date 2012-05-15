@@ -40,9 +40,9 @@ public:
 //        bkg = nonWtbSum; 
 //        data = hData; 
 //        signal = WtbSum;
-        data->Sumw2();
-        bkg->Sumw2();
-        signal->Sumw2();
+        data->Sumw2(); //cout<<"---"<<endl;
+        bkg->Sumw2();//cout<<"----"<<endl;
+        signal->Sumw2();//cout<<"-----"<<endl;
         smCosTheta = new TF1(string("smCosTheta_"+Name).c_str(),CosTheta,-1.,1.,2);
         smCosTheta->SetParName(0, "f_{0}");
         smCosTheta->SetParName(1, "f_{neg}");
@@ -131,8 +131,8 @@ private:
 class ChiSquaredFunction{
 public:
     ChiSquaredFunction(string name , TH1* nonWtbSum , TH1* hData , TH1* WtbSum)
-    :Name(name){ 
-        bkg= new TH1(*nonWtbSum); data= new TH1(*hData); signal= new TH1(*WtbSum);
+    :Name(name), bkg(nonWtbSum), data(hData), signal(WtbSum){ 
+        
         data->Sumw2();
         bkg->Sumw2();
         signal->Sumw2();

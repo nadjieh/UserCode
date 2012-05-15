@@ -28,9 +28,10 @@ using namespace std;
 #include <vector>
 
 
-TH1* GetCosThetaPlot(string name, int nFinalBin = 10){
-    TFile * f = TFile::Open(string("bareFilesFromEvesel/TypeIMET_"+name+"_plots.root").c_str());
-    TH1* h = ((TH1*)f->Get("cosTheta"));
+TH1* GetCosThetaPlot(string name, string prefix, string suffix, string histName, int nFinalBin = 10){
+
+    TFile * f = TFile::Open(string(prefix+name+suffix).c_str());
+    TH1* h = ((TH1*)f->Get(histName.c_str()));
         
     if((h->GetXaxis()->GetNbins()) == nFinalBin)
         return h;
@@ -49,11 +50,11 @@ TH1* GetCosThetaPlot(string name, int nFinalBin = 10){
 //    cout<<"Nbins after rebinning: "<<h->GetXaxis()->GetNbins()<<endl;
     return h;
 }
-void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull , int LPEXPull, double Lumi = 3793){
+void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull , int LPEXPull,string prefix,string suffix, string histName ,double Lumi = 3793){
     stringstream outName;
     outName<<"Linearity_start-"<<StartPEX<<"-length-"<<LPEX<<"_Pull_start-"<<StartPEXPull<<
             "-length-"<<LPEXPull<<".root";
-    
+    cout<<outName.str().c_str()<<endl;
 //    double FposFixed = 0.0009;
     double FposFixed = 1-(6.64263e-01)-(3.03734e-01);
     std::pair<TF1,WeightFunctionCreator*> WtbWeightor = WeightFunctionCreator::getWeightFunction("WtbWeightor");
@@ -72,7 +73,7 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull , int LPEXPull, d
         }
         if(sampleItr->first == "w" || sampleItr->first == "dy"){
 //            cout<<sampleItr->first<<endl;
-            TH1* hist = GetCosThetaPlot(sampleItr->first,10);
+            TH1* hist = GetCosThetaPlot(sampleItr->first,prefix,suffix,histName, 10);
             hist->Sumw2();
             DistributionProducerFromSelected *myDist = new DistributionProducerFromSelected(hist,string(sampleItr->first),Lumi);
             bkg_samples[sampleItr->first] = myDist;
@@ -87,7 +88,8 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull , int LPEXPull, d
             }
         }else{
 //            cout<<sampleItr->first<<endl;
-            TH1* hist = GetCosThetaPlot(sampleItr->first,10);
+
+            TH1* hist = GetCosThetaPlot(sampleItr->first,prefix,suffix,histName, 10);
             hist->Sumw2();
             DistributionProducerFromSelected* myDist = new DistributionProducerFromSelected(hist,string(sampleItr->first),Lumi);
             signal_samples[sampleItr->first] = myDist;

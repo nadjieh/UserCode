@@ -83,6 +83,9 @@ int main(int argc, char** argv){
     int StartPEXPull=-1;
     int LPEXPull = 0;
     double Lumi = 0;
+    string prefix;
+    string suffix;
+    string histName;
     for (int f = 1; f < argc; f++) {
         std::string arg_fth(*(argv + f));
         if (arg_fth == "StartPEX") {
@@ -105,9 +108,21 @@ int main(int argc, char** argv){
             f++;
             std::string out(*(argv + f));
             Lumi = atof(out.c_str());            
+        }else if (arg_fth == "prefix") {
+            f++;
+            std::string out(*(argv + f));
+            prefix = out;            
+        }else if (arg_fth == "suffix") {
+            f++;
+            std::string out(*(argv + f));
+            suffix = out;            
+        }else if (arg_fth == "histName") {
+            f++;
+            std::string out(*(argv + f));
+            histName = out;            
         }
     }
 
-    RunFitValidation(StartPEX, LPEX, StartPEXPull, LPEXPull);
+    RunFitValidation(StartPEX, LPEX, StartPEXPull, LPEXPull,prefix,suffix,histName);
     return 0;
 }

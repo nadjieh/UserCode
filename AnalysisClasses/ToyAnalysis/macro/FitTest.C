@@ -82,17 +82,26 @@ int main(int argc, char** argv){
           f++;
           std::string out(*(argv + f));
           file = new TFile(out.c_str(),"read");
-          signal = ((TH1*)file->Get("cosTheta"));
+//          signal = ((TH1*)file->Get("cosTheta"));
+          signal = ((TH1*)file->Get("EtaFwDCut/EtaFwDCutcosTheta"));
+//          signal = ((TH1*)file->Get("HtCut/HtCutcosTheta"));
+//          signal = ((TH1*)file->Get("Default/DefaultcosTheta"));
         }else if(arg_fth == "data"){
           f++;
           std::string out(*(argv + f));
           file = new TFile(out.c_str(),"read");
-          data = ((TH1*)file->Get("cosTheta"));
+//          data = ((TH1*)file->Get("cosTheta"));
+          data = ((TH1*)file->Get("EtaFwDCut/EtaFwDCutcosTheta"));
+//          data = ((TH1*)file->Get("HtCut/HtCutcosTheta"));
+//          data = ((TH1*)file->Get("Default/DefaultcosTheta"));
         }else if (arg_fth == "bkg") {
             f++;
             std::string out(*(argv + f));
             file = new TFile(out.c_str(),"read");
-            bkg = ((TH1*)file->Get("cosTheta"));
+//            bkg = ((TH1*)file->Get("cosTheta"));
+            bkg = ((TH1*)file->Get("EtaFwDCut/EtaFwDCutcosTheta"));
+//            bkg = ((TH1*)file->Get("HtCut/HtCutcosTheta"));
+//            bkg = ((TH1*)file->Get("Default/DefaultcosTheta"));
         }
     }
     cout<<bkg <<"\t"<<signal<<"\t"<<data<<endl;
@@ -100,12 +109,13 @@ int main(int argc, char** argv){
 //    std::pair<TF3,ChiSquaredFunction*> myChi2 = ChiSquaredFunction::getChiSquaredFunction("Chi2" , bkg , data , signal);
     double x[3] = {-1.,-1.,-1};
     double xerr[3] = {-1.,-1.,-1};
-//    myChi2.first.GetMinimumXYZ(x_m , y_m , z_m);
+//    myChi2.first.GetMinimumXYZ(x[0] , x[1] , x[2]);
     myLL.first.GetMinimumXYZ(x[0] , x[1] , x[2]);
     
     cout<<"simple getMin: "<<x[0]<<"  "<<x[1]<<"  "<<x[2]<<endl;
     double correlation;
     GetMinimum(myLL.first,x,xerr,correlation);
+//    GetMinimum(myChi2.first,x,xerr,correlation);
     cout<<"my getMin-vals: "<<x[0]<<"  "<<x[1]<<"  "<<x[2]<<endl;
     cout<<"my getMin-err: "<<xerr[0]<<"  "<<xerr[1]<<"  "<<xerr[2]<<endl;
     cout<<"F0_FNeg correlation: "<<correlation/(double)(xerr[0]*xerr[1])<<endl;
