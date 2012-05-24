@@ -206,6 +206,14 @@ namespace TopSingleLepton {
     hists_["jet3Pt_"     ] = store_->book1D("Jet3Pt"     , "pt_{L2L3}(jet3)"  ,     60,     0.,    300.);   
     // pt of the 4. leading jet (corrected to L2+L3)
     hists_["jet4Pt_"     ] = store_->book1D("Jet4Pt"     , "pt_{L2L3}(jet4)"  ,     60,     0.,    300.);   
+    // eta of the 1. 
+    hists_["jet1Eta_"     ] = store_->book1D("Jet1Eta"     , "#eta(jet1)"  ,     30,    -3.,      3.);   
+    // eta of the 2. 
+    hists_["jet2Eta_"     ] = store_->book1D("Jet2Eta"     , "#eta(jet2)"  ,     30,    -3.,      3.);   
+    // eta of the 3. 
+    hists_["jet3Eta_"     ] = store_->book1D("Jet3Eta"     , "#eta(jet3)"  ,     30,    -3.,      3.);   
+    // eta of the 4.
+    hists_["jet4Eta_"     ] = store_->book1D("Jet4Eta"     , "#eta(jet4)"  ,     30,    -3.,      3.);   
     // MET (tc)
     hists_["metTC_"      ] = store_->book1D("METTC"      , "MET_{TC}"         ,     50,     0.,    200.);   
     // MET (pflow)
@@ -461,10 +469,10 @@ namespace TopSingleLepton {
 	fill("jetBDiscVtx_", (*btagVtx)[jetRef]); if( (*btagVtx)[jetRef]>btagVtxWP_ ) ++multBVtx; 
       }
       // fill pt (raw or L2L3) for the leading four jets  
-      if(idx==0) {fill("jet1Pt_" , monitorJet.pt()); fill("jet1PtRaw_", jet->pt() );}
-      if(idx==1) {fill("jet2Pt_" , monitorJet.pt()); fill("jet2PtRaw_", jet->pt() );}
-      if(idx==2) {fill("jet3Pt_" , monitorJet.pt()); fill("jet3PtRaw_", jet->pt() );}
-      if(idx==3) {fill("jet4Pt_" , monitorJet.pt()); fill("jet4PtRaw_", jet->pt() );}
+      if(idx==0) {fill("jet1Pt_" , monitorJet.pt()); fill("jet1PtRaw_", jet->pt() ); fill("jet1Eta_" , monitorJet.eta());}
+      if(idx==1) {fill("jet2Pt_" , monitorJet.pt()); fill("jet2PtRaw_", jet->pt() ); fill("jet2Eta_" , monitorJet.eta());}
+      if(idx==2) {fill("jet3Pt_" , monitorJet.pt()); fill("jet3PtRaw_", jet->pt() ); fill("jet3Eta_" , monitorJet.eta());}
+      if(idx==3) {fill("jet4Pt_" , monitorJet.pt()); fill("jet4PtRaw_", jet->pt() ); fill("jet4Eta_" , monitorJet.eta());}
     }
     fill("jetMult_"    , mult    );
     fill("jetMultBEff_", multBEff);
@@ -558,13 +566,13 @@ TopSingleLeptonDQM::TopSingleLeptonDQM(const edm::ParameterSet& cfg): triggerTab
 void 
 TopSingleLeptonDQM::analyze(const edm::Event& event, const edm::EventSetup& setup)
 { 
-  cout<<"NEW EVENT -----------"<<endl;
+//  cout<<"NEW EVENT -----------"<<endl;
   if(!triggerTable_.label().empty()){
     edm::Handle<edm::TriggerResults> triggerTable;
     if( !event.getByLabel(triggerTable_, triggerTable) ) return;
     if(!accept(event, *triggerTable, triggerPaths_)) return;
   }
-  cout<<"trig passed"<<endl;
+//  cout<<"trig passed"<<endl;
   if(!beamspot_.label().empty()){
     edm::Handle<reco::BeamSpot> beamspot;
     if( !event.getByLabel(beamspot_, beamspot) ) return;
@@ -585,11 +593,11 @@ TopSingleLeptonDQM::analyze(const edm::Event& event, const edm::EventSetup& setu
 	selection_[key].second->fill(event, setup);
       }
       if(type=="Hlt" ){
-	cout<<"HLT filled"<<endl;
+//	cout<<"HLT filled"<<endl;
         selection_[key].second->fill(event, setup);
       }
       if(type=="muons"){
-	cout<<"Good Mu found"<<endl;
+//	cout<<"Good Mu found"<<endl;
 	SelectionStep<reco::Muon> step(selection_[key].first);
 	if(step.select(event)){ ++passed;
 	  selection_[key].second->fill(event, setup);
@@ -614,7 +622,7 @@ TopSingleLeptonDQM::analyze(const edm::Event& event, const edm::EventSetup& setu
 	} else break;
       }
       if(type=="jets/calo" ){
-	cout<<"Jet found!"<<endl;
+//	cout<<"Jet found!"<<endl;
 	SelectionStep<reco::CaloJet> step(selection_[key].first);
 	if(step.select(event, setup)){ ++passed;
 	  selection_[key].second->fill(event, setup);
