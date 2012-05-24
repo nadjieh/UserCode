@@ -365,7 +365,7 @@ topSingleMuonMediumTriggerDQM = cms.EDAnalyzer("TopSingleLeptonDQM",
       ## when omitted no extra selection will be applied on jets before
       ## filling the monitor histograms; if jetCorrector is present the
       ## selection will be applied to corrected jets                                                
-      select = cms.string("pt>15 & abs(eta)<2.5& emEnergyFraction>0.01"),
+      select = cms.string("pt>30 & abs(eta)<2.5& emEnergyFraction>0.01"),
       ## when omitted monitor histograms for b-tagging will not be filled                                                                                                   
       jetBTaggers  = cms.PSet(
         trackCountingEff = cms.PSet(
@@ -444,7 +444,7 @@ topSingleMuonMediumTriggerDQM = cms.EDAnalyzer("TopSingleLeptonDQM",
       label  = cms.string("jets/calo:step3"),
       src    = cms.InputTag("ak5CaloJets"),
       jetCorrector = cms.string("ak5CaloL2L3"),
-      select = cms.string("pt>15 & abs(eta)<2.5 & emEnergyFraction>0.01"),
+      select = cms.string("pt>30 & abs(eta)<2.5 & emEnergyFraction>0.01"),
       jetID  = cms.PSet(
         label  = cms.InputTag("ak5JetID"),
         select = cms.string("fHPD < 0.98 & n90Hits>1 & restrictedEMF<1")
@@ -455,7 +455,7 @@ topSingleMuonMediumTriggerDQM = cms.EDAnalyzer("TopSingleLeptonDQM",
       label  = cms.string("jets/calo:step4"),
       src    = cms.InputTag("ak5CaloJets"),
       jetCorrector = cms.string("ak5CaloL2L3"),
-      select = cms.string("pt>15 & abs(eta)<2.5 & emEnergyFraction>0.01"),
+      select = cms.string("pt>30 & abs(eta)<2.5 & emEnergyFraction>0.01"),
       jetID  = cms.PSet(
         label  = cms.InputTag("ak5JetID"),
         select = cms.string("fHPD < 0.98 & n90Hits>1 & restrictedEMF<1")
@@ -466,7 +466,7 @@ topSingleMuonMediumTriggerDQM = cms.EDAnalyzer("TopSingleLeptonDQM",
       label  = cms.string("jets/calo:step5"),
       src    = cms.InputTag("ak5CaloJets"),
       jetCorrector = cms.string("ak5CaloL2L3"),
-      select = cms.string("pt>15 & abs(eta)<2.5 & emEnergyFraction>0.01"),
+      select = cms.string("pt>30 & abs(eta)<2.5 & emEnergyFraction>0.01"),
       jetID  = cms.PSet(
         label  = cms.InputTag("ak5JetID"),
         select = cms.string("fHPD < 0.98 & n90Hits>1 & restrictedEMF<1")
@@ -477,7 +477,7 @@ topSingleMuonMediumTriggerDQM = cms.EDAnalyzer("TopSingleLeptonDQM",
       label  = cms.string("jets/calo:step5"),
       src    = cms.InputTag("ak5CaloJets"),
       jetCorrector = cms.string("ak5CaloL2L3"),
-      select = cms.string("pt>15 & abs(eta)<2.5 & emEnergyFraction>0.01"),
+      select = cms.string("pt>30 & abs(eta)<2.5 & emEnergyFraction>0.01"),
       jetID  = cms.PSet(
         label  = cms.InputTag("ak5JetID"),
         select = cms.string("fHPD < 0.98 & n90Hits>1 & restrictedEMF<1")
