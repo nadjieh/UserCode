@@ -79,7 +79,11 @@ process.MessageLogger.categories.append('TopDiLeptonOfflineDQM')
 process.MessageLogger.cerr.TopDiLeptonOfflineDQM = cms.untracked.PSet(limit = cms.untracked.int32(1))
 
 process.MEtoEDMConverter.deleteAfterCopy = cms.untracked.bool(False)  ## line added to avoid crash when changing run number
-
+## To examin more paths at the same time, clone the module
+##process.NEWHLTtopSingleMuonMediumTriggerDQM = process.topSingleMuonMediumTriggerDQM.clone()
+##process.NEWHLTtopSingleMuonMediumTriggerDQM.preselection.trigger.select = cms.vstring(['NEWPATH'])#Only one
+##process.NEWHLTtopSingleMuonMediumTriggerDQM.setup.directory = cms.string("Physics/Top/NEWHLTTopSingleMuonLooseTriggerDQM/")
+## add it to the p path below
 
 ## path definitions
 process.p      = cms.Path(
@@ -87,7 +91,7 @@ process.p      = cms.Path(
     process.simpleEleId70cIso          *
 #    process.topDiLeptonOfflineDQM      +
 #    process.topSingleLeptonTriggerDQM         +
-#    process.topSingleMuonLooseTriggerDQM      +    
+#    process.topSingleMuonLooseTriggerDQM      +   
     process.topSingleMuonMediumTriggerDQM     #+
 #    process.topSingleElectronLooseTriggerDQM  +    
 #    process.topSingleElectronMediumTriggerDQM
