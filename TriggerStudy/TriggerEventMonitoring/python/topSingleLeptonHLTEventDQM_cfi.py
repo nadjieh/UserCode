@@ -526,7 +526,7 @@ topSingleElectronLooseTriggerDQM = cms.EDAnalyzer("TopSingleLeptonDQM",
       electronId = cms.PSet( src = cms.InputTag("simpleEleId70cIso"), pattern = cms.int32(1) ),
       ## when omitted electron plots will be filled w/o additional pre-
       ## selection of the electron candidates
-      select     = cms.string("pt>15 & abs(eta)<2.5"),
+      select     = cms.string("pt>30 & abs(eta)<2.5"),
       ## when omitted isolated electron multiplicity plot will be equi-
       ## valent to inclusive electron multiplicity plot                                                    
       isolation  = cms.string("(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/pt<0.1"),                                                   
