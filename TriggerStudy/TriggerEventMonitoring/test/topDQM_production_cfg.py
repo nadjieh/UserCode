@@ -89,12 +89,7 @@ process.MEtoEDMConverter.deleteAfterCopy = cms.untracked.bool(False)  ## line ad
 process.p      = cms.Path(
    #process.content *
     process.simpleEleId70cIso          *
-#    process.topDiLeptonOfflineDQM      +
-#    process.topSingleLeptonTriggerDQM         +
-#    process.topSingleMuonLooseTriggerDQM      +   
     process.topSingleMuonMediumTriggerDQM     #+
-#    process.topSingleElectronLooseTriggerDQM  +    
-#    process.topSingleElectronMediumTriggerDQM
 )
 process.endjob = cms.Path(
     process.endOfProcess
