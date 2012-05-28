@@ -17,8 +17,8 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 ## For more details have a look at: WGuideFrontierConditions
 ## --------------------------------------------------------------------
 ##process.GlobalTag.globaltag = 'START38_V12::All'
-#process.GlobalTag.globaltag = 'GR_R_42_V14::All' 
-process.GlobalTag.globaltag   = 'START52_V4A::All'
+process.GlobalTag.globaltag = 'GR_R_52_V7::All' 
+#process.GlobalTag.globaltag   = 'START52_V4A::All'
 
 ## input file(s) for testing
 process.source = cms.Source("PoolSource",
@@ -26,7 +26,8 @@ process.source = cms.Source("PoolSource",
      #'/store/relval/CMSSW_4_2_3/RelValTTbar/GEN-SIM-RECO/START42_V12-v2/0062/728877FF-717B-E011-9989-00261894395B.root'
      #'/store/data/Run2011A/SingleMu/AOD/PromptReco-v4/000/165/999/A2B8A207-838B-E011-B1F5-000423D94908.root'
 #    '/store/relval/CMSSW_4_2_3/RelValTTbar/GEN-SIM-RECO/MC_42_V12-v2/0062/60815BF5-387B-E011-805B-0018F3D0970C.root'
-	'/store/relval/CMSSW_5_2_0/RelValTTbar/GEN-SIM-RECO/START52_V4A-v1/0248/14F70731-1A69-E111-B218-0018F3D096EA.root'
+#	'/store/relval/CMSSW_5_2_0/RelValTTbar/GEN-SIM-RECO/START52_V4A-v1/0248/14F70731-1A69-E111-B218-0018F3D096EA.root'
+     "/store/data/Run2012B/SingleMu/AOD/PromptReco-v1/000/194/702/EE71F090-EFA5-E111-84E0-BCAEC518FF52.root"
      )
 )
 
@@ -85,11 +86,12 @@ process.MEtoEDMConverter.deleteAfterCopy = cms.untracked.bool(False)  ## line ad
 ##process.NEWHLTtopSingleMuonMediumTriggerDQM.setup.directory = cms.string("Physics/Top/NEWHLTTopSingleMuonLooseTriggerDQM/")
 ## add it to the p path below
 
+process.SingleTopTriggerDQM.preselection.trigger.select = cms.vstring(['HLT_IsoMu17_eta2p1_CentralPFNoPUJet30_BTagIPIter_v1'])
 ## path definitions
 process.p      = cms.Path(
    #process.content *
     process.simpleEleId70cIso          *
-    process.topSingleMuonMediumTriggerDQM     +
+    #process.topSingleMuonMediumTriggerDQM     +
     process.SingleTopTriggerDQM
 )
 process.endjob = cms.Path(

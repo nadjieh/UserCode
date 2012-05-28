@@ -3,12 +3,12 @@
 
 #include <string>
 #include <vector>
-#include <iostream>
+//#include <math>
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Common/interface/TriggerNames.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
-using namespace std;
+#include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
 /**
    \fn      accept TopDQMHelpers.h "DQM/Physics/interface/TopDQMHelpers.h"
    
@@ -24,7 +24,6 @@ accept(const edm::Event& event, const edm::TriggerResults& triggerTable, const s
   bool passed=false;
   const edm::TriggerNames& triggerNames = event.triggerNames(triggerTable);
   for(unsigned int i=0; i<triggerNames.triggerNames().size(); ++i){
-    //cout<<triggerNames.triggerNames()[i]<<endl;
     if(triggerNames.triggerNames()[i] == triggerPath) {
       if(triggerTable.accept(i)){
 	passed=true;
@@ -52,6 +51,7 @@ accept(const edm::Event& event, const edm::TriggerResults& triggerTable, const s
 #include "DataFormats/JetReco/interface/Jet.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 
+#include "DataFormats/METReco/interface/CaloMET.h"
 /**
    \class   Calculate TopDQMHelpers.h "DQM/Physics/interface/TopDQMHelpers.h"
    
@@ -72,15 +72,28 @@ class Calculate {
      
   /// calculate W boson mass estimate
   double massWBoson(const std::vector<reco::Jet>& jets);
-  /// calculate W boson mass estimate
+  /// calculate top quark mass estimate
   double massTopQuark(const std::vector<reco::Jet>& jets); 
+  /// calculate W boson transverse mass estimate
+/*  double tmassWBoson(const T& mu, const reco::CaloMET& met, const reco::Jet& b);
+  /// calculate top quark transverse mass estimate
+  double tmassTopQuark(const T& mu, const reco::CaloMET& met, const reco::Jet& b);
+  /// calculate mlb estimate
+  double masslb(const T& mu, const reco::CaloMET& met, const reco::Jet& b);*/
+
+  /// calculate W boson transverse mass estimate
+  double tmassWBoson(reco::RecoCandidate* mu, const reco::MET& met, const reco::Jet& b);
+  /// calculate top quark transverse mass estimate
+  double tmassTopQuark(reco::RecoCandidate* mu, const reco::MET& met, const reco::Jet& b);
+  /// calculate mlb estimate
+  double masslb(reco::RecoCandidate* mu, const reco::MET& met, const reco::Jet& b);
   
  private:
   /// do the calculation; this is called only once per event by the first 
   /// function call to return a mass estimate. The once calculated values 
   /// are cached afterwards
   void operator()(const std::vector<reco::Jet>& jets);
-
+  void operator()(const reco::Jet& bJet, reco::RecoCandidate* lepton, const reco::MET& met);
  private:
   /// indicate failed associations
   bool failed_;
@@ -92,6 +105,14 @@ class Calculate {
   double massWBoson_;
   /// cache of top quark mass estimate
   double massTopQuark_;
+  /// cache of W boson transverse mass estimate
+  double tmassWBoson_;
+  /// cache of top quark transverse mass estimate
+  double tmassTopQuark_;
+  /// cache of mlb estimate
+  double mlb_;
+
+
 };
 
 
@@ -105,6 +126,7 @@ class Calculate {
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "CommonTools/Utils/interface/StringCutObjectSelector.h"
 #include "JetMETCorrections/Objects/interface/JetCorrectionsRecord.h"
+#include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
 
 /**
    \class   SelectionStep TopDQMHelpers.h "DQM/Physics/interface/TopDQMHelpers.h"

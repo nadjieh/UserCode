@@ -179,6 +179,22 @@ namespace TopSingleLepton {
     hists_["massW_"      ] = store_->book1D("MassW"      , "M(W)"             ,     60,     0.,    300.);   
     // Top mass estimate
     hists_["massTop_"    ] = store_->book1D("MassTop"    , "M(Top)"           ,     50,     0.,    500.);   
+    // Mlb mu 
+    hists_["mMub_"       ] = store_->book1D("mMub"       , "m_{#mub}"         ,     50,     0.,    500.);
+    // W mass transverse estimate mu
+    hists_["MTWm_"       ] = store_->book1D("MTWm"       , "M_{T}^{W}(#mu)"   ,     60,     0.,    300.);
+    // Top mass transverse estimate mu
+    hists_["mMTT_"       ] = store_->book1D("mMTT"       , "M_{T}^{t}(#mu)"   ,     50,     0.,    500.);
+
+    // Mlb e 
+    hists_["mEb_"        ] = store_->book1D("mEb"        , "m_{eb}"           ,     50,     0.,    500.);
+    // W mass transverse estimate e
+    hists_["MTWe_"       ] = store_->book1D("MTWe"       , "M_{T}^{W}(e)"     ,     60,     0.,    300.);
+    // Top mass transverse estimate e
+    hists_["eMTT_"       ] = store_->book1D("eMTT"       , "M_{T}^{t}(e)"     ,     50,     0.,    500.);
+
+
+
 
     // set bin labels for trigger monitoring
     triggerBinLabels(std::string("trigger"), triggerPaths_);
@@ -318,6 +334,7 @@ namespace TopSingleLepton {
     // loop electron collection
     unsigned int eMult=0, eMultIso=0;
     std::vector<const reco::GsfElectron*> isoElecs;
+    reco::GsfElectron e;
     for(edm::View<reco::GsfElectron>::const_iterator elec=elecs->begin(); elec!=elecs->end(); ++elec){
       unsigned int idx = elec-elecs->begin();
       // restrict to electrons with good electronId
@@ -336,7 +353,7 @@ namespace TopSingleLepton {
 	  }
 	  // in addition to the multiplicity counter buffer the iso 
 	  // electron candidates for later overlap check with jets
-	  ++eMult; if(!elecIso_ || (*elecIso_)(*elec)){ isoElecs.push_back(&(*elec)); ++eMultIso;}
+	  ++eMult; if(!elecIso_ || (*elecIso_)(*elec)){ if(eMultIso == 0) e = *elec;  isoElecs.push_back(&(*elec)); ++eMultIso;}
 	}
       }
     }
@@ -356,7 +373,7 @@ namespace TopSingleLepton {
 
     edm::Handle<edm::View<reco::Muon> > muons;
     if( !event.getByLabel(muons_, muons) ) return;
-
+    reco::Muon mu;
     for(edm::View<reco::Muon>::const_iterator muon=muons->begin(); muon!=muons->end(); ++muon){
       // restrict to globalMuons
       if( muon->isGlobalMuon() ){ 
@@ -375,7 +392,7 @@ namespace TopSingleLepton {
 	    fill("muonTrkIso_" , isolationTrk );
 	    fill("muonCalIso_" , isolationCal );
 	  }
-	   ++mMult; if(!muonIso_ || (*muonIso_)(*muon)) ++mMultIso;
+	   ++mMult; if(!muonIso_ || (*muonIso_)(*muon)) {if(mMultIso == 0) mu = *muon; ++mMultIso;}
 	}
       }
     }
@@ -431,7 +448,7 @@ namespace TopSingleLepton {
     if(jetIDSelect_){ 
       if( !event.getByLabel(jetIDLabel_, jetID) ) return;
     }
-
+    reco::Jet bJetCand;	
     for(edm::View<reco::Jet>::const_iterator jet=jets->begin(); jet!=jets->end(); ++jet){
       // check jetID for calo jets
       unsigned int idx = jet-jets->begin();
@@ -465,7 +482,7 @@ namespace TopSingleLepton {
 	// fill b-discriminators
 	edm::RefToBase<reco::Jet> jetRef = jets->refAt(idx);	
 	fill("jetBDiscEff_", (*btagEff)[jetRef]); if( (*btagEff)[jetRef]>btagEffWP_ ) ++multBEff; 
-	fill("jetBDiscPur_", (*btagPur)[jetRef]); if( (*btagPur)[jetRef]>btagPurWP_ ) ++multBPur; 
+	fill("jetBDiscPur_", (*btagPur)[jetRef]); if( (*btagPur)[jetRef]>btagPurWP_ ) {if(multBPur == 0) bJetCand = *jet; ++multBPur;} 
 	fill("jetBDiscVtx_", (*btagVtx)[jetRef]); if( (*btagVtx)[jetRef]>btagVtxWP_ ) ++multBVtx; 
       }
       // fill pt (raw or L2L3) for the leading four jets  
@@ -488,6 +505,7 @@ namespace TopSingleLepton {
     */
 
     // fill monitoring histograms for met
+    reco::MET mET;
     for(std::vector<edm::InputTag>::const_iterator met_=mets_.begin(); met_!=mets_.end(); ++met_){
       edm::Handle<edm::View<reco::MET> > met;
       if( !event.getByLabel(*met_, met) ) continue;
@@ -496,6 +514,7 @@ namespace TopSingleLepton {
 	if(idx==0) fill("metCalo_" , met->begin()->et());
 	if(idx==1) fill("metTC_"   , met->begin()->et());
 	if(idx==2) fill("metPflow_", met->begin()->et());
+	mET = *(met->begin());
       }
     }
 
@@ -529,6 +548,18 @@ namespace TopSingleLepton {
 	fill("eventLogger_", 8.5, logged_+0.5, topMass); 
 	++logged_;
       }
+    }
+    if(multBPur != 0 && mMultIso == 1 ){
+	cout<<bJetCand.pt()<<"\t"<<mu.pt()<<"\t"<<mET.pt()<<endl;
+	double mtW = eventKinematics.tmassWBoson(&mu,mET,bJetCand); fill("MTWm_",mtW);
+	double Mlb = eventKinematics.masslb(&mu,mET,bJetCand); fill("mMub_", Mlb);
+	double MTT = eventKinematics.tmassTopQuark(&mu,mET,bJetCand); fill("mMTT_", MTT);
+    }
+
+    if(multBPur != 0 && eMultIso == 1 ){
+        double mtW = eventKinematics.tmassWBoson(&mu,mET,bJetCand); fill("MTWe_",mtW);
+        double Mlb = eventKinematics.masslb(&mu,mET,bJetCand); fill("mEb_", Mlb);
+        double MTT = eventKinematics.tmassTopQuark(&mu,mET,bJetCand); fill("eMTT_", MTT);
     }
   }
   
