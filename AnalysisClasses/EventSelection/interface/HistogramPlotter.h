@@ -117,7 +117,8 @@ public:
                     if(tmpName.find("topMass") != 0 &&  tmpName.find("topMass") <tmpName.size())
                     	h->Rebin(2);
                     if(tmpName.find("cosTheta") != 0 &&  tmpName.find("cosTheta") <tmpName.size())
-                    	h->Rebin(5);
+//                    	h->Rebin(5);
+                    	h->Rebin(2);
 
                     stack.Add(h);
 //		    stack.ls();
@@ -141,7 +142,8 @@ public:
                 if(datatmpName.find("topMass") != 0 &&  datatmpName.find("topMass") <datatmpName.size())
                     hdata->Rebin(2);
                 if(datatmpName.find("cosTheta") != 0 &&  datatmpName.find("cosTheta") <datatmpName.size())
-                    hdata->Rebin(5);
+//                    hdata->Rebin(5);
+                    hdata->Rebin(2);
 
 		hdata->SetMarkerStyle(20);
                 TCanvas s;
@@ -186,7 +188,8 @@ public:
                 if(directHists.at(g).find("topMass") != 0 &&  directHists.at(g).find("topMass") <directHists.at(g).size())
                     cf->Rebin(2);
                 if(directHists.at(g).find("cosTheta") != 0 &&  directHists.at(g).find("cosTheta") <directHists.at(g).size())
-                    cf->Rebin(5);
+//                    cf->Rebin(5);
+                    cf->Rebin(2);
                 cf->SetFillColor(colors.at(e));
                 cf->SetLineColor(colors.at(e));
                 cf->SetTitle(MCnames.at(e).c_str());
@@ -228,7 +231,8 @@ public:
             if(directHists.at(g).find("topMass") != 0 &&  directHists.at(g).find("topMass") <directHists.at(g).size())
                     cf->Rebin(2);
             if(directHists.at(g).find("cosTheta") != 0 &&  directHists.at(g).find("cosTheta") <directHists.at(g).size())
-                    cf->Rebin(5);
+//                    cf->Rebin(5);
+                    cf->Rebin(2);
 //	    cf->Sumw2();
 	    if(directHists.at(g) == "CutFlow"){
             //        cout<<"After scaling: "<<endl;

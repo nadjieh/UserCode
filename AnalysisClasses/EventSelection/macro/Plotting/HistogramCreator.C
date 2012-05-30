@@ -113,10 +113,12 @@ int main(int argc, char** argv) {
     MuonHists GoldenFinalMuons("final_Muon");
     MetHists MetHist("finalMet");
     
-    SingleTopHistograms Default("Default");
+//    SingleTopHistograms Default("Default");
     SingleTopHistograms EtaFwDCut("EtaFwDCut");
-    SingleTopHistograms HtCut("HtCut");
+    SingleTopHistograms HtCutL("HtLess");
+    SingleTopHistograms HtCutM("HtMore");
     
+    TH1D * HT = new TH1D("HT","H_{T};H_{T}(GeV)",500, 0.,500.);
     TH1D * finalMT = new TH1D("finalMT","final-W-neutrino transverse mass",100, 0.,200.);
     finalMT->GetXaxis()->SetTitle("M_{T}(W,#nu)");
     TH1D * delNu = new TH1D("delNu","delNu",100, 0.,100.);
@@ -366,17 +368,23 @@ int main(int argc, char** argv) {
             std::vector<TRootPFJet> nonBs ; nonBs.push_back(myEvent_tmp.GPFJets.at(mySecondJetIndex));
             std::vector<TRootPFJet> sortedJetsbyEta; sortedJetsbyEta.push_back(myEvent_tmp.SortedJetsByEta().at(0));
             //Reweighting process
+            if(fabs(sortedJetsbyEta.at(0).Eta()) <= 1.5)
+                continue;
             SemiLepTopQuark myLeptonicTop(myEvent_tmp.BPFJets.at(0),myEvent_tmp.mets.at(0),myEvent_tmp.Dmuons.at(0),
                     myEvent_tmp.GPFJets.at(mySecondJetIndex),METResolutions);
             
-            Default.Fill(myLeptonicTop,lumiWeight3D);
-            if(fabs(sortedJetsbyEta.at(0).Eta()) > 1.5)
-                EtaFwDCut.Fill(myLeptonicTop,lumiWeight3D);
+//            Default.Fill(myLeptonicTop,lumiWeight3D);
+//            if(fabs(sortedJetsbyEta.at(0).Eta()) > 1.5)
+            EtaFwDCut.Fill(myLeptonicTop,lumiWeight3D);
+            
             double ht = myEvent_tmp.GPFJets.at(0).Pt()+ myEvent_tmp.GPFJets.at(1).Pt();
             ht+=myEvent_tmp.Dmuons.at(0).Pt();
             ht+=myEvent_tmp.mets.at(0).Pt();
+            HT->Fill(ht,lumiWeight3D);
             if(ht >= 180)
-                HtCut.Fill(myLeptonicTop,lumiWeight3D);
+                HtCutM.Fill(myLeptonicTop,lumiWeight3D);
+            if(ht < 180)
+                HtCutL.Fill(myLeptonicTop,lumiWeight3D);
 //            atLeastOnGPV.Fill(myEvent_tmp.Gpvs,myEvent_tmp.Gpvs.size(),lumiWeight3D);
 //            GoldenFinalMuons.Fill(myEvent_tmp.Dmuons,myEvent_tmp.Dmuons.size(),lumiWeight3D);
 //            Jets.FillPFJets(myEvent_tmp.GPFJets,myEvent_tmp.GPFJets.size(),myEvent_tmp.BPFJets.size(),false,lumiWeight3D);
@@ -412,9 +420,11 @@ int main(int argc, char** argv) {
 //    finalMT->Write();
 //    delNu->Write();
 //    delNuII->Write();
-    Default.Write(fout);
+//    Default.Write(fout);
     EtaFwDCut.Write(fout);
-    HtCut.Write(fout);
+    HtCutL.Write(fout);
+    HtCutM.Write(fout);
+    HT->Write();
     fout->Write();
     fout->Close();
     
