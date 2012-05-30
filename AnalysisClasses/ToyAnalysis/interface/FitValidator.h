@@ -66,12 +66,37 @@ public:
         NSelected["w"]= 4196;
         NSelected["dy"]= 1873;
         NSelected["qcd"]= 24;
+
+//        NHt["t"]= 31180;
+//        NHt["tbar"]= 17232;
+//        NHt["tW"]= 6416;
+//        NHt["tWbar"]= 5468;
+//        NHt["tt"]=16225;
+//        NHt["s"]= 1186;
+//        NHt["sbar"]= 1242;
+//        NHt["w"]= 2995;
+//        NHt["dy"]= 1112;
+//        NHt["qcd"]= 7;
+//
+//        NFwdEta["t"]= 27003;
+//        NFwdEta["tbar"]= 14398;
+//        NFwdEta["tW"]= 2309;
+//        NFwdEta["tWbar"]= 2022;
+//        NFwdEta["tt"]=5796;
+//        NFwdEta["s"]= 2209;
+//        NFwdEta["sbar"]= 619;
+//        NFwdEta["w"]= 2043;
+//        NFwdEta["dy"]= 924;
+//        NFwdEta["qcd"]= 12;
     }
     ~SamplesInfo(){};
     
     std::map<string, double> Xsections;//pb
     std::map<string, double> N0;
     std::map<string, double> NSelected;
+
+//    std::map<string, double> NHt;
+//    std::map<string, double> NFwdEta;
 
     
 };
@@ -111,7 +136,8 @@ public:
         SamplesInfo mySampleInfo;
         Xsec = mySampleInfo.Xsections[MCName];
         N0 = mySampleInfo.N0[MCName];
-        selEff = (double)mySampleInfo.NSelected[MCName]/(double)N0;
+//        selEff = (double)mySampleInfo.NSelected[MCName]/(double)N0;
+        selEff = (double)(hInput->GetEntries())/(double)N0;
     }
     ~DistributionProducerFromSelected(){}
         
