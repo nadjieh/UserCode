@@ -56,7 +56,7 @@ public:
 //        delete data;
 //        delete smCosTheta;
     }
-    Double_t operator()(double * x, double * par = 0){
+    virtual Double_t operator()(double * x, double * par = 0){
 //        x[0] = f_0
 //        x[1] = f_Neg
 //        x[2] = rec_gen factor
@@ -79,7 +79,7 @@ public:
 //        cout<<ret.Eval(0.249,0.75,1)<<endl;
         return make_pair(ret, functor);
     }
-private:
+protected:
     string Name;
     TH1* bkg;
     TH1* data;

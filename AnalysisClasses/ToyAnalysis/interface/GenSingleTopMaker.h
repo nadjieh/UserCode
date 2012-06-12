@@ -65,7 +65,7 @@ public:
             genSingleTop.setMET(neutrinos.at(0));
             genSingleTop.setMuon(muons.at(0));
             if(quarks.size() != 0)
-                genSingleTop.setlightJet(quarks.at(0));
+                genSingleTop.setunTagged(quarks.at(0));
             genSingleTop.setbJet(bQuarks.at(0));
             genSingleTop.setVerbosity(v);
             
