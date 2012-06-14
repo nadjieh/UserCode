@@ -1,0 +1,1 @@
+./ToyAnalysis input work/samples/T_t-channel/T_t_100.root out T_t XSec 1 Lumi 1 preSelEff 1 JES 1 isData no METResolFileName /home/nadjieh/work/AnalysisClasses/ToyAnalysis/macro/METResolution/METresolutions.root

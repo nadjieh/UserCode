@@ -1,0 +1,47 @@
+MC (AN-2011-229-v12):
+				cross section 	#Initial	#Preselected		preselection efficiency
+single top t-channel 		41.9		3857900		323410			0.0838
+single top s-channel 		3.19		259777		23072			0.0888
+single top tW-channel (DR)	7.9		813134		146807			0.1805
+single anti-top t-channel 	22.6		1943627		180847			0.093
+single anti-top s-channel 	1.44		137889		12221			0.0886 
+single anti-top tW-channel (DR)	7.9		689462 		124363			0.1804 
+tt				157.5		3698723		606884			0.1641
+W (→ lν) + jets		31314		80388662	16324787		0.2031
+Z/γ∗ (→ l + l − )+jets		3048		35526705	10128425		0.2851
+QCD (μ-enriched)		84679		25026537	671189			0.0268
+
+
+
+
+
+Data, RunA:			
+				#Initial	#Preselected		preselection efficiency
+				
+PRV4 				33553574	8268172			0.2464
+PRV6				15641709	5597450			0.3579
+May				17714457	2252108			0.1271
+Aug				9961922		3571853			0.3586
+
+All runA			76871662	19689583		0.2561
+
+Data,RunB:
+				45800914	15327414		0.3346
+
+Total:
+				122672576	35016997		0.2854
+
+preselection condition: >= 1 mu with pt > 15 and |eta| < 3
+
+
+
+
+
+
+
+
+
+
+
+
+
