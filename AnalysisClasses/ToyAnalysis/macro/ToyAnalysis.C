@@ -494,10 +494,12 @@ int main(int argc, char** argv){
             int mySecondJetIndex = 0;
             if(mySecondJetIndex == myEvent_tmp.firstBtagIndex)
                 mySecondJetIndex = 1;
-            
+            TRootPFJet forward = myEvent_tmp.GPFJets.at(0);
+	    if(fabs(forward.Eta()) < fabs(myEvent_tmp.GPFJets.at(1).Eta()))
+		forward = myEvent_tmp.GPFJets.at(1);
             //Reweighting process
             SemiLepTopQuark myLeptonicTop(myEvent_tmp.BPFJets.at(0),myEvent_tmp.mets.at(0),myEvent_tmp.Dmuons.at(0),
-                    myEvent_tmp.GPFJets.at(mySecondJetIndex),METResolutions);
+                    myEvent_tmp.GPFJets.at(mySecondJetIndex),forward,METResolutions);
             if(isData){
                 cosTheta->Fill(myLeptonicTop.cosThetaStar(),lumiWeight3D);
 //                cout<<lumiWeight3D<<endl;
