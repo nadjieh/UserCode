@@ -26,20 +26,31 @@ using namespace ROOT;
 class SemiLepTopQuark{
 public:
     
-    SemiLepTopQuark(TRootPFJet b, TRootPFMET mis, TRootMuon Mu, TRootPFJet b2,TH1D * res ,int v = 0):
-    bJet(b),lightJet(b2),met(mis),mu(Mu),resolutions(res),verbosity(v){        
-        met_W = this->neutrino_W();
-        met_MET = this->neutrino_MET();
+    SemiLepTopQuark(TRootPFJet b, TRootPFMET mis, TRootMuon Mu, TRootPFJet b2,TRootPFJet FwD, TH1D * res ,int v = 0, bool nuCalc_ = true):
+    bJet(b),unTagged(b2),FwDJet(FwD),met(mis),mu(Mu),resolutions(res),verbosity(v),nuCalc(nuCalc_){   
+        if(nuCalc){
+            met_W = this->neutrino_W();
+            met_MET = this->neutrino_MET();
+        }else{
+            met_W.SetPxPyPzE(-1,-1,-1,-1);
+            met_MET.SetPxPyPzE(-1,-1,-1,-1);
+        }
 //        met.SetPxPyPzE(nu.Px(),nu.Py(),nu.Pz(),sqrt(nu.Px()*nu.Px()+nu.Py()*nu.Py()+nu.Pz()*nu.Pz()));    
     };
-    SemiLepTopQuark(TLorentzVector b, TLorentzVector mis, TLorentzVector Mu, TLorentzVector b2, TH1D * res ,int v = 0):
-    bJet(b),lightJet(b2),met(mis),mu(Mu),resolutions(res),verbosity(v){
-        met_W = this->neutrino_W();
-        met_MET = this->neutrino_MET();
+    SemiLepTopQuark(TLorentzVector b, TLorentzVector mis, TLorentzVector Mu, TLorentzVector b2, TRootPFJet FwD, TH1D * res ,int v = 0, bool nuCalc_ = true):
+    bJet(b),unTagged(b2),FwDJet(FwD) ,met(mis),mu(Mu),resolutions(res),verbosity(v),nuCalc(nuCalc_){
+        if(nuCalc){
+            met_W = this->neutrino_W();
+            met_MET = this->neutrino_MET();
+        }else{
+            met_W.SetPxPyPzE(-1,-1,-1,-1);
+            met_MET.SetPxPyPzE(-1,-1,-1,-1);
+        }
+        
 //        met.SetPxPyPzE(nu.Px(),nu.Py(),nu.Pz(),sqrt(nu.Px()*nu.Px()+nu.Py()*nu.Py()+nu*nu));    
     };
     SemiLepTopQuark():
-    bJet(-1,-1,-1,-1),lightJet(-1,-1,-1,-1),met(-1,-1,-1,-1),mu(-1,-1,-1,-1),resolutions(0),verbosity(0){};
+    bJet(-1,-1,-1,-1),unTagged(-1,-1,-1,-1),FwDJet(-1,-1,-1,-1),met(-1,-1,-1,-1),mu(-1,-1,-1,-1),resolutions(0),verbosity(0){};
     ~SemiLepTopQuark(){//delete resolutions;
     };
     TLorentzVector neutrino_MET(){
@@ -140,15 +151,15 @@ public:
         return nut;
     }
 
-    TLorentzVector W(int skim = 1){
+    TLorentzVector W(int skim = 1)const{
         if(skim == 2)
             return (met_MET + mu);
         return (met_W + mu);
     }
-    TLorentzVector top(int skim = 1){
+    TLorentzVector top(int skim = 1)const{
         return (this->W(skim)+bJet);
     }
-    double cosThetaStar(int skim = 1){
+    double cosThetaStar(int skim = 1)const{
         TLorentzVector w = this->W(skim);
         if(verbosity>0){
             cout<<"W boson:"<<w.Px()<<", "<<w.Py()<<", "<<w.Pz()<<endl;
@@ -181,18 +192,21 @@ public:
         return met;
     }
     TLorentzVector getbJet()const{return bJet;}
-    TLorentzVector getlightJet()const{return lightJet;}
+    TLorentzVector getunTagged()const{return unTagged;}
+    TLorentzVector getFwDJet() const{return FwDJet;}
     TLorentzVector getMuon()const{return mu;}
     
     void setMET(TLorentzVector MET){ met = MET;}
     void setbJet(TLorentzVector jet){ bJet = jet;}
-    void setlightJet(TLorentzVector jet){ lightJet = jet;}
+    void setunTagged(TLorentzVector jet){ unTagged = jet;}
+    void setFwDJet(TLorentzVector jet){ FwDJet = jet;}
     void setMuon(TLorentzVector muon){ mu = muon;}
     void setVerbosity(int v){ verbosity = v;}
     void printContent(){
-        cout<<"lepton: "<<mu.Px()<<", "<<mu.Py()<<", "<<mu.Pz()<<", "<<mu.Pt()<<endl;
-        cout<<"b: "<<bJet.Px()<<", "<<bJet.Py()<<", "<<bJet.Pz()<<", "<<bJet.Pt()<<endl;
-        cout<<"light b: "<<lightJet.Px()<<", "<<lightJet.Py()<<", "<<lightJet.Pz()<<", "<<lightJet.Pt()<<endl;
+        cout<<"lepton  : "<<mu.Px()<<", "<<mu.Py()<<", "<<mu.Pz()<<", "<<mu.Pt()<<endl;
+        cout<<"b       : "<<bJet.Px()<<", "<<bJet.Py()<<", "<<bJet.Pz()<<", "<<bJet.Pt()<<endl;
+        cout<<"light b : "<<unTagged.Px()<<", "<<unTagged.Py()<<", "<<unTagged.Pz()<<", "<<unTagged.Pt()<<endl;
+        cout<<"FwDJet  : "<<FwDJet.Px()<<", "<<FwDJet.Py()<<", "<<FwDJet.Pz()<<", "<<FwDJet.Pt()<<endl;
         cout<<"neutrino: "<<met.Px()<<", "<<met.Py()<<", "<<met.Pz()<<", "<<met.Pt()<<endl;
     }
 private:
@@ -279,11 +293,13 @@ private:
     }
 
     TLorentzVector bJet;
-    TLorentzVector lightJet;
+    TLorentzVector unTagged;
+    TLorentzVector FwDJet;
     TLorentzVector met;
     TLorentzVector mu;
     TH1D * resolutions;
     int verbosity;
+    bool nuCalc;
     TLorentzVector met_MET;
     TLorentzVector met_W;
 };
