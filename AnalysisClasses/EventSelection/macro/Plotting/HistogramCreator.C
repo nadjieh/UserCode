@@ -114,9 +114,10 @@ int main(int argc, char** argv) {
     MetHists MetHist("finalMet");
     
 //    SingleTopHistograms Default("Default");
-    SingleTopHistograms EtaFwDCut("EtaFwDCut");
-    SingleTopHistograms HtCutL("HtLess");
-    SingleTopHistograms HtCutM("HtMore");
+    SingleTopHistograms Aregion("EtaFwD_AntiHt");
+    SingleTopHistograms Bregion("AntiEtaFwD_Ht");
+    SingleTopHistograms Cregion("AntiEtaFwD_AntiHt");
+    SingleTopHistograms Dregion("EtaFwD_Ht");
     
     TH1D * HT = new TH1D("HT","H_{T};H_{T}(GeV)",500, 0.,500.);
     TH1D * finalMT = new TH1D("finalMT","final-W-neutrino transverse mass",100, 0.,200.);
@@ -368,29 +369,32 @@ int main(int argc, char** argv) {
             std::vector<TRootPFJet> nonBs ; nonBs.push_back(myEvent_tmp.GPFJets.at(mySecondJetIndex));
             std::vector<TRootPFJet> sortedJetsbyEta; sortedJetsbyEta.push_back(myEvent_tmp.SortedJetsByEta().at(0));
             //Reweighting process
-            if(fabs(sortedJetsbyEta.at(0).Eta()) <= 1.5)
-                continue;
             SemiLepTopQuark myLeptonicTop(myEvent_tmp.BPFJets.at(0),myEvent_tmp.mets.at(0),myEvent_tmp.Dmuons.at(0),
-                    myEvent_tmp.GPFJets.at(mySecondJetIndex),METResolutions);
+                    myEvent_tmp.GPFJets.at(mySecondJetIndex), sortedJetsbyEta.at(0),METResolutions);
             
 //            Default.Fill(myLeptonicTop,lumiWeight3D);
-//            if(fabs(sortedJetsbyEta.at(0).Eta()) > 1.5)
-            EtaFwDCut.Fill(myLeptonicTop,lumiWeight3D);
-            
+            double eta = fabs(sortedJetsbyEta.at(0).Eta());
             double ht = myEvent_tmp.GPFJets.at(0).Pt()+ myEvent_tmp.GPFJets.at(1).Pt();
+            
+            
             ht+=myEvent_tmp.Dmuons.at(0).Pt();
             ht+=myEvent_tmp.mets.at(0).Pt();
             HT->Fill(ht,lumiWeight3D);
-            if(ht >= 180)
-                HtCutM.Fill(myLeptonicTop,lumiWeight3D);
-            if(ht < 180)
-                HtCutL.Fill(myLeptonicTop,lumiWeight3D);
+            if(eta > 1.5 && ht < 180)
+                Aregion.Fill(myLeptonicTop,lumiWeight3D);
+            else if(eta > 1.5 && ht >= 180)
+                Bregion.Fill(myLeptonicTop,lumiWeight3D);
+            else if(eta <= 1.5 && ht < 180)
+                Cregion.Fill(myLeptonicTop,lumiWeight3D);
+            else if(eta <= 1.5 && ht >= 180)
+                Dregion.Fill(myLeptonicTop,lumiWeight3D);
+
 //            atLeastOnGPV.Fill(myEvent_tmp.Gpvs,myEvent_tmp.Gpvs.size(),lumiWeight3D);
 //            GoldenFinalMuons.Fill(myEvent_tmp.Dmuons,myEvent_tmp.Dmuons.size(),lumiWeight3D);
 //            Jets.FillPFJets(myEvent_tmp.GPFJets,myEvent_tmp.GPFJets.size(),myEvent_tmp.BPFJets.size(),false,lumiWeight3D);
 //            BJets.FillPFJets(myEvent_tmp.BPFJets,myEvent_tmp.BPFJets.size(),myEvent_tmp.BPFJets.size(),false,lumiWeight3D);
-            nonBJets.FillPFJets(nonBs,nonBs.size(),myEvent_tmp.BPFJets.size(),false,lumiWeight3D);
-            Light.FillPFJets(sortedJetsbyEta,sortedJetsbyEta.size(),myEvent_tmp.BPFJets.size(),false,lumiWeight3D);
+//            nonBJets.FillPFJets(nonBs,nonBs.size(),myEvent_tmp.BPFJets.size(),false,lumiWeight3D);
+//            Light.FillPFJets(sortedJetsbyEta,sortedJetsbyEta.size(),myEvent_tmp.BPFJets.size(),false,lumiWeight3D);
 //            MetHist.Fill(&myEvent_tmp.mets.at(0),lumiWeight3D);
 //            finalMT->Fill(mt,lumiWeight3D);
 
@@ -414,16 +418,17 @@ int main(int argc, char** argv) {
 //    GoldenFinalMuons.WriteAll(fout);
 //    Jets.WriteAll(fout);
 //    BJets.WriteAll(fout);
-    Light.WriteAll(fout);
-    nonBJets.WriteAll(fout);
+//    Light.WriteAll(fout);
+//    nonBJets.WriteAll(fout);
 //    MetHist.WriteAll(fout);  
 //    finalMT->Write();
 //    delNu->Write();
 //    delNuII->Write();
 //    Default.Write(fout);
-    EtaFwDCut.Write(fout);
-    HtCutL.Write(fout);
-    HtCutM.Write(fout);
+    Aregion.Write(fout);
+    Bregion.Write(fout);
+    Cregion.Write(fout);
+    Dregion.Write(fout);
     HT->Write();
     fout->Write();
     fout->Close();
