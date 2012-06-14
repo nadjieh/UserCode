@@ -20,6 +20,7 @@
 #include "../interface/TRootVertex.h"
 #include "../interface/TRootHLTInfo.h"
 #include "../interface/TRootTagProbeObject.h"
+#include "../interface/TRootTrackMET.h"
 #else
 #include "../interface/TRootRun.h"
 #include "../interface/TRootEvent.h"
@@ -42,6 +43,7 @@
 #include "../interface/TRootVertex.h"
 #include "../interface/TRootHLTInfo.h"
 #include "../interface/TRootTagProbeObject.h"
+#include "../interface/TRootTrackMET.h"
 #endif
 
 #ifdef __CINT__
@@ -71,5 +73,6 @@
 #pragma link C++ class TopTree::TRootHLTInfo;
 #pragma link C++ class TopTree::TRootTagProbeObject;
 #pragma link C++ struct TopTree::triggeredObject;
+#pragma link C++ struct TopTree::TRootTrackMET;
 
 #endif
