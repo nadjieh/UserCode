@@ -121,6 +121,9 @@ int main(int argc, char** argv) {
     TH2D * cosTheta_Ht = new TH2D("cosTheta_Ht","cos(#theta*_{l}) vs. H_{T}(GeV)",500, 0.,500.,50, -1.,1. );
     cosTheta_Ht->GetXaxis()->SetTitle("H_{T}(GeV)");
     cosTheta_Ht->GetYaxis()->SetTitle("cos(#theta*_{l})");
+    TH2D * EtaFwd_Ht = new TH2D("EtaFwd_Ht","|#eta_{FwdJet}| vs. H_{T}(GeV);H_{T}(GeV);|#eta_{FwdJet}|",500, 0.,500.,500, 0.,5. );
+//    EtaFwd_Ht->GetXaxis()->SetTitle("H_{T}(GeV)");
+//    EtaFwd_Ht->GetYaxis()->SetTitle("cos(#theta*_{l})");
     std::vector<std::string> inputFileNames;
     std::string plotFileName;
     int verbosity = 0;
@@ -366,8 +369,8 @@ int main(int argc, char** argv) {
             ht+=myEvent_tmp.Dmuons.at(0).Pt();
             ht+=myEvent_tmp.mets.at(0).Pt();
             //Reweighting process
-            SemiLepTopQuark myLeptonicTop(myEvent_tmp.BPFJets.at(0),myEvent_tmp.mets.at(0),myEvent_tmp.Dmuons.at(0),
-                    myEvent_tmp.GPFJets.at(mySecondJetIndex),METResolutions);
+//            SemiLepTopQuark myLeptonicTop(myEvent_tmp.BPFJets.at(0),myEvent_tmp.mets.at(0),myEvent_tmp.Dmuons.at(0),
+//                    myEvent_tmp.GPFJets.at(mySecondJetIndex),METResolutions);
             
             
             std::vector<TRootPFJet> nonBs ; nonBs.push_back(myEvent_tmp.GPFJets.at(mySecondJetIndex));
@@ -383,15 +386,16 @@ int main(int argc, char** argv) {
             nonB.Fill(&nonBs.at(0),lumiWeight3D);
             B.Fill(&myEvent_tmp.BPFJets.at(0),lumiWeight3D);
             FwD.Fill(&sortedJetsbyEta.at(0),lumiWeight3D);
-            cosTheta->Fill(myLeptonicTop.cosThetaStar(),lumiWeight3D);
-            cosThetaII->Fill(myLeptonicTop.cosThetaStar(2),lumiWeight3D);
-            cosTheta_EtaFwd->Fill(fabs(sortedJetsbyEta.at(0).Eta()),myLeptonicTop.cosThetaStar(),lumiWeight3D);
-            cosTheta_EtaLight->Fill(fabs(nonBs.at(0).Eta()),myLeptonicTop.cosThetaStar(),lumiWeight3D);
-            cosTheta_Ht->Fill(ht,myLeptonicTop.cosThetaStar(),lumiWeight3D);
-            Wmass->Fill(myLeptonicTop.W().M(),lumiWeight3D);
-            topMass->Fill(myLeptonicTop.top().M(),lumiWeight3D);
-            WmassII->Fill(myLeptonicTop.W(2).M(),lumiWeight3D);
-            topMassII->Fill(myLeptonicTop.top(2).M(),lumiWeight3D);
+//            cosTheta->Fill(myLeptonicTop.cosThetaStar(),lumiWeight3D);
+//            cosThetaII->Fill(myLeptonicTop.cosThetaStar(2),lumiWeight3D);
+//            cosTheta_EtaFwd->Fill(fabs(sortedJetsbyEta.at(0).Eta()),myLeptonicTop.cosThetaStar(),lumiWeight3D);
+//            cosTheta_EtaLight->Fill(fabs(nonBs.at(0).Eta()),myLeptonicTop.cosThetaStar(),lumiWeight3D);
+//            cosTheta_Ht->Fill(ht,myLeptonicTop.cosThetaStar(),lumiWeight3D);
+            EtaFwd_Ht->Fill(ht,fabs(sortedJetsbyEta.at(0).Eta()),lumiWeight3D);
+//            Wmass->Fill(myLeptonicTop.W().M(),lumiWeight3D);
+//            topMass->Fill(myLeptonicTop.top().M(),lumiWeight3D);
+//            WmassII->Fill(myLeptonicTop.W(2).M(),lumiWeight3D);
+//            topMassII->Fill(myLeptonicTop.top(2).M(),lumiWeight3D);
 //            delNu->Fill((fabs(myGenSingleTop.genSingleTop.getMET(0).Pt()-myLeptonicTop.getMET().Pt())/(double)
 //            myGenSingleTop.genSingleTop.getMET(0).Pt()),lumiWeight3D);
 //            delNuII->Fill((fabs(myGenSingleTop.genSingleTop.getMET(0).Pt()-myLeptonicTop.getMET(2).Pt())/(double)
@@ -427,6 +431,7 @@ int main(int argc, char** argv) {
     cosTheta_EtaFwd->Write();
     cosTheta_EtaLight->Write();
     cosTheta_Ht->Write();
+    EtaFwd_Ht->Write();
     nonB.WriteAll(fout);
     B.WriteAll(fout);
     FwD.WriteAll(fout);
