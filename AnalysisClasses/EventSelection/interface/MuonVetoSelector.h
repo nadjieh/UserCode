@@ -17,51 +17,59 @@ using namespace std;
 class MuonVetoSelector{
 public:
     MuonVetoSelector(std::string name, double pt = 20., double eta = 2.1,double chi2 = 10,
-		     double D0 = 0.02, int nvh = 10, double isoCut_ = 0.15, int nPixWithMeasuredHits = 1, int nSegM = 1):Name(name)
+		     double D0 = 0.2, int nTrkLM = 5, int nvMuhit = 0, int nValidPixelHits = 1,
+                     int nSegM = 1, double pvZ = 10000, double isocut= 0.12):Name(name)
             ,ptCut(pt)
             ,EtaCut(eta)
             ,chi2Cut(chi2)
             ,d0Cut(D0)
-            ,nvhCut(nvh)
-            ,isoCut(isoCut_)
-            ,nPixelWithMeasuredHits(nPixWithMeasuredHits)
-	    ,nSegMatched(nSegM){verbosity = 0;};
+            ,nTrkLwMCut(nTrkLM)
+            ,nMuValHit(nvMuhit)
+            ,nValidPixelHits(nValidPixelHits)
+	    ,nSegMatched(nSegM)
+            ,Zpv(pvZ)
+            ,isoCut(isocut){verbosity = 0;};
     virtual ~MuonVetoSelector(){};
     void verbose(int i){verbosity = i;}
     bool isDesiredMuon(TRootMuon muon){
-            double relIso=(muon.chargedHadronIso()+muon.neutralHadronIso()+muon.photonIso())/muon.Pt();
-	    bool GlTrk = (muon.isTrackerMuon() && muon.isGlobalMuon());
-//	    bool isGlobalPromptTight = ((muon.nofValidMuHits()>0) && (muon.chi2()<chi2Cut));
-	    bool isGlobalPromptTight = muon.idGlobalMuonPromptTight();
+            double relIso=relativePFIsolation(muon);
+	    if(verbosity > 2){
+		cout<<"isGlobal: "<<muon.isGlobalMuon()<<endl;
+		cout<<"pt: "<<muon.Pt()<<" > ? "<<ptCut<<endl;
+		cout<<"eta: "<<fabs(muon.Eta())<<" <? " <<EtaCut<<endl;
+		cout<<"Chi2: "<<muon.chi2()<<" < ? "<<chi2Cut<<endl;
+		cout<<"nTrkLayerWithMesurement: "<<muon.nofTrackerLayersWithMeasurement()<<
+                        " > ? "<<nTrkLwMCut<<endl;
+		cout<<"nMuvh: "<<muon.nofValidMuHits()<< " > ? "<<nMuValHit<<endl;
+		cout<<"D0: "<<muon.d0()<<" < ? "<<d0Cut<<endl;
+		cout<<"dist to pv: "<<fabs(muon.vz()-Zpv)<<" < ? 0.5"<<endl;
+		cout<<"nValidPixelHit: "<<muon.nofValidPixelHits()<< " > ? "<< nValidPixelHits<<endl;
+		cout<<"nSegMatched: "<<muon.nofMatchedStations()<<" > ? "<<nSegMatched<<endl;
+		cout<<"isoVal: "<<relIso<<" < ? "<<isoCut<<endl;
+                cout<<"isGlobalPromptTight: "<<muon.idGlobalMuonPromptTight()<<endl;
+		if(muon.Pt() > ptCut && fabs(muon.Eta()) < EtaCut  && muon.chi2()> chi2Cut &&
+                   muon.nofTrackerLayersWithMeasurement()> nTrkLwMCut && muon.nofValidMuHits() > nMuValHit && 
+                   fabs(muon.d0()) < d0Cut && fabs(muon.vz()-Zpv) < 0.5 && muon.nofValidPixelHits() > nValidPixelHits &&
+                   muon.nofMatchedStations() > nSegMatched && relIso < isoCut  )
+		    cout<<"Desired Muon is found :-)"<<endl;
+	    }
+            return(muon.Pt() > ptCut && fabs(muon.Eta()) < EtaCut  && muon.chi2()> chi2Cut &&
+                   muon.nofTrackerLayersWithMeasurement()> nTrkLwMCut && muon.nofValidMuHits() > nMuValHit && 
+                   fabs(muon.d0()) < d0Cut && fabs(muon.vz()-Zpv) < 0.5 && muon.nofValidPixelHits() > nValidPixelHits &&
+                   muon.nofMatchedStations() > nSegMatched && relIso < isoCut  );
+    }
+    bool isLooseMuon(TRootMuon muon ){
+            double relIso=this->relativePFIsolation(muon);
 	    if(verbosity > 2){
 		cout<<"isGlobal: "<<muon.isGlobalMuon()<<endl;
 		cout<<"isTracker: "<<muon.isTrackerMuon()<<endl;
-		cout<<"eta: "<<fabs(muon.Eta())<<" <? " <<EtaCut<<endl;
-		cout<<"pt: "<<muon.Pt()<<" > ? "<<ptCut<<endl;
-		cout<<"Chi2: "<<muon.chi2()<<" < ? "<<chi2Cut<<endl;
-		cout<<"D0: "<<muon.d0()<<" < ? "<<d0Cut<<endl;
-		cout<<"nvh: "<<muon.nofValidHits()<< " > ? "<<nvhCut<<endl;
-		cout<<"nMuvh: "<<muon.nofValidMuHits()<< " > ? 0"<<endl;
-		cout<<"isoVal: "<<relIso<<" < ? "<<isoCut<<endl;
-		cout<<"nPixelLayersWithMeasuredHits: "<<muon.nofPixelLayersWithMeasurement()<<" >= ? "<<nPixelWithMeasuredHits<<endl;
-		cout<<"nSegMatched: "<<muon.nofMatches()<<" > ? "<<nSegMatched<<endl;
-                cout<<"isGlobalPromptTight: "<<muon.idGlobalMuonPromptTight()<<endl;
-		if(muon.Pt() > ptCut && fabs(muon.Eta()) < EtaCut  && fabs(muon.d0())< d0Cut && muon.nofValidHits()> nvhCut && relIso< isoCut && isGlobalPromptTight && GlTrk && (muon.nofPixelLayersWithMeasurement() >= nPixelWithMeasuredHits) && (muon.nofMatches()>nSegMatched))
-		    cout<<"Desired Muon is found :-)"<<endl;
-	    }
-            return(muon.Pt() > ptCut && fabs(muon.Eta()) < EtaCut && fabs(muon.d0())< d0Cut && muon.nofValidHits()> nvhCut && relIso< isoCut && isGlobalPromptTight && GlTrk &&  (muon.nofPixelLayersWithMeasurement() >= nPixelWithMeasuredHits) && (muon.nofMatches()>nSegMatched));
-    }
-    bool isLooseMuon(TRootMuon muon ){
-            double relIso=(muon.chargedHadronIso()+muon.neutralHadronIso()+muon.photonIso())/muon.Pt();
-	    if(verbosity > 2){
-		cout<<"isGlobal: "<<muon.isGlobalMuon()<<endl;
 		cout<<"eta: "<<fabs(muon.Eta())<<" <? 2.5" <<endl;
 		cout<<"pt: "<<muon.Pt()<<" > ? 10"<<endl;
 		cout<<"isoVal: "<<relIso<<" < ? 0.2"<<endl;
-		if(muon.isGlobalMuon() && (fabs(muon.Eta())<2.5) && (muon.Pt()>10) && relIso<0.2)
+		if((muon.isGlobalMuon() || muon.isTrackerMuon()) && (fabs(muon.Eta())<2.5) && (muon.Pt()>10) && relIso<0.2)
 		    cout<<"Loose muon is found :-("<<endl;
 	    }
-	    return (muon.isGlobalMuon() && (fabs(muon.Eta())<2.5) && (muon.Pt()>10) && relIso<0.2);
+	    return ((muon.isGlobalMuon() || muon.isTrackerMuon()) && (fabs(muon.Eta())<2.5) && (muon.Pt()>10) && relIso<0.2);
     }
     void setMuons(std::vector<TRootMuon> muons){
         DesiredMuons.clear();
@@ -87,18 +95,24 @@ public:
     }
     std::vector<TRootMuon> desiredMuons()const{return DesiredMuons; }
     std::vector<TRootMuon> looseMuons()const{return LooseMuons; }
+    double relativePFIsolation(TRootMuon muon){
+        return ((muon.chargedHadronIso() + max( 0.0, muon.neutralHadronIso() + muon.photonIso() - 0.5*muon.puChargedHadronIso() ) ) / muon.Pt());
+    }
 private:
     std::string Name;
     double ptCut;
     double EtaCut;
     double chi2Cut;
     double d0Cut;
-    int nvhCut;
+    int nTrkLwMCut;
+    int nMuValHit;
+    int nValidPixelHits;
+    int nSegMatched;
+    double Zpv;
     double isoCut;
     std::vector<TRootMuon> DesiredMuons;
     std::vector<TRootMuon> LooseMuons;
     int nPixelWithMeasuredHits;
-    int nSegMatched;
     int verbosity;
 };
 #endif	/* _MuonVetoSelector_H */

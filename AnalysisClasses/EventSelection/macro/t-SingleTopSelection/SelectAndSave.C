@@ -124,35 +124,30 @@ std::string sin_outFileName_FullSelection;
 void beginJob(){
      sin_n0 = 0;
      sin_nScrapFilter = 0;
-     sin_doScrapFilter = true;
+     sin_doScrapFilter = true;//true;
      sin_nHCALnoiseFilter = 0;
-     sin_doHCALnoiseFilter = true;
+     sin_doHCALnoiseFilter = true;//true;
      sin_nHlt = 0;
-     sin_doHLT = true;
+     sin_doHLT = true;//true;
      sin_nPV = 0;
-     sin_doPV = true;//
+     sin_doPV = true;//true;//
      sin_nMu = 0;
-     sin_doMuon = true;//
+     sin_doMuon = true;//true;//
      sin_nNoLMu = 0;
-     sin_doLMuVeto =  true;//
+     sin_doLMuVeto = true;// true;//
      sin_nNoLE = 0;
-     sin_doLEVeto = true;//
-     sin_doConv = false;// Specific to electron selection.
-     sin_nConv_a= 0;
-     sin_nConv_b= 0;
-     sin_nEcalDriven = 0;
-     sin_doEcalDriven =false;// Specific to electron selection.   
+     sin_doLEVeto = true;//true;//
      sin_nJet= 0;
-     sin_dojet = true;//
+     sin_dojet = true;//true;//
      sin_nMT = 0;
      sin_doMT = true;//
      sin_nBtag= 0;
      sin_doBtag = true;// Specific to electron selection.  
      sin_verbosity = 0;
-     fillTree = true;//false;
-     pu3D = false;
+     fillTree = true;
+     pu3D = false;//false;
      fillHists = true;
-     saveTypeIMET=true;
+     saveTypeIMET=false;//true;
      MT = new TH1D("MT","W-neutrino transverse mass",100, 0.,200.);
      MT->GetXaxis()->SetTitle("M_{T}(W,#nu)");
      finalMT = new TH1D("finalMT","final-W-neutrino transverse mass",100, 0.,200.);
@@ -253,18 +248,19 @@ void endJob(){
 int main(int argc, char** argv){
 //    sleep(60);
     double doJES = 1.;
-    for (int f = 1; f < argc; f++) {
+    std::string HLTname="HLT_IsoMu17_v*";//"HLT_Mu17_eta2p1_CentralJet30_BTagIP_v1";//
+        for (int f = 1; f < argc; f++) {
         std::string arg_fth(*(argv + f));
 
         if (arg_fth == "out") {
           f++;
           std::string out(*(argv + f));
-          sin_outFileName_FullSelection = string(out+".root");
-	  sin_plotFileName = out;
+          sin_outFileName_FullSelection = string("FullSelection_TypeIMET_"+out+".root");
+	  sin_plotFileName = string(out+".root");
         }else if (arg_fth == "input") {
           f++;
           std::string in(*(argv + f));
-          sin_inputFileNames.push_back(string("~/"+in));
+          sin_inputFileNames.push_back(string("~/work/samples/"+in));
         }else if(arg_fth == "XSec"){
           f++;
           std::string Xsec(*(argv + f));
@@ -289,6 +285,11 @@ int main(int argc, char** argv){
 	    else
 		isData = false;
 
+        }else if (arg_fth == "HLTname") {
+            f++;
+            std::string in(*(argv + f));
+            HLTname = in;
+            std::cout<<HLTname<<endl;
         }
     }
 //    cout<<doJES<<endl;
@@ -299,25 +300,15 @@ int main(int argc, char** argv){
 
     beginJob();
     TApplication theApp("App", &argc, argv);
-//    gSystem->Load("libTree.so");
-//    string tmp = "NadjiehV*";
-//    cout<<tmp.find("*")<<"  "<<tmp.size()<<endl;
-//    cout<<tmp.substr(0,tmp.find("*"))<<endl;
-//    string tmp3 = tmp.substr(0,tmp.find("*"));
-//    string tmp2 = "NadjiehV27";
-//    cout<<tmp3.size()<<endl;
-//    cout<<tmp2.substr(0,tmp.find("*"))<<endl;
-//    cout<<<<endl;
     
     for(unsigned int fNumber = 0; fNumber<sin_inputFileNames.size(); fNumber++){
-        cout<<"RunNumber|\tEventNumber|\tLumiBlock|\tptLepton|\trelIso|\tptjet1|\tptjet2|\tMET|\tMT|\tbtagjet1|\tbtagjet2"<<endl;
+        cout<<"file number "<<fNumber+1<<": "<<sin_inputFileNames.at(fNumber)<<endl;
         f = TFile::Open(sin_inputFileNames.at(fNumber).c_str());
-//        cout<<"nFiles: "<<sin_inputFileNames.size()<<endl;
 
         TTree* runTree = (TTree*) f->Get("runTree");
         TTree* eventTree = (TTree*) f->Get("eventTree");
         
-//        cout<<runTree->GetName()<<"????"<<endl;
+
 
         PracticalEvent * pracEvt = new PracticalEvent(eventTree,runTree);
         pracEvt->eventTree->SetBranchStatus("*", 1);
@@ -345,8 +336,8 @@ int main(int argc, char** argv){
         
 
         while (pracEvt->Next()) {
-            if(ievt > 1)
-                break;
+//            if(ievt > 1)
+//                break;
             if(sin_verbosity > 0){
                 cout<<"JES: "<<doJES<<endl;
             }
@@ -371,9 +362,12 @@ int main(int argc, char** argv){
             std::vector<TRootPFJet>  myJets_;
             myJets_.clear();
 //            cout<<"I am going to Jet Correction "<<isData<<endl;
-            myJets_ = pracEvt->ScaledPFJetCollection(1,false);
+            myJets_ = pracEvt->ScaledPFJetCollection(1,isData);
+//            Event myEvent_tmp( myJets_, *pracEvt->ElectronCollection()
+//            ,*pracEvt->METCollection(),*pracEvt->MuonCollection(),*pracEvt->VertexCollection());
             Event myEvent_tmp( myJets_, *pracEvt->ElectronCollection()
-            ,*pracEvt->METCollection(),*pracEvt->MuonCollection(),*pracEvt->VertexCollection());
+            ,pracEvt->TypeICorrMET(),*pracEvt->MuonCollection(),*pracEvt->VertexCollection());
+            myEvent_tmp.setChannel("mu+jets");
             if(sin_verbosity > 0)
                 cout<<"PV size: "<<myEvent_tmp.pvs.size()<<"\n"
                     <<"Muon size: "<<myEvent_tmp.muons.size()<<"\n"
@@ -390,25 +384,23 @@ int main(int argc, char** argv){
             myEvent_tmp.VertexMaker();
             if(sin_verbosity > 0)
                 cout<<"Electron Maker ---------------------------------------------------------------------"<<endl;
-            myEvent_tmp.ElectronMaker();
-            /*pt = 30., eta = 2.5,  Exc_Low = 1.4442 , Exc_High = 1.5660, Id = "VBTF70", IdSecond = "VBTF95" (not applied),
-             * D0 = 0.02, IsoCut = 0.125, drToPV = 10000.,  secondEIso = 0.2, secPt=15 GeV 
+            myEvent_tmp.ElectronMaker(30., 2.5, 1.4442, 1.5660, string("mva"), string("mva"),0.02,0.125,10000.,0.2,20.);
+            /*
+             * pt = 30., eta = 2.5,  Exc_Low = 1.4442 , Exc_High = 1.5660, Id = "mva", 
+             * IdSecond = "mva", D0 = 0.02, IsoCut = 0.125, drToPV = 10000.,  secondEIso = 0.2,
+             * secPt=20 GeV 
              */
             
-            /* if(sin_verbosity > 0)
-             * cout<<"Jet Cleaning  ---------------------------------------------------------------------"<<endl;
-             * myEvent_tmp.JetCleaning();
-            *///not needed for PFToPAT
-            
+                  
             if(sin_verbosity > 0)
                 cout<<"Jet Makers ---------------------------------------------------------------------"<<endl;
-            myEvent_tmp.PFJetMaker(/*bTagAlgo*/"TCHP",/*pt*/30.,/*eta*/4.5);
+            myEvent_tmp.PFJetMaker(/*bTagAlgo*/"TCHP",/*pt*/40.,/*eta*/5.0 );
             if(sin_verbosity > 0)
                 cout<<"Muon Maker ---------------------------------------------------------------------"<<endl;
-            myEvent_tmp.MuonMaker();
+            myEvent_tmp.MuonMaker(26, 2.1, 10, 0.2, 5, 0, 0, 1, myEvent_tmp.pvs.at(0).z(), 0.12);
             /*
-             * pt = 20.,  eta = 2.1, chi2 = 10,  D0 = 0.02,  nvh = 10, isoCut_ = 0.15,  doGL = false,  
-             * nPixWithMeasuredHits = 1,  nSegM = 1
+             * pt = 20.,  eta = 2.1, chi2 = 10,  D0 = 0.02,  nTrkLM = 5, int nvMuhit = 0,
+             * int nValidPixelHits = 1, int nSegM = 1, double pvZ = 10000, double isocut= 0.12
              */
             if(sin_verbosity > 0)
                 cout<<"START TO SELECT : "<<endl;
@@ -427,8 +419,9 @@ int main(int argc, char** argv){
             }
             if(sin_doHLT){
                 TopTree::TRootHLTInfo hltInfo = pracEvt->RunInfo()->getHLTinfo(pracEvt->Event()->runId());
-                int trigID = hltInfo.hltPath("HLT_IsoMu17_v*");
-//                cout<<"trigID: "<<trigID<<", hlt: "<<pracEvt->Event()->trigHLT(trigID)<<endl;   
+                int trigID = hltInfo.hltPath(HLTname);
+//                int trigID = hltInfo.hltPath("");
+
                 if(pracEvt->Event()->trigHLT(trigID)){
                     sin_nHlt++;
                     if(sin_verbosity > 0){
@@ -472,9 +465,6 @@ int main(int argc, char** argv){
             }
             TRootMuon myMu = myEvent_tmp.Dmuons.at(0);
             double relIso=(myMu.chargedHadronIso()+myMu.neutralHadronIso()+myMu.photonIso())/myMu.Pt();
-//            cout<<pracEvt->Event()->runId()<<"|\t"<<pracEvt->Event()->eventId()<<"|\t"
-//            <<pracEvt->Event()->lumiBlockId()<<"|\t"<<myMu.Pt()<<"|\t"<<relIso<<" ("<<myMu.neutralHadronIso()
-//            <<", "<<myMu.chargedHadronIso()<<", "<<myMu.photonIso()<<") |\t|\t|\t\t\t\t"<<endl;
             if(sin_doLEVeto){
                 if(myEvent_tmp.Gelectrons.size()==0 && myEvent_tmp.Secondelectrons.size()==0){
                     sin_nNoLE++;
@@ -483,9 +473,6 @@ int main(int argc, char** argv){
                 }else 
                     continue;
             }
-//            cout<<pracEvt->Event()->runId()<<"|\t"<<pracEvt->Event()->eventId()<<"|\t"
-//            <<pracEvt->Event()->lumiBlockId()<<"|\t"<<myMu.Pt()<<"|\t"<<relIso<<" ("<<myMu.neutralHadronIso()
-//            <<", "<<myMu.chargedHadronIso()<<", "<<myMu.photonIso()<<") |\t|\t|\t\t\t\t"<<endl;
 
             if(sin_dojet){
                 if(fillHists)
@@ -498,19 +485,15 @@ int main(int argc, char** argv){
                 } else
                     continue;
             }
-            if(fillTree){
-                if(saveTypeIMET)
-                    if(sin_verbosity>0) cout << endl << "Analyzing ParticleFlow Missing Et..." << endl;
-                if(saveTypeIMET)
-                    new( (*corrMET)[0] ) TRootPFMET(pracEvt->TypeICorrMET());
-                eventTree_f->Fill();
-                if(saveTypeIMET) 
-                    (*corrMET).Delete();
-            }
-//            cout<<pracEvt->Event()->runId()<<"|\t"<<pracEvt->Event()->eventId()<<"|\t"
-//            <<pracEvt->Event()->lumiBlockId()<<"|\t"<<myMu.Pt()<<"|\t"<<relIso<<" ("<<myMu.neutralHadronIso()
-//            <<", "<<myMu.chargedHadronIso()<<", "<<myMu.photonIso()<<") |\t"<<myEvent_tmp.GPFJets.at(0).Pt()
-//            <<"|\t"<<myEvent_tmp.GPFJets.at(1).Pt()<<"|\t|\t|\t|\t"<<endl;
+//            if(fillTree){
+//                if(saveTypeIMET)
+//                    if(sin_verbosity>0) cout << endl << "Analyzing ParticleFlow Missing Et..." << endl;
+//                if(saveTypeIMET)
+//                    new( (*corrMET)[0] ) TRootPFMET(pracEvt->TypeICorrMET());
+//                eventTree_f->Fill();
+//                if(saveTypeIMET) 
+//                    (*corrMET).Delete();
+//            }
             double mt = 0;
             if(sin_doMT){
                 double metT = sqrt((myEvent_tmp.mets.at(0).Px()*myEvent_tmp.mets.at(0).Px())+
@@ -529,10 +512,6 @@ int main(int argc, char** argv){
                 }else
                     continue;
             }
-//            cout<<pracEvt->Event()->runId()<<"|\t"<<pracEvt->Event()->eventId()<<"|\t"
-//            <<pracEvt->Event()->lumiBlockId()<<"|\t"<<myMu.Pt()<<"|\t"<<relIso<<" ("<<myMu.neutralHadronIso()
-//            <<", "<<myMu.chargedHadronIso()<<", "<<myMu.photonIso()<<") |\t"<<myEvent_tmp.GPFJets.at(0).Pt()
-//            <<"|\t"<<myEvent_tmp.GPFJets.at(1).Pt()<<"|\t"<<myEvent_tmp.mets.at(0).Pt()<<"|\t"<<mt<<"|\t|\t"<<endl;
             if(sin_doBtag){
                 if(fillHists)
                     sin_BJets.FillPFJets(myEvent_tmp.GPFJets,myEvent_tmp.GPFJets.size(),myEvent_tmp.BPFJets.size(),false,lumiWeight3D);
@@ -543,12 +522,15 @@ int main(int argc, char** argv){
                 } else
                     continue;
             }
-
-            cout<<pracEvt->Event()->runId()<<"|\t"<<pracEvt->Event()->eventId()<<"|\t"
-            <<pracEvt->Event()->lumiBlockId()<<"|\t"<<myMu.Pt()<<"|\t"<<relIso<<" ("<<myMu.neutralHadronIso()
-            <<", "<<myMu.chargedHadronIso()<<", "<<myMu.photonIso()<<") |\t"<<myEvent_tmp.GPFJets.at(0).Pt()
-            <<"|\t"<<myEvent_tmp.GPFJets.at(1).Pt()<<"|\t"<<myEvent_tmp.mets.at(0).Pt()<<"|\t"<<mt<<"|\t"
-            <<myEvent_tmp.BPFJets.at(0).btag_trackCountingHighPurBJetTags()<<"|\t"<<endl;
+            if(fillTree){
+                if(saveTypeIMET)
+                    if(sin_verbosity>0) cout << endl << "Analyzing ParticleFlow Missing Et..." << endl;
+                if(saveTypeIMET)
+                    new( (*corrMET)[0] ) TRootPFMET(pracEvt->TypeICorrMET());
+                eventTree_f->Fill();
+                if(saveTypeIMET) 
+                    (*corrMET).Delete();
+            }
             if(fillHists){
                 sin_GoldenFinalMuons.Fill(myEvent_tmp.Dmuons,myEvent_tmp.Dmuons.size(),lumiWeight3D);
                 finalMT->Fill(mt,lumiWeight3D);

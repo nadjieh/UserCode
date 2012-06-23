@@ -36,17 +36,16 @@ using namespace std;
 
 class ElectronSelector{
 public:
-    ElectronSelector(std::string name,double pt = 30., double eta = 2.5, double Exc_Low = 1.4442
+    ElectronSelector(std::string channel = "mu+jets",double pt = 30., double eta = 2.5, double Exc_Low = 1.4442
         ,double Exc_High = 1.5660, std::string Id = "VBTF70",std::string secondID = "rLoose" ,
-	std::string Iso = "", double D0 = 0.02, double IsoCut = 0.125,double secPt = 15., 
-        double distToPV = 10000.,double secIsoCut =0.2 ):Name(name)
+	double D0 = 0.02, double IsoCut = 0.125,double secPt = 15., 
+        double distToPV = 10000.,double secIsoCut =0.2 ):Channel(channel)
         ,ptCut(pt)
         ,etaCut(eta)
         ,exclusion_Low(Exc_Low)
         ,exclusion_High(Exc_High)
         ,id(Id)
         ,idSec(secondID)
-        ,iso(Iso)
         ,d0Cut(D0)
         ,isoCut(IsoCut)
         ,secondptCut(secPt)
@@ -57,16 +56,12 @@ public:
     void verbose(int i){verbosity = i;}
 
     bool isGoodElectron(TRootElectron e, std::string gap= "SC", double PVposition = 0.){
-        //double distanceToPV = fabs(e.vz() - PVposition);
-	//bool closeToPV = (distanceToPV < distToPv);
-	//if(verbosity > 2 )
-  	//     cout<<"PV position Z: "<<PVposition<<", distanceToPV = "<<distanceToPV<<" ? "<<distToPv<<" isOk = "<<closeToPV<<endl;
         double eta = fabs(e.Eta());
 	if (verbosity > 2)
 		cout<<"eta: "<<eta<<endl;
 	bool EtaGoodRange = (eta < etaCut);
         if(gap == "SC")
-            eta = fabs(e.caloPosition().Eta());
+            eta = fabs(e.superClusterEta());
 	if (verbosity > 2)
 		cout<<"etaSC: "<<eta<<endl;
         EtaGoodRange = (EtaGoodRange && !(exclusion_Low < eta && eta < exclusion_High) );
@@ -78,7 +73,7 @@ public:
 	bool Id = this->isId(e);
 	if (verbosity > 2)
 		cout<<"ID: "<<Id<<endl;
-	double relIso = (e.chargedHadronIso()+e.neutralHadronIso()+e.photonIso())/e.Pt();
+	double relIso = this->relativePFIsolation(e);
 	bool isIso = (relIso<isoCut);
 	if (verbosity > 2)
 		cout<<"IsoVal: "<<relIso<<"\tisIso: "<<isIso<<endl;
@@ -87,35 +82,41 @@ public:
 		cout<<"D0: "<<fabs(e.d0())<<"\td0Constraint: "<<d0Constraint<<endl;
 //		cout<<"ip: "<<fabs(e.dB())<<"\td0Constraint: "<<d0Constraint<<endl;
         }
+        bool passConv = this->passConversion(e);
 	if (verbosity > 2)
-		if(EtaGoodRange && PtGoodRange && Id && isIso && d0Constraint/* && closeToPV*/)
+		if(EtaGoodRange && PtGoodRange && Id && isIso && d0Constraint && passConv)
 			cout<<"Golden Electron is Accepted :-)"<<endl;
-	return(EtaGoodRange && PtGoodRange && Id && isIso && d0Constraint/* && closeToPV*/);
+	return(EtaGoodRange && PtGoodRange && Id && isIso && d0Constraint && passConv);
     }
-    bool isSecondElectron(TRootElectron e, std::string gap= "SC"){
+    bool isSecondElectron(TRootElectron e){
         double eta = fabs(e.Eta());
 	if (verbosity > 2)
 		cout<<"eta: "<<eta<<endl;
 	bool EtaGoodRange = (eta < etaCut);
+        if(this->Channel == "e+jets"){
+            eta = fabs(e.superClusterEta());
+            EtaGoodRange = EtaGoodRange && (!(eta < exclusion_High && eta > exclusion_Low));
+        }
 	if (verbosity > 2)
 		cout<<"eta in range: "<<EtaGoodRange<<endl;
 	bool PtGoodRange = e.Pt() > secondptCut;
 	if (verbosity > 2)
 		cout<<"Pt: "<<e.Pt()<<"\tPtGoodRange: "<<PtGoodRange<<endl;
-	double relIso = (e.chargedHadronIso()+e.neutralHadronIso()+e.photonIso())/e.Pt();
+	double relIso = this->relativePFIsolation(e);
 	bool isIso = (relIso<secondIsoCut);
 	if(verbosity > 2 )
 	  cout<<"IsoVal = "<<relIso<<" isIso: "<<isIso<<endl;
+        bool isID = isId(e);
 	if (verbosity > 2)
-		if(EtaGoodRange && PtGoodRange  && isIso)
+		if(EtaGoodRange && PtGoodRange  && isIso && isID)
 			cout<<"Second Electron is Accepted :-)"<<endl;
-	return(EtaGoodRange && PtGoodRange  && isIso);
+	return(EtaGoodRange && PtGoodRange  && isIso && isID);
     }
     bool isVBTF70Id(TopTree::TRootElectron * e){
 	if(e->isEB()){//ECal Barrel
             if(verbosity > 2){
                 cout<<"\tElectron eta is "<<e->Eta()<<" and is EB: "<<endl;
-                cout<<"\t\tHoE: "<<fabs(e->hadronicOverEm())<<" ? "<<0.025<<endl;
+                cout<<"\t\tHoE: "<<fabs(e->hadronicOverEm())<<" ? "<<0.12<<endl;
                 cout<<"\t\tSiEta: "<<fabs(e->sigmaIEtaIEta())<<" ? "<<0.01<<endl;
                 cout<<"\t\tDelEta: "<<fabs(e->deltaEtaIn())<<" ? "<<0.004<<endl;
                 cout<<"\t\tDelPhi: "<<fabs(e->deltaPhiIn())<<" ? "<<0.03<<endl;
@@ -128,7 +129,8 @@ public:
 	if(e->isEE()){//ECal EndCap
             if(verbosity > 2){
                 cout<<"\tElectron eta is "<<e->Eta()<<" and is EE: "<<endl;
-                cout<<"\t\tHoE: "<<fabs(e->hadronicOverEm())<<" ? "<<0.025<<endl;
+//                cout<<"\t\tHoE: "<<fabs(e->hadronicOverEm())<<" ? "<<0.025<<endl;
+                cout<<"\t\tHoE: "<<fabs(e->hadronicOverEm())<<" ? "<<0.10<<endl;
                 cout<<"\t\tSiEta: "<<fabs(e->sigmaIEtaIEta())<<" ? "<<0.03<<endl;
                 cout<<"\t\tDelEta: "<<fabs(e->deltaEtaIn())<<" ? "<<0.005<<endl;
                 cout<<"\t\tDelPhi: "<<fabs(e->deltaPhiIn())<<" ? "<<0.02<<endl;
@@ -158,7 +160,7 @@ public:
 	if(e->isEE()){//ECal EndCap
             if(verbosity > 2){
                 cout<<"\tElectron eta is "<<e->Eta()<<" and is EE: "<<endl;
-                cout<<"\t\tHoE: "<<fabs(e->hadronicOverEm())<<" ? "<<0.07<<endl;
+//                cout<<"\t\tHoE: "<<fabs(e->hadronicOverEm())<<" ? "<<0.07<<endl;
                 cout<<"\t\tSiEta: "<<fabs(e->sigmaIEtaIEta())<<" ? "<<0.03<<endl;
                 cout<<"\t\tDelEta: "<<fabs(e->deltaEtaIn())<<" ? "<<0.01<<endl;
                 cout<<"\t\tDelPhi: "<<fabs(e->deltaPhiIn())<<" ? "<<0.7<<endl;
@@ -172,39 +174,28 @@ public:
 	return false;
     }
     bool isId(TRootElectron e){
-        if(id == "rTight")
-            return e.isRobustTight();
-        else if(id == "rLoose")
-            return e.isRobustLoose();
-        else if(id == "Loose")
-            return e.isLoose();
-        else if(id == "Tight")
-            return e.isTight();
-        else if(id == "VBTF70"){
+        if(id == "VBTF70"){
             if(verbosity > 2)
                 cout<<"\tId is "<<id<<endl;
             return isVBTF70Id(&e);
-        }
-        else if(id == "VBTF95"){
+        }else if(id == "VBTF95"){
             if(verbosity > 2)
                 cout<<"\tId is "<<id<<endl;
             return isVBTF95Id(&e);
-        }
-        else if(id == "NoId")
+        }else if(id == "NoId"){
             return true;
+        }
+        else if(id == "mva"){
+            return (e.mvaNonTrigId() > 0 && e.mvaNonTrigId() < 1);
+        }
         std::cout<<"Bad ID, returns false"<<std::endl;
         return false;
     }
+    double relativePFIsolation(TRootElectron e){
+        return (e.chargedHadronIso() + max( 0.0, e.neutralHadronIso() + e.photonIso() - 0.5*e.puChargedHadronIso() ) ) / e.Pt(); 
+    }
     bool isSecondId(TRootElectron e){
-        if(idSec == "rTight")
-            return e.isRobustTight();
-        else if(idSec == "rLoose")
-            return e.isRobustLoose();
-        else if(idSec == "Loose")
-            return e.isLoose();
-        else if(idSec == "Tight")
-            return e.isTight();
-        else if(idSec == "VBTF70"){
+        if(idSec == "VBTF70"){
             if(verbosity > 2)
                 cout<<"\tId is "<<idSec<<endl;
             return isVBTF70Id(&e);
@@ -213,8 +204,12 @@ public:
             if(verbosity > 2)
                 cout<<"\tId is "<<idSec<<endl;
             return isVBTF95Id(&e);
-        } else if(id == "NoId")
+        } else if(id == "NoId"){
             return false;
+        }
+        else if(id == "mva"){
+            return (e.mvaNonTrigId() > 0 && e.mvaNonTrigId() < 1);
+        }
         std::cout<<"Bad ID, returns false"<<std::endl;
         return false;
     }
@@ -254,10 +249,12 @@ public:
 	return goldenElecs;
     }
     bool GoldenNotFromConversion()const{return ((fabs(goldenElecs.at(0).DCot()) > 0.02 || fabs(goldenElecs.at(0).Dist()) > 0.02)  &&(goldenElecs.at(0).missingHits() == 0) );}
+    bool passConversion(TRootElectron e)const
+    {return ((fabs(e.DCot()) > 0.02 || fabs(e.Dist()) > 0.02) && (e.missingHits() == 0) );}
     bool EventPassConversion()const{return this->GoldenNotFromConversion();}// backward compatibility
     std::vector<TRootElectron> secondElectrons()const{return secondElecs;};
 private:
-    std::string Name;
+    std::string Channel;
     double ptCut;
     double etaCut;
     double exclusion_Low;

@@ -33,6 +33,9 @@
 
 
 using namespace TopTree;
+struct SortByEta{
+    bool operator() (TLorentzVector comb1, TLorentzVector comb2) { return (fabs(comb1.Eta()) > fabs(comb2.Eta()));}
+} mySortByEta;
 class Event{
 public:
     Event(TRootEvent Evt, TRootRun Run, TClonesArray jets_,TClonesArray electrons_,TClonesArray mets_,TClonesArray muons_, TClonesArray primaryVertices):evt(Evt), run(Run){
@@ -174,6 +177,25 @@ public:
         verbosity = 0;
 
     };
+    Event(std::vector<TRootPFJet> jets_,TClonesArray electrons_,TRootPFMET mets_,TClonesArray muons_,
+    TClonesArray primaryVertices){
+        this->clear();
+        mets.push_back(mets_);
+        for(unsigned int i = 0; i<jets_.size(); i++)
+            PFJets.push_back(jets_.at(i));
+        for(int i = 0; i<electrons_.GetEntriesFast(); i++)
+            electrons.push_back(*(TRootElectron*)electrons_.At(i));
+        for(int i = 0; i<muons_.GetEntriesFast(); i++)
+            muons.push_back(*(TRootMuon*)muons_.At(i));
+        for(int i = 0; i<primaryVertices.GetEntriesFast(); i++)
+            pvs.push_back(*(TRootVertex*)primaryVertices.At(i));
+
+        GenElec.SetPxPyPzE(0,0,0,0);
+        doMatchElec = false;
+        firstBtagIndex = -1;
+        verbosity = 0;
+
+    };
     Event(TClonesArray jets_,std::vector<TRootElectron> electrons_,
     TClonesArray mets_,TClonesArray muons_, TClonesArray primaryVertices){
         this->clear();
@@ -292,12 +314,12 @@ public:
     ~Event(){};
     void verbose(int i){verbosity = i;}
     void ElectronMaker(double pt = 30., double eta = 2.5, double Exc_Low = 1.4442 ,double Exc_High = 1.5660,
-        std::string Id = "VBTF70",std::string IdSecond = "VBTF95", std::string Iso = "", double D0 = 0.02, double IsoCut = 0.125, 
-	double drToPV = 10000., double secondEIso = 0.2){ //secPt=15 GeV       
+        std::string Id = "VBTF70",std::string IdSecond = "VBTF95", double D0 = 0.02, double IsoCut = 0.125, 
+	double drToPV = 10000., double secondEIso = 0.2, double secPt=15){       
 	double PVz = 0;
 	if(Gpvs.size() != 0)
 	    PVz = Gpvs.at(0).z();
-        ElectronSelector electronSelector("ElectronSelector",pt,eta,Exc_Low,Exc_High,Id,IdSecond,Iso,D0,IsoCut,15.,drToPV ,secondEIso);
+        ElectronSelector electronSelector(this->Channel,pt,eta,Exc_Low,Exc_High,Id,IdSecond,D0,IsoCut,secPt,drToPV ,secondEIso);
 	electronSelector.verbose(verbosity);
         electronSelector.setElectrons(electrons,PVz);
         if( verbosity > 1){
@@ -393,11 +415,13 @@ public:
     }
 
 
-    void MuonMaker(double pt = 20., double eta = 2.1,double chi2 = 10, double D0 = 0.02, int nvh = 10,
-        double isoCut_ = 0.15, bool doGL = false, int nPixWithMeasuredHits = 1, int nSegM = 1){
+    void MuonMaker(double pt = 20., double eta = 2.1,double chi2 = 10,
+		     double D0 = 0.2, int nTrkLM = 5, int nvMuhit = 0, int nValidPixelHits = 1,
+                     int nSegM = 1, double pvZ = 10000, double isocut= 0.12){
         if(verbosity > 2)
 		cout<<"In MuMaker Method: "<<endl;
-	MuonVetoSelector MuSelector("MuonVetoSelector",pt,eta,chi2,D0,nvh,isoCut_,nPixWithMeasuredHits,nSegM);
+	MuonVetoSelector MuSelector("MuonVetoSelector",pt,eta,chi2,D0,nTrkLM,nvMuhit,nValidPixelHits,
+                nSegM, pvZ, isocut);
         MuSelector.verbose(verbosity);
         MuSelector.setMuons(muons);
 
@@ -470,6 +494,12 @@ public:
       }
       return( !inRange );
     }
+    std::vector<TRootPFJet> SortedJetsByEta(){
+        std::vector<TRootPFJet> res = this->GPFJets;
+        std::sort(res.begin(), res.end(), mySortByEta);
+        return res;
+    }
+    void setChannel(std::string channel){ this->Channel = channel;}
     TRootEvent evt;
     TRootRun run;
     std::vector<TRootCaloJet> CaloJets;
@@ -499,6 +529,7 @@ public:
     int matchElecIndex;
     int firstBtagIndex;
     int verbosity;
+    std::string Channel;
 };
 
 

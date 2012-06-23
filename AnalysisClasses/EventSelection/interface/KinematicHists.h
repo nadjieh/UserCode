@@ -13,6 +13,7 @@
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootElectron.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootJet.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootMET.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootPFMET.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootGenEvent.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootEvent.h"
 #include "../../../TopBrussels/TopTreeProducer/interface/TRootRun.h"
@@ -33,7 +34,7 @@ class KinematicHists{
 public:
     KinematicHists(std::string name):Name(name){
         pt = new TH1D((Name+"_Pt").c_str(), (Name+"_Pt").c_str(), 50,0.,200.);
-        eta = new TH1D((Name+"_Eta").c_str(),(Name+"_Eta").c_str(), 40,-3.,3.);
+        eta = new TH1D((Name+"_Eta").c_str(),(Name+"_Eta").c_str(), 100,-5.,5.);
         pt->GetXaxis()->SetTitle("P_{T}");
         eta->GetXaxis()->SetTitle("#eta");
     };

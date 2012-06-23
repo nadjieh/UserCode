@@ -197,6 +197,14 @@ public:
     TClonesArray * TagProbeCollection()const{
         return tps;
     };
+    std::vector<TRootPFJet> unCorrectedPFJetVector(){
+        std::vector<TRootPFJet> init_jets_corrected;
+        init_jets_corrected.clear();
+//	cout<<jets->GetEntriesFast()<<endl;
+        for(int i=0; i<jets->GetEntriesFast(); i++)
+        	init_jets_corrected.push_back(*( (TRootPFJet*) jets->At(i)) );
+        return init_jets_corrected;
+    }
     std::vector<TRootPFJet> ScaledPFJetCollection(double fScaling, bool isData){
         //cout<<"In prac: "<<isData<<endl;
         std::vector<TRootJet*> init_jets_corrected;
@@ -212,10 +220,10 @@ public:
         vector<JetCorrectorParameters> vCorrParam;
         vCorrParam.clear();
 
-        JetCorrectorParameters *L3JetCorPar  = new JetCorrectorParameters("../../../../TopBrussels/TopTreeAnalysis/macros/JECFiles/START42_V17_AK5PFchs_L3Absolute.txt");
-        JetCorrectorParameters *L2JetCorPar  = new JetCorrectorParameters("../../../../TopBrussels/TopTreeAnalysis/macros/JECFiles/START42_V17_AK5PFchs_L2Relative.txt");
-        JetCorrectorParameters *L1JetCorPar  = new JetCorrectorParameters("../../../../TopBrussels/TopTreeAnalysis/macros/JECFiles/START42_V17_AK5PFchs_L1FastJet.txt");
-        JetCorrectorParameters *ResJetCorPar = new JetCorrectorParameters("../../../../TopBrussels/TopTreeAnalysis/macros/JECFiles/START42_V17_AK5PFchs_L2L3Residual.txt");
+        JetCorrectorParameters *L3JetCorPar  = new JetCorrectorParameters("/home/nadjieh/work/TopBrussels/TopTreeAnalysis/macros/JECFiles/START42_V17_AK5PFchs_L3Absolute.txt");
+        JetCorrectorParameters *L2JetCorPar  = new JetCorrectorParameters("/home/nadjieh/work/TopBrussels/TopTreeAnalysis/macros/JECFiles/START42_V17_AK5PFchs_L2Relative.txt");
+        JetCorrectorParameters *L1JetCorPar  = new JetCorrectorParameters("/home/nadjieh/work/TopBrussels/TopTreeAnalysis/macros/JECFiles/START42_V17_AK5PFchs_L1FastJet.txt");
+        JetCorrectorParameters *ResJetCorPar = new JetCorrectorParameters("/home/nadjieh/work/TopBrussels/TopTreeAnalysis/macros/JECFiles/START42_V17_AK5PFchs_L2L3Residual.txt");
         vCorrParam.push_back(*L1JetCorPar);
         vCorrParam.push_back(*L2JetCorPar);
         vCorrParam.push_back(*L3JetCorPar);
@@ -225,7 +233,7 @@ public:
         delete L3JetCorPar;
         delete ResJetCorPar;
 
-        JetCorrectionUncertainty *jecUnc = new JetCorrectionUncertainty("../../../../TopBrussels/TopTreeAnalysis/macros/JECFiles/START42_V17_AK5PFchs_Uncertainty.txt");
+        JetCorrectionUncertainty *jecUnc = new JetCorrectionUncertainty("/home/nadjieh/work/TopBrussels/TopTreeAnalysis/macros/JECFiles/START42_V17_AK5PFchs_Uncertainty.txt");
         // true means redo also the L1
         JetTools *jetTools = new JetTools(vCorrParam, jecUnc, true);
         //cout<<"ACTION: "<<endl;   
@@ -282,6 +290,7 @@ public:
             return true;
         return(false);
     }
+    
     TTree * eventTree;
     TTree * runTree;
     TRootPFMET TypeICorrMET()const{return CorrectedMETI;}

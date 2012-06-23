@@ -43,17 +43,22 @@ class MuonHists{
           kinHists = new KinematicHists<TRootMuon>(Name);
 	  isGood = new TH1D((Name+"_isGlobal").c_str(),(Name+"_isGlobal").c_str(),2,0.,2.);
 	  isGood->GetXaxis()->SetTitle("isGlobal");
-	  relIso = new TH1D((Name+"_relIso").c_str(),(Name+"_relIso").c_str(),10,0.,2.);
+	  relIso = new TH1D((Name+"_relIso").c_str(),(Name+"_relIso").c_str(),50,0.,2.);
 	  relIso->GetXaxis()->SetTitle("#mu relative isolation");
 	  nMV = new TH1D((Name+"_nMV").c_str(),(Name+"_nMu").c_str(),5,0.,5.);
-	  nMV->GetXaxis()->SetTitle("N_{muons} for veto");
+	  nMV->GetXaxis()->SetTitle("N_{muons} selected");
+	  d0 = new TH1D((Name+"_d0").c_str(),(Name+"_d0").c_str(),50,0.,0.2);
+	  d0->GetXaxis()->SetTitle("d0");
      }
     virtual ~MuonHists(){};
     virtual void Fill(std::vector<TRootMuon> mu, int nVM = -1,double weight = 1){
 	for(unsigned int i = 0; i<mu.size(); i++){
             kinHists->Fill(&(mu.at(i)),weight);
 	    isGood->Fill(mu.at(i).isGlobalMuon(),weight);
-	    relIso->Fill((mu.at(i).isoR03_sumPt()+mu.at(i).isoR03_emEt()+mu.at(i).isoR03_hadEt())/mu.at(i).Pt(),weight);
+            double RelIso=(mu.at(i).chargedHadronIso()+mu.at(i).neutralHadronIso()+mu.at(i).photonIso())/mu.at(i).Pt();
+	    relIso->Fill(RelIso,weight);
+            d0->Fill(fabs(mu.at(i).d0()));
+            
 	}
         nMV->Fill(nVM,weight);
     }
@@ -65,6 +70,7 @@ class MuonHists{
 	relIso->Write();
 	isGood->Write();
 	nMV->Write();
+	d0->Write();
         kinHists->Write();
 
         dir->cd();
@@ -75,6 +81,7 @@ class MuonHists{
      TH1D * isGood;
      TH1D * relIso;
      TH1D * nMV;
+     TH1D * d0;
      KinematicHists<TRootMuon> * kinHists;
 };
 #endif
