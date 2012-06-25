@@ -66,7 +66,7 @@ public:
 		cout<<"etaSC: "<<eta<<endl;
         EtaGoodRange = (EtaGoodRange && !(exclusion_Low < eta && eta < exclusion_High) );
 	if (verbosity > 2)
-		cout<<"eta in range: "<<EtaGoodRange<<endl;
+		cout<<"eta in range: "<<EtaGoodRange<<", EtaCut: "<<etaCut<<endl;
 	bool PtGoodRange = e.Pt() > ptCut;
 	if (verbosity > 2)
 		cout<<"Pt: "<<e.Pt()<<"\tPtGoodRange: "<<PtGoodRange<<endl;

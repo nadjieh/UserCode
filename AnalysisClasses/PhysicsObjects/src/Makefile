@@ -9,7 +9,7 @@ ROOTINC		=-I$(shell root-config --incdir)
 ROOTLIBS	=$(shell root-config --libs) -lMinuit
 ROOTCFLAGS	=$(shell root-config --cflags)
 ROOTGLIBS	=$(shell root-config --glibs) -lMinuit
-HOMELIB		= $(HOME)/lib
+HOMELIB		= $(HOME)/lib/8TeV
 TROOTINC	=-I../../../../TopBrussels/TopTreeProducer/interface
 
 MYHEADERS=-I../interface

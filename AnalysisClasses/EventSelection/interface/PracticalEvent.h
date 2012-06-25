@@ -117,7 +117,7 @@ public:
             //---------------------------- MET
 //            cout<<metOk_<<endl;
 //            if(metOk_){
-                met_br = (TBranch *) eventTree->GetBranch("PFMET");
+                met_br = (TBranch *) eventTree->GetBranch("PFMET_patMETsPF2PAT");
                 mets = new TClonesArray("TopTree::TRootPFMET", 0);
                 if(met_br != NULL)
                     met_br->SetAddress(&mets);

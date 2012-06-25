@@ -245,10 +245,13 @@ void endJob(){
 
 }
 
+
 int main(int argc, char** argv){
+    TH1D * den = new TH1D("all","all",200,0,200);
+    TH1D * num = new TH1D("pass","pass",200,0,200);
 //    sleep(60);
     double doJES = 1.;
-    std::string HLTname="HLT_IsoMu17_v*";//"HLT_Mu17_eta2p1_CentralJet30_BTagIP_v1";//
+    std::string HLTname="HLT_IsoMu20_eta2p1_v3";//"HLT_Mu17_eta2p1_CentralJet30_BTagIP_v1";//
         for (int f = 1; f < argc; f++) {
         std::string arg_fth(*(argv + f));
 
@@ -339,7 +342,7 @@ int main(int argc, char** argv){
 //            if(ievt > 1)
 //                break;
             if(sin_verbosity > 0){
-                cout<<"JES: "<<doJES<<endl;
+//                cout<<"JES: "<<doJES<<endl;
             }
             double lumiWeight3D = 1;
             if(pu3D){
@@ -357,16 +360,16 @@ int main(int argc, char** argv){
 
             ievt++;
             if(sin_verbosity > 0)
-                cout<<"*******************************************************************"<<endl;
+                cout<<ievt<<"  *******************************************************************"<<endl;
 
             std::vector<TRootPFJet>  myJets_;
             myJets_.clear();
 //            cout<<"I am going to Jet Correction "<<isData<<endl;
-            myJets_ = pracEvt->ScaledPFJetCollection(1,isData);
-//            Event myEvent_tmp( myJets_, *pracEvt->ElectronCollection()
-//            ,*pracEvt->METCollection(),*pracEvt->MuonCollection(),*pracEvt->VertexCollection());
+            myJets_ = pracEvt->unCorrectedPFJetVector();
             Event myEvent_tmp( myJets_, *pracEvt->ElectronCollection()
-            ,pracEvt->TypeICorrMET(),*pracEvt->MuonCollection(),*pracEvt->VertexCollection());
+            ,*pracEvt->METCollection(),*pracEvt->MuonCollection(),*pracEvt->VertexCollection());
+//            Event myEvent_tmp( myJets_, *pracEvt->ElectronCollection()
+//            ,pracEvt->TypeICorrMET(),*pracEvt->MuonCollection(),*pracEvt->VertexCollection());
             myEvent_tmp.setChannel("mu+jets");
             if(sin_verbosity > 0)
                 cout<<"PV size: "<<myEvent_tmp.pvs.size()<<"\n"
@@ -385,6 +388,7 @@ int main(int argc, char** argv){
             if(sin_verbosity > 0)
                 cout<<"Electron Maker ---------------------------------------------------------------------"<<endl;
             myEvent_tmp.ElectronMaker(30., 2.5, 1.4442, 1.5660, string("mva"), string("mva"),0.02,0.125,10000.,0.2,20.);
+            
             /*
              * pt = 30., eta = 2.5,  Exc_Low = 1.4442 , Exc_High = 1.5660, Id = "mva", 
              * IdSecond = "mva", D0 = 0.02, IsoCut = 0.125, drToPV = 10000.,  secondEIso = 0.2,
@@ -394,7 +398,12 @@ int main(int argc, char** argv){
                   
             if(sin_verbosity > 0)
                 cout<<"Jet Makers ---------------------------------------------------------------------"<<endl;
-            myEvent_tmp.PFJetMaker(/*bTagAlgo*/"TCHP",/*pt*/40.,/*eta*/5.0 );
+//            myEvent_tmp.PFJetMaker(/*bTagAlgo*/"JP",/*pt*/40.,/*eta*/5.0, /*nCaloTower*/1,/*EmfUp*/ 1000.,
+//                    /*EmfLow*/-1., /*fhpd_*/1000.,/*N90*/-1, /*bTagCut*/ 0.790);
+            myEvent_tmp.PFJetMaker(/*bTagAlgo*/"JP",/*pt*/40.,/*eta*/5.0, /*nCaloTower*/1,/*EmfUp*/ 1000.,
+                    /*EmfLow*/-1., /*fhpd_*/1000.,/*N90*/-1, /*bTagCut*/ 0.790);
+//            myEvent_tmp.PFJetMaker(/*bTagAlgo*/"TCHP",/*pt*/40.,/*eta*/5.0, /*nCaloTower*/1,/*EmfUp*/ 1000.,
+//                    /*EmfLow*/-1., /*fhpd_*/1000.,/*N90*/-1, /*bTagCut*/ 3.41);
             if(sin_verbosity > 0)
                 cout<<"Muon Maker ---------------------------------------------------------------------"<<endl;
             myEvent_tmp.MuonMaker(26, 2.1, 10, 0.2, 5, 0, 0, 1, myEvent_tmp.pvs.at(0).z(), 0.12);
@@ -402,6 +411,7 @@ int main(int argc, char** argv){
              * pt = 20.,  eta = 2.1, chi2 = 10,  D0 = 0.02,  nTrkLM = 5, int nvMuhit = 0,
              * int nValidPixelHits = 1, int nSegM = 1, double pvZ = 10000, double isocut= 0.12
              */
+            
             if(sin_verbosity > 0)
                 cout<<"START TO SELECT : "<<endl;
             sin_n0++;

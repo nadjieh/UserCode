@@ -99,9 +99,9 @@ int main(int argc, char** argv){
                 cosThetaGen->Fill(myGenStMaker.genSingleTop.cosThetaStar(),W);
                 topMass->Fill(myGenStMaker.genSingleTop.top().M(),W);
                 Wmass->Fill(myGenStMaker.genSingleTop.W().M(),W);
-                cosThetaGen_I->Fill(myGenStMaker.cosThetaStar,W);
+                /*cosThetaGen_I->Fill(myGenStMaker.cosThetaStar,W);
                 topMass_I->Fill(myGenStMaker.topMass,W);
-                Wmass_I->Fill(myGenStMaker.wMass,W);
+                Wmass_I->Fill(myGenStMaker.wMass,W);*/
 //                myGenStMaker.genSingleTop.printContent();
             }
         }

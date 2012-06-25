@@ -41,19 +41,19 @@ public:
 		cout<<"nTrkLayerWithMesurement: "<<muon.nofTrackerLayersWithMeasurement()<<
                         " > ? "<<nTrkLwMCut<<endl;
 		cout<<"nMuvh: "<<muon.nofValidMuHits()<< " > ? "<<nMuValHit<<endl;
-		cout<<"D0: "<<muon.d0()<<" < ? "<<d0Cut<<endl;
+		cout<<"D0: "<<fabs(muon.d0())<<" < ? "<<d0Cut<<endl;
 		cout<<"dist to pv: "<<fabs(muon.vz()-Zpv)<<" < ? 0.5"<<endl;
 		cout<<"nValidPixelHit: "<<muon.nofValidPixelHits()<< " > ? "<< nValidPixelHits<<endl;
 		cout<<"nSegMatched: "<<muon.nofMatchedStations()<<" > ? "<<nSegMatched<<endl;
 		cout<<"isoVal: "<<relIso<<" < ? "<<isoCut<<endl;
                 cout<<"isGlobalPromptTight: "<<muon.idGlobalMuonPromptTight()<<endl;
-		if(muon.Pt() > ptCut && fabs(muon.Eta()) < EtaCut  && muon.chi2()> chi2Cut &&
+		if(muon.Pt() > ptCut && fabs(muon.Eta()) < EtaCut  && muon.chi2() < chi2Cut &&
                    muon.nofTrackerLayersWithMeasurement()> nTrkLwMCut && muon.nofValidMuHits() > nMuValHit && 
                    fabs(muon.d0()) < d0Cut && fabs(muon.vz()-Zpv) < 0.5 && muon.nofValidPixelHits() > nValidPixelHits &&
                    muon.nofMatchedStations() > nSegMatched && relIso < isoCut  )
 		    cout<<"Desired Muon is found :-)"<<endl;
 	    }
-            return(muon.Pt() > ptCut && fabs(muon.Eta()) < EtaCut  && muon.chi2()> chi2Cut &&
+            return(muon.Pt() > ptCut && fabs(muon.Eta()) < EtaCut  && muon.chi2() < chi2Cut &&
                    muon.nofTrackerLayersWithMeasurement()> nTrkLwMCut && muon.nofValidMuHits() > nMuValHit && 
                    fabs(muon.d0()) < d0Cut && fabs(muon.vz()-Zpv) < 0.5 && muon.nofValidPixelHits() > nValidPixelHits &&
                    muon.nofMatchedStations() > nSegMatched && relIso < isoCut  );

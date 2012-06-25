@@ -333,10 +333,10 @@ public:
         }
         Gelectrons.clear();
         Gelectrons = electronSelector.GoldenElecs();
-	if(verbosity > 0)
-	    cout<<"In event, number of GoldenElectrons is: "<<Gelectrons.size()<<"\nIn event, number of SecondElectrons is: "<<Secondelectrons.size()<<endl;
         Secondelectrons.clear();
         Secondelectrons = electronSelector.secondElectrons();
+	if(verbosity > 0)
+	    cout<<"In event, number of GoldenElectrons is: "<<Gelectrons.size()<<"\nIn event, number of SecondElectrons is: "<<Secondelectrons.size()<<endl;
 
     };
      void JetCleaning(){

@@ -1,67 +1,58 @@
-ObjSuf        = o
-SrcSuf        = cc
-ExeSuf        = 
-DllSuf        = so
-OutPutOpt     = -o
-HeadSuf       = h
-CLIBS		=-L/usr/lib -lstdc++
 ROOTINC		=-I$(shell root-config --incdir)
 ROOTLIBS	=$(shell root-config --libs) -lMinuit
 ROOTCFLAGS	=$(shell root-config --cflags)
 ROOTGLIBS	=$(shell root-config --glibs) -lMinuit
-TROOTLIBS	= -L$(HOMELIB) -lTotoData
-ESLIBS 		= -L$(HOMELIB) -lEventSelection385P3
-BASELIBS	= -L$(HOMELIB) -lBaseBaseAnalysis
-BASEINCLUDES	=-I../../../../Base/BaseAnalysis/interface
-TROOTINCLUDES = -I../../../TopBrussels/TopTreeProducer/interface
-
-MYHEADERS=-I../../interface
-MYSOURCES= ../../src
-CXX=g++
-CXXFLAGS	= -ggdb -O0 -DDEBUG -Wall -fPIC -DNO_ORCACLASSES -g -c
-LD		= g++
-LDFLAGS 	= -g
-SOFLAGS 	= -shared
-
-CXXFLAGS	+= $(ROOTCFLAGS)
-LIBS		= $(ROOTFLAGS)
-LIBS		+= $(TROOTLIBS)
-LIBS		+= $(ESLIBS)
-
-HEADERS 	=$(TROOTINCLUDES)
-HEADERS 	+=$(MYHEADERS)
-
-
-
-# Linux with egcs
-
-
-
-CXXFLAGS	+= $(ROOTCFLAGS)
-GLIBS		=$(ROOTGLIBS) 
-LIBS		= $(ROOTLIBS)
-#LIBS		+= $(TROOTLIBS)
-#LIBS		+= $(ESLIBS)
-#------------------------------------------------------------------------------
-SOURCES 	= $(wildcard $(MYSOURCES)/*.cc)
-HEADERS 	= $(wildcard ../interface/*.h)
-OBJECTS 	= $(SOURCES:.$(SrcSuf)=.$(ObjSuf))
-DEPENDS 	= $(SOURCES:.$(SrcSuf)=.d)
-SOBJECTS	= $(SOURCES:.$(SrcSuf)=.$(DllSuf))
 HOMELIB		= $(HOME)/lib
-OPTLIBS		= $(LIBS)
-OPTLIBS		+=$(BASELIBS)
-OPTHEADER	=$(HEADERS)
-OPTHEADER	+=$(BASEINCLUDES)
+TROOTLIBS	= -L$(HOMELIB) -lToto
+ESLIBS 		= -L$(HOMELIB) -lEventSelection
+PULIBS		= -L$(HOMELIB) -lLumi3DRW
+JETTOOLS	= -L$(HOMELIB) -lTools
+RECOLIBS	= -L$(HOMELIB) -lReco
+PHYSOBJLIBS	= -L$(HOMELIB) -lPhysObj
+TOYLIBS		= -L$(HOMELIB) -lToyAnalysis
+TROOTINCLUDES   = -I../../../../TopBrussels/TopTreeProducer/interface
+PUINCLUDES	=-I../../../../TopBrussels/TopTreeAnalysis/MCInformation/interface/
+JETINCLUDES	=-I../../../../TopBrussels/TopTreeAnalysis/Tools/interface/
+RECOINCLUDES	=-I../../../../TopBrussels/TopTreeAnalysis/Reconstruction/interface/
+PHYSOBJINCS	=-I../../../PhysicsObjects/interface/
+ESINCLUDES	=-I../../../EventSelection/interface/
+MYHEADERS=-I../../interface
 
-#PROGRAMS	=  $(SOBJECTS)
+CXX=g++
 
-all: 
-	@echo "Compiling the Macro ...."
-	$(CXX) $(CXXFLAGS) $(MYHEADERS)  Plotting.C
-	@echo "Linking \n\n\n\t"
-	gcc -o plot $(CLIBS) $(LIBS)  Plotting.o
+
+#LIBS		= $(ROOTLIBS)
+LIBS		= $(TROOTLIBS)
+LIBS		+= $(ESLIBS)
+LIBS		+= $(PULIBS)
+LIBS		+= $(JETTOOLS)
+LIBS		+= $(RECOLIBS)
+LIBS		+= $(PHYSOBJLIBS)
+HEADERS 	=$(TROOTINCLUDES)
+HEADERS		+=$(PUINCLUDES)
+HEADERS		+=$(JETINCLUDES)
+HEADERS 	+=$(RECOINCLUDES)
+HEADERS 	+=$(ESINCLUDES)
+HEADERS 	+=$(PHYSOBJINCS)
+
+all:  hist clean
+
+plot: pl clean	
+
+hist:
+	@echo "Compiling the HistogramCreator .... \n"
+	$(CXX) HistogramCreator.C -c -o HistogramCreator.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
+	@echo "Linking ...... \n"
+	g++ HistogramCreator.o -o CreateHistogram $(ROOTGLIBS) -lEG $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
+
+pl:
+	@echo "Compiling the Plotting .... \n"
+	$(CXX) Plotting.C -c -o Plotting.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
+	@echo "Linking ...... \n"
+	g++ Plotting.o -o Plot $(ROOTGLIBS) -lEG $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS) 
+	
+clean:
+	@echo "Cleaning..."
 	@rm -f *.o
+	@rm -f *~
 	@rm -f ../../interface/*.gch
-
-
