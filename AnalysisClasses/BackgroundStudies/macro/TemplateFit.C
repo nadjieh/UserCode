@@ -39,20 +39,20 @@ int main(int argc, char** argv) {
             f++;
             std::string out(*(argv + f));
             file = new TFile(out.c_str(),"read");
-            signal = ((TH1*)file->Get("HtCut/HtCutcosTheta"));
+            signal = ((TH1*)file->Get("Default/DefaultcosTheta"));
 //            signal = ((TH1*)file->Get("EtaFwDCut/EtaFwDCutcosTheta"));
         }else if(arg_fth == "data"){
             f++;
             std::string out(*(argv + f));
             file = new TFile(out.c_str(),"read");
-            data = ((TH1*)file->Get("HtCut/HtCutcosTheta"));
+            data = ((TH1*)file->Get("Default/DefaultcosTheta"));
 //            data = ((TH1*)file->Get("EtaFwDCut/EtaFwDCutcosTheta"));
         }else if (arg_fth == "bkg") {
             f++;
             std::string out(*(argv + f));
             file = new TFile(out.c_str(),"read");
-            bkg = ((TH1*)file->Get("HtCut/HtCutcosTheta"));
-//            bkg = ((TH1*)file->Get("EtaFwDCut/EtaFwDCutcosTheta"));
+//            bkg = ((TH1*)file->Get("RandomB/RandomBcosTheta"));
+            bkg = ((TH1*)file->Get("Default/DefaultcosTheta"));
         }
     }
     signal->Sumw2();
@@ -99,11 +99,11 @@ int main(int argc, char** argv) {
     RooDataHist Signal("Signal","Signal",cosTheta,signal);
     RooHistPdf signalPDF("signalPDF","signalPDF",cosTheta,Signal);
 
-//    RooDataHist Bkg("Bkg","Bkg",cosTheta,bkg);
-//    RooHistPdf BkgPDF("BkgPDF","BkgPDF",cosTheta,Bkg);
-
-    RooDataHist Bkg("Bkg","Bkg",cosTheta,lowHtw);
+    RooDataHist Bkg("Bkg","Bkg",cosTheta,bkg);
     RooHistPdf BkgPDF("BkgPDF","BkgPDF",cosTheta,Bkg);
+
+//    RooDataHist Bkg("Bkg","Bkg",cosTheta,lowHtw);
+//    RooHistPdf BkgPDF("BkgPDF","BkgPDF",cosTheta,Bkg);
 
 
     RooRealVar Nsignal("Nsignal","N_{non-Wjets}",1000,0,100000);

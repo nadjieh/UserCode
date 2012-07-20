@@ -21,35 +21,53 @@ int main(int argc, char** argv) {
     TH1*  signal;
     TH1*  bkg;
     TH1*  wtemplate;
+    TH1*  toptemplate;
     TFile * file = 0;
     for (int f = 1; f < argc; f++) {
         std::string arg_fth(*(argv + f));
+	cout<<f<<" ---- "<<arg_fth<<endl;
         if (arg_fth == "signal") {
             f++;
             std::string out(*(argv + f));
+		cout<<"signal"<<endl;
             file = new TFile(out.c_str(),"read");
             signal = ((TH1*)file->Get("Default/DefaultcosTheta"));
         }else if(arg_fth == "data"){
             f++;
             std::string out(*(argv + f));
+		cout<<"data"<<endl;
             file = new TFile(out.c_str(),"read");
             data = ((TH1*)file->Get("Default/DefaultcosTheta"));
         }else if (arg_fth == "bkg") {
             f++;
             std::string out(*(argv + f));
+		cout<<"bkg"<<endl;
             file = new TFile(out.c_str(),"read");
             bkg = ((TH1*)file->Get("Default/DefaultcosTheta"));
         }else if (arg_fth == "wtemplate") {
             f++;
             std::string out(*(argv + f));
+		cout<<"w template"<<endl;
             file = new TFile(out.c_str(),"read");
             wtemplate = ((TH1*)file->Get("Default/DefaultcosTheta"));
+            //wtemplate = ((TH1*)file->Get("BtagOrderedB/BtagOrderedBcosTheta"));
+	    //wtemplate = ((TH1*)file->Get("PtOrderedB/PtOrderedBcosTheta"));
+        }else if (arg_fth == "toptemplate") {
+            f++;
+            std::string out(*(argv + f));
+		cout<<"top template"<<endl;
+            file = new TFile(out.c_str(),"read");
+            toptemplate = ((TH1*)file->Get("Default/DefaultcosTheta"));
+            //wtemplate = ((TH1*)file->Get("BtagOrderedB/BtagOrderedBcosTheta"));
+	    //wtemplate = ((TH1*)file->Get("PtOrderedB/PtOrderedBcosTheta"));
         }
     }
-    cout<<bkg <<"\t"<<signal<<"\t"<<data<<"\t"<<wtemplate<<endl;
+    cout<<bkg <<"\t"<<signal<<"\t"<<data<<"\t"<<wtemplate<<"\t"<<toptemplate<<endl;
     wtemplate->Sumw2();
     wtemplate->Scale((double)1./(double)wtemplate->Integral());
     
+    toptemplate->Sumw2();
+    toptemplate->Scale((double)1./(double)toptemplate->Integral());
     double lowHtAll[50] = {0.00682428, 0.00914364, 0.0119189, 0.0149055, 0.0169624, 0.0168313, 0.018781, 0.018375, 
     0.0193246, 0.01926, 0.0187486, 0.016555, 0.0196346, 0.0188182, 0.0244237, 0.0253316, 0.0196833, 0.0172154,
     0.0212007, 0.0256599, 0.0146082, 0.0155231, 0.0191555, 0.0221673, 0.0202544, 0.0159449, 0.0212312, 0.0187745, 
@@ -68,11 +86,11 @@ int main(int argc, char** argv) {
         lowHtw->SetBinContent(s+1,lowHtAll[s]);
     
     std::pair<ROOT::Math::Functor,MultiDimensionalFitLiklihood*>  myLL =
-            MultiDimensionalFitLiklihood::getMDLLFunction("MDLL" , bkg , data , signal,wtemplate);
+            MultiDimensionalFitLiklihood::getMDLLFunction("MDLL" , bkg , data , signal,wtemplate,toptemplate);
 //            MultiDimensionalFitLiklihood::getMDLLFunction("MDLL" , bkg , data , signal,lowHtw);
     
-    double x[4]    = {0.7,0.3,1.,1.};
-    double xerr[4] = {-1.,-1.,-1.,-1.};
+    double x[5]    = {0.7,0.3,1.,1.,1.};
+    double xerr[5] = {-1.,-1.,-1.,-1.,-1.};
     double correlation;
     GetMinimumMD(myLL.first,x,xerr,correlation);
     delete myLL.second;

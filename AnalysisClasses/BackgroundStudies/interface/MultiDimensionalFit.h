@@ -20,8 +20,9 @@ using namespace std;
 class MultiDimensionalFitLiklihood : public LikelihoodFunction{
 public:
     MultiDimensionalFitLiklihood(string name , TH1* nonWtbNoWSum , TH1* hData , TH1* WtbSum, 
-    TH1* Wtemplate):LikelihoodFunction(name,nonWtbNoWSum,hData,WtbSum){
+    TH1* Wtemplate, TH1* tt = 0):LikelihoodFunction(name,nonWtbNoWSum,hData,WtbSum){
         wtemplate = Wtemplate;
+	toptemplate = tt;
     }
     ~MultiDimensionalFitLiklihood(){}
     double operator()( const double * x){
@@ -29,13 +30,14 @@ public:
 //        x[1] = f_Neg
 //        x[2] = rec_gen factor
 //        x[3] = nWjets
+//        x[4] = nTt
    
 //        no parameter is needed
 
         double LL = 0.0;
         int nbins = data->GetXaxis()->GetNbins();
         for(int i = 0; i<nbins; i++){
-            std::pair<double, double>  numbers = this->getNdataNmcMD(i+1, x[0],x[1],x[2],x[3]);
+            std::pair<double, double>  numbers = this->getNdataNmcMD(i+1, x[0],x[1],x[2],x[3],x[4]);
 //            cout<<"in LL: "<<numbers.first << "\t"<<numbers.second<<endl;
             LL += LikelihoodFunction::logLikelihood(numbers.first, numbers.second);
         }
@@ -43,17 +45,18 @@ public:
         return LL;
     }
     static std::pair<ROOT::Math::Functor,MultiDimensionalFitLiklihood*> getMDLLFunction(string name ,
-            TH1* nonWtbSum , TH1* hData , TH1* WtbSum, TH1* Wtemplate){
+            TH1* nonWtbSum , TH1* hData , TH1* WtbSum, TH1* Wtemplate, TH1* tt = 0){
         MultiDimensionalFitLiklihood * functor = new MultiDimensionalFitLiklihood(name , nonWtbSum ,
-                hData , WtbSum, Wtemplate);
-        ROOT::Math::Functor ret(*functor, 4 );
+                hData , WtbSum, Wtemplate, tt);
+        ROOT::Math::Functor ret(*functor, 5 );
         return make_pair(ret, functor);
     }
     
 private:
     TH1* wtemplate;
+    TH1* toptemplate;
     std::pair<double, double> getNdataNmcMD(int bin, double f0 = 6.64263e-01, 
-            double f_ = 3.03734e-01, double rec_gen = 1., double nWjets = 1.){
+            double f_ = 3.03734e-01, double rec_gen = 1., double nWjets = 1., double ntt = 1.){
         int nbins = data->GetXaxis()->GetNbins();
         if(bin > nbins || nbins < 0){
             cout<<"No value for this cos(theta) bin"<<endl;
@@ -64,7 +67,7 @@ private:
         double weight = LikelihoodFunction::getWeight(costheta,f0,f_)*rec_gen;
         double nSignal = weight*signal->GetBinContent(bin);
 //        double nMC = bkg->GetBinContent(bin) + nSignal;
-        double nMC = bkg->GetBinContent(bin)+ (nWjets * wtemplate->GetBinContent(bin)) + nSignal;
+        double nMC = bkg->GetBinContent(bin)+ (nWjets * wtemplate->GetBinContent(bin)) + (ntt * toptemplate->GetBinContent(bin))  + nSignal;
 //        cout<<"****** "<<nData<<"\t"<<nMC<<endl;
         return make_pair(nData,nMC);        
     }
@@ -82,8 +85,9 @@ void GetMinimumMD(ROOT::Math::Functor f,double * x, double * xerr,double & corr1
 //        x[1] = f_Neg
 //        x[2] = rec_gen factor
 //        x[3] = n W+jets
-    double step[4] = {0.001,0.001,0.001,0.01};
-    double A[4] = {x[0],x[1],x[2],x[3]};
+//        x[4] = n tT
+    double step[5] = {0.001,0.001,0.001,0.01,0.01};
+    double A[5] = {x[0],x[1],x[2],x[3],x[4]};
 
     min->SetFunction(f);
  
@@ -93,12 +97,14 @@ void GetMinimumMD(ROOT::Math::Functor f,double * x, double * xerr,double & corr1
     min->SetVariable(2,"z",A[2], step[2]);
     min->SetFixedVariable(2,"z",1.);
     min->SetVariable(3,"t",A[3], step[3]); 
-//    min->SetFixedVariable(3,"t",6200.);
+    //min->SetFixedVariable(3,"t",6200.);
+    min->SetVariable(4,"r",A[4], step[4]); 
     min->Minimize(); 
     x[0] = min->X()[0];
     x[1] = min->X()[1];
     x[2] = min->X()[2];
     x[3] = min->X()[3];
+    x[4] = min->X()[4];
     if(!CalcError)
         return;
     corr12 = min->Correlation(0,1);
@@ -106,11 +112,13 @@ void GetMinimumMD(ROOT::Math::Functor f,double * x, double * xerr,double & corr1
     xerr[1] = min->Errors()[1];   
     xerr[2] = min->Errors()[2];   
     xerr[3] = min->Errors()[3];  
+    xerr[4] = min->Errors()[4]; 
     
     cout<<"f0            : "<<x[0]<<"\t+/-\t"<<xerr[0]<<endl;
     cout<<"f_            : "<<x[1]<<"\t+/-\t"<<xerr[1]<<endl;
     cout<<"reg_gen factor: "<<x[2]<<"\t+/-\t"<<xerr[2]<<endl;
     cout<<"n_{W+jets}    : "<<x[3]<<"\t+/-\t"<<xerr[3]<<endl;
+    cout<<"n_{t#bar{t}}    : "<<x[4]<<"\t+/-\t"<<xerr[4]<<endl;
     
     cout<<"f0-f_ correlation: "<<corr12<<endl;
 }
