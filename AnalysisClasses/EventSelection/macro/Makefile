@@ -2,9 +2,9 @@ ROOTINC		=-I$(shell root-config --incdir)
 ROOTLIBS	=$(shell root-config --libs) -lMinuit
 ROOTCFLAGS	=$(shell root-config --cflags)
 ROOTGLIBS	=$(shell root-config --glibs) -lMinuit
-TROOTLIBS	= -L$(HOMELIB) -lToto
-ESLIBS 		= -L$(HOMELIB) -lEventSelection
-BASELIBS	= -L$(HOMELIB) -lBaseBaseAnalysis
+TROOTLIBS	= -L$(HOMELIB) -lToto.2011
+ESLIBS 		= -L$(HOMELIB) -lEventSelection.2011
+BASELIBS	= -L$(HOMELIB) -lBaseBaseAnalysis.2011
 TROOTINCLUDES = -I../../../TopBrussels/TopTreeProducer/interface
 
 MYHEADERS=-I../interface
