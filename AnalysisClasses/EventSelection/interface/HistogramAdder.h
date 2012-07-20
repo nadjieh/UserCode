@@ -53,6 +53,7 @@ public:
         }
     }
     void StructureFinder(TDirectory * f){
+        cout<<f->GetName()<<"--------------------------"<<endl;
 	TKey *key;
 	TIter nextkey(f->GetListOfKeys());
         TDirectory * dir = 0;
@@ -69,6 +70,8 @@ public:
                  l2 = dir->GetListOfKeys();
                  tmp.content.clear();
                  for(int  j=0; j<l2->GetSize(); j++){
+                     if(string(l2->At(j)->GetName()) == "ttDecayModes")
+                         continue;
      	             tmp.content.push_back(string(l2->At(j)->GetName()));
                  }
                  structure.push_back(tmp);

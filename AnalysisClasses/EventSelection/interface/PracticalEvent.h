@@ -71,8 +71,10 @@ public:
                 jets_br = (TBranch *) eventTree->GetBranch("PFJets_selectedPatJetsPF2PAT");
                 if(jets_br != NULL)
                     jets_br->SetAddress(&jets);
-                else
+                else{
                     cout<<"No Branch PFJets_selectedPatJetsPF2PAT" <<endl;
+                    jets = 0;
+                }
 //            }
 
             //---------------------------- genEvents
@@ -82,16 +84,19 @@ public:
                     genEvents = new TClonesArray("TopTree::TRootGenEvent", 0);
                     if(genEvent_br != NULL)
                         genEvent_br->SetAddress(&genEvents);
-                    else
+                    else{
                         cout<<"No Branch GenEvent" <<endl;
-                }
-                else {
+                        genEvents = 0;
+                    }
+                }else {
                     NPgenEvent_br = (TBranch *) eventTree->GetBranch("NPGenEvent");
                     NPgenEvents = new TClonesArray("TopTree::TRootNPGenEvent", 0);
                     if(NPgenEvent_br != NULL)
                         NPgenEvent_br->SetAddress(&NPgenEvents);
-                    else
+                    else{
                         cout<<"No Branch NPGenEvent" <<endl;
+                        NPgenEvents = 0;
+                    }
                 }
 //            }
             //---------------------------- Electrons
@@ -101,8 +106,10 @@ public:
                 electrons = new TClonesArray("TopTree::TRootElectron", 0);
                 if(electron_br != NULL)
                     electron_br->SetAddress(&electrons);
-                else
+                else{
                     cout<<"No Branch Electrons_selectedPatElectronsPF2PAT" <<endl;
+                    electrons = 0;
+                }
 //            }
             //---------------------------- Muons
 //            cout<<muOk_<<endl;
@@ -111,8 +118,10 @@ public:
                 muons = new TClonesArray("TopTree::TRootMuon", 0);
                 if(muon_br != NULL)
                     muon_br->SetAddress(&muons);
-                else
+                else{
                     cout<<"No Branch Muons_selectedPatMuonsPF2PAT" <<endl;
+                    muons = 0;
+                }
 //            }
             //---------------------------- MET
 //            cout<<metOk_<<endl;
@@ -121,8 +130,10 @@ public:
                 mets = new TClonesArray("TopTree::TRootPFMET", 0);
                 if(met_br != NULL)
                     met_br->SetAddress(&mets);
-                else
+                else{
                     cout<<"No Branch PFMET" <<endl;
+                    mets = 0;
+                }
 //            }
             //---------------------------- PrimaryVertex
 //            if(pvOk_){
@@ -130,8 +141,10 @@ public:
                 PVs = new TClonesArray("TopTree::TRootVertex", 0);
                 if(pvs_br != NULL)
                     pvs_br->SetAddress(&PVs);
-                else
+                else{
                     cout<<"No Branch PrimaryVertex" <<endl;
+                    PVs = 0;
+                }
 //            }
             //---------------------------- TagAndProbeObjects
 //            if(tpOk_){
@@ -139,8 +152,10 @@ public:
                 tps = new TClonesArray("TopTree::TRootTagProbeObject", 0);
                 if(TP_br != NULL)
                     TP_br->SetAddress(&tps);
-                else
+                else{
                     cout<<"No Branch TagProbeObject" <<endl;
+                    tps = 0;
+                }
 //            }
             if(runTree != 0)
                 runTree->GetEntries();
@@ -219,11 +234,21 @@ public:
         //////////////////////////////////
         vector<JetCorrectorParameters> vCorrParam;
         vCorrParam.clear();
-
-        JetCorrectorParameters *L3JetCorPar  = new JetCorrectorParameters("/home/nadjieh/work/TopBrussels/TopTreeAnalysis/macros/JECFiles/START42_V17_AK5PFchs_L3Absolute.txt");
-        JetCorrectorParameters *L2JetCorPar  = new JetCorrectorParameters("/home/nadjieh/work/TopBrussels/TopTreeAnalysis/macros/JECFiles/START42_V17_AK5PFchs_L2Relative.txt");
-        JetCorrectorParameters *L1JetCorPar  = new JetCorrectorParameters("/home/nadjieh/work/TopBrussels/TopTreeAnalysis/macros/JECFiles/START42_V17_AK5PFchs_L1FastJet.txt");
-        JetCorrectorParameters *ResJetCorPar = new JetCorrectorParameters("/home/nadjieh/work/TopBrussels/TopTreeAnalysis/macros/JECFiles/START42_V17_AK5PFchs_L2L3Residual.txt");
+        JetCorrectorParameters *L3JetCorPar = 0 ;
+        JetCorrectorParameters *L2JetCorPar  = 0 ;
+        JetCorrectorParameters *L1JetCorPar  = 0 ;
+        JetCorrectorParameters *ResJetCorPar = 0 ;
+        if(!isData){
+            L3JetCorPar  = new JetCorrectorParameters("/home/nadjieh/work/TopBrussels/TopTreeAnalysis/macros/JECFiles/START42_V17_AK5PFchs_L3Absolute.txt");
+            L2JetCorPar  = new JetCorrectorParameters("/home/nadjieh/work/TopBrussels/TopTreeAnalysis/macros/JECFiles/START42_V17_AK5PFchs_L2Relative.txt");
+            L1JetCorPar  = new JetCorrectorParameters("/home/nadjieh/work/TopBrussels/TopTreeAnalysis/macros/JECFiles/START42_V17_AK5PFchs_L1FastJet.txt");
+            ResJetCorPar = new JetCorrectorParameters("/home/nadjieh/work/TopBrussels/TopTreeAnalysis/macros/JECFiles/START42_V17_AK5PFchs_L2L3Residual.txt");
+        }else{
+            L3JetCorPar  = new JetCorrectorParameters("/home/nadjieh/work/TopBrussels/TopTreeAnalysis/macros/JECFiles/GR_R_42_V23_AK5PFchs_L3Absolute.txt");
+            L2JetCorPar  = new JetCorrectorParameters("/home/nadjieh/work/TopBrussels/TopTreeAnalysis/macros/JECFiles/GR_R_42_V23_AK5PFchs_L2Relative.txt");
+            L1JetCorPar  = new JetCorrectorParameters("/home/nadjieh/work/TopBrussels/TopTreeAnalysis/macros/JECFiles/GR_R_42_V23_AK5PFchs_L1FastJet.txt");
+            ResJetCorPar = new JetCorrectorParameters("/home/nadjieh/work/TopBrussels/TopTreeAnalysis/macros/JECFiles/GR_R_42_V23_AK5PFchs_L2L3Residual.txt"); 
+        }
         vCorrParam.push_back(*L1JetCorPar);
         vCorrParam.push_back(*L2JetCorPar);
         vCorrParam.push_back(*L3JetCorPar);
@@ -233,7 +258,11 @@ public:
         delete L3JetCorPar;
         delete ResJetCorPar;
 
-        JetCorrectionUncertainty *jecUnc = new JetCorrectionUncertainty("/home/nadjieh/work/TopBrussels/TopTreeAnalysis/macros/JECFiles/START42_V17_AK5PFchs_Uncertainty.txt");
+        JetCorrectionUncertainty *jecUnc = 0;
+        if(!isData)
+            jecUnc = new JetCorrectionUncertainty("/home/nadjieh/work/TopBrussels/TopTreeAnalysis/macros/JECFiles/START42_V17_AK5PFchs_Uncertainty.txt");
+        else 
+            jecUnc = new JetCorrectionUncertainty("/home/nadjieh/work/TopBrussels/TopTreeAnalysis/macros/JECFiles/GR_R_42_V23_AK5PFchs_Uncertainty.txt");
         // true means redo also the L1
         JetTools *jetTools = new JetTools(vCorrParam, jecUnc, true);
         //cout<<"ACTION: "<<endl;   

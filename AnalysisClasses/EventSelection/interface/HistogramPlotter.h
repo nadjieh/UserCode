@@ -190,6 +190,10 @@ public:
                 if(directHists.at(g).find("cosTheta") != 0 &&  directHists.at(g).find("cosTheta") <directHists.at(g).size())
 //                    cf->Rebin(5);
                     cf->Rebin(2);
+                if(directHists.at(g).find("MT") != 0 &&  directHists.at(g).find("MT") <directHists.at(g).size())
+                    cf->Rebin(4);
+                if(directHists.at(g) == "HT")
+                    cf->Rebin(20);
                 cf->SetFillColor(colors.at(e));
                 cf->SetLineColor(colors.at(e));
                 cf->SetTitle(MCnames.at(e).c_str());
@@ -232,7 +236,11 @@ public:
                     cf->Rebin(2);
             if(directHists.at(g).find("cosTheta") != 0 &&  directHists.at(g).find("cosTheta") <directHists.at(g).size())
 //                    cf->Rebin(5);
-                    cf->Rebin(2);
+                 cf->Rebin(2);
+            if(directHists.at(g).find("MT") != 0 &&  directHists.at(g).find("MT") <directHists.at(g).size())
+                 cf->Rebin(4);
+            if(directHists.at(g) == "HT")
+                cf->Rebin(20);
 //	    cf->Sumw2();
 	    if(directHists.at(g) == "CutFlow"){
             //        cout<<"After scaling: "<<endl;
