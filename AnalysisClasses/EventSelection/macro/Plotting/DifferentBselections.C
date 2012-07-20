@@ -1,0 +1,347 @@
+/* 
+ * File:   HistogramCreator.C
+ * Author: nadjieh
+ *
+ * Created on March 12, 2012, 2:51 PM
+ */
+//same as SelectAndSave with less complexities. Aimed to run on selected samples.
+
+#include "TDirectory.h"
+#include "../../interface/ElectronSelector.h"
+
+#include "../../interface/Event.h"
+
+#include "../../interface/ElectronHists.h"
+#include "../../interface/MuonHists.h"
+#include "../../interface/PVHists.h"
+#include "../../interface/JetHists.h"
+#include "../../interface/JetSelector.h"
+#include "../../interface/MuonVetoSelector.h"
+#include "../../interface/MetHists.h"
+#include "../../interface/PrimaryVertexSelector.h"
+
+#include "../../../PhysicsObjects/interface/SemiLepTopQuark.h"
+
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootMuon.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootElectron.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootJet.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootPFJet.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootMET.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootGenEvent.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootNPGenEvent.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootEvent.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootRun.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootParticle.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootMCParticle.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootVertex.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootHLTInfo.h"
+#include "../../../../AnalysisClasses/EventSelection/interface/PracticalEvent.h"
+#include "../../../../AnalysisClasses/ToyAnalysis/interface/GenSingleTopMaker.h"
+#include "../../../../TopBrussels/TopTreeAnalysis/MCInformation/interface/Lumi3DReWeighting.h"
+
+
+
+
+#include <sstream>
+#include <string>
+
+#include <TApplication.h>
+#include <TRandom.h>
+#include <TFile.h>
+#include <TH1.h>
+#include <TH2.h>
+#include <TCanvas.h>
+#include <TBranch.h>
+#include <TTree.h>
+#include <TSystem.h>
+#include <vector>
+using namespace std;
+using namespace TopTree;
+/*
+ * 
+ */
+class SingleTopHistograms{
+public:
+    SingleTopHistograms(string name):Name(name){
+        Wmass = new TH1D(string(name+"_Wmass").c_str(),string(name+": final-W-mass").c_str(),50, 0.,200.);
+        Wmass->GetXaxis()->SetTitle("M_{W}");
+        WmassII = new TH1D(string(name+"_WmassMET").c_str(),string(name+": final-W-mass (MET)").c_str(),50, 0.,200.);
+        WmassII->GetXaxis()->SetTitle("M_{W}");
+        topMass = new TH1D(string(name+"_topMass").c_str(),string(name+": final-top-mass").c_str(),50, 50.,500.);
+        topMass->GetXaxis()->SetTitle("M_{top}");
+        topMassII = new TH1D(string(name+"_topMassMET").c_str(),string(name+": final-top-mass (MET)").c_str(),50, 50.,500.);
+        topMassII->GetXaxis()->SetTitle("M_{top}");
+        cosTheta = new TH1D(string(name+"cosTheta").c_str(),string(name+": cos(#theta)").c_str(),50, -1.,1.);
+        cosTheta->GetXaxis()->SetTitle("cos(#theta*)");
+        cosThetaII = new TH1D(string(name+"cosTheta_MET").c_str(),string(name+": cos(#theta) (MET)").c_str(),50, -1.,1.);
+        cosThetaII->GetXaxis()->SetTitle("cos(#theta*)");
+    };
+    ~SingleTopHistograms(){};
+    void Fill(SemiLepTopQuark myLeptonicTop, double  lumiWeight3D = 1){
+        cosTheta->Fill(myLeptonicTop.cosThetaStar(),lumiWeight3D);
+        cosThetaII->Fill(myLeptonicTop.cosThetaStar(2),lumiWeight3D);
+        Wmass->Fill(myLeptonicTop.W().M(),lumiWeight3D);
+        topMass->Fill(myLeptonicTop.top().M(),lumiWeight3D);
+        WmassII->Fill(myLeptonicTop.W(2).M(),lumiWeight3D);
+        topMassII->Fill(myLeptonicTop.top(2).M(),lumiWeight3D);
+    }
+    void Write(TDirectory * dir){
+        (dir->mkdir(Name.c_str()))->cd();
+        cosTheta->Write();
+        Wmass->Write();
+        topMass->Write();
+        cosThetaII->Write();
+        WmassII->Write();
+        topMassII->Write();
+        dir->cd();
+    }
+    string Name;
+    TH1D * Wmass;
+    TH1D * WmassII;
+    TH1D * topMass;
+    TH1D * topMassII;
+    TH1D * cosTheta;
+    TH1D * cosThetaII;
+};
+int main(int argc, char** argv) {
+
+    PVHists atLeastOnGPV("final_PV");
+    JetHists Jets("final_Jet",2);
+    JetHists BJets("final_BJet",2);
+    JetHists nonBJets("final_nonBJet",2);
+    JetHists Light("final_Light",2);
+    MuonHists GoldenFinalMuons("final_Muon");
+    MetHists MetHist("finalMet");
+    
+    SingleTopHistograms RandomB("RandomB");
+    SingleTopHistograms PtOrderedB("PtOrderedB");
+    SingleTopHistograms BtagOrderedB("BtagOrderedB");
+
+    
+    TH1D * HT = new TH1D("HT","H_{T};H_{T}(GeV)",500, 0.,500.);
+    TH1D * finalMT = new TH1D("finalMT","final-W-neutrino transverse mass",100, 0.,200.);
+    finalMT->GetXaxis()->SetTitle("M_{T}(W,#nu)");
+    TH1D * delNu = new TH1D("delNu","delNu",100, 0.,100.);
+    delNu->GetXaxis()->SetTitle("#Delta#nu");
+    TH1D * delNuII = new TH1D("delNuMET","delNuMET",100, 0.,100.);
+    delNuII->GetXaxis()->SetTitle("#Delta#nu");
+    std::vector<std::string> inputFileNames;
+    std::string plotFileName;
+    int verbosity = 0;
+    TH1D * METResolutions = 0;
+    std::string HLTname = "HLT_IsoMu17_v*";
+    bool pu3D =false;//true;
+    string PUWeightFileName="";
+    double XSec = 1; double Luminosity = 1; double PreSelEff = 1; double doJES = 1;
+    bool isData = false;
+    int smearingSkim = 1;
+    for (int f = 1; f < argc; f++) {
+        std::string arg_fth(*(argv + f));
+
+        if (arg_fth == "out") {
+          f++;
+          std::string out(*(argv + f));
+	  plotFileName = out;
+        }else if (arg_fth == "input") {
+          f++;
+          std::string in(*(argv + f));
+          inputFileNames.push_back(string("~/work/samples/"+in));
+        }else if(arg_fth == "XSec"){
+          f++;
+          std::string Xsec(*(argv + f));
+          XSec = atof(Xsec.c_str());
+        }else if(arg_fth == "Lumi"){
+          f++;
+          std::string Lumi(*(argv + f));
+          Luminosity = atof(Lumi.c_str());
+        }else if(arg_fth == "preSelEff"){
+          f++;
+          std::string preSelEff(*(argv + f));
+          PreSelEff = atof(preSelEff.c_str());
+        }else if (arg_fth == "JES") {
+            f++;
+            std::string in(*(argv + f));
+           doJES = atof(in.c_str());
+        }else if (arg_fth == "isData") {
+            f++;
+            std::string in(*(argv + f));
+            if(in == "yes" || in == "YES" || in == "Yes" || in == "y" || in == "Y")
+		isData = true;
+	    else
+		isData = false;
+        }else if (arg_fth == "METResolFileName") {
+            f++;
+            std::string in(*(argv + f));
+            TFile * METResolFileName = TFile::Open(in.c_str());
+            METResolutions = (TH1D*) METResolFileName->Get("METresolutions");
+        }else if (arg_fth == "HLTname") {
+            f++;
+            std::string in(*(argv + f));
+            HLTname = in;
+            std::cout<<HLTname<<endl;
+        }else if (arg_fth == "PUWeightFileName") {
+            f++;
+            std::string in(*(argv + f));
+            PUWeightFileName = in;
+            std::cout<<HLTname<<endl;
+        }else if (arg_fth == "smearingSkim") {
+            f++;
+            std::string in(*(argv + f));
+            smearingSkim = atof(in.c_str());
+        }
+    }
+    
+    TFile* f = 0;
+    TApplication theApp("App", &argc, argv);
+    double nInit = 0;
+    double nFinal = 0;
+    double nHLTrunB = 0;
+    double nMt = 0;
+    TRandom SeedGenerator(1726367);
+    
+    for(unsigned int fNumber = 0; fNumber<inputFileNames.size(); fNumber++){
+        cout<<"file number "<<fNumber+1<<": "<<inputFileNames.at(fNumber)<<endl;
+        f = TFile::Open(inputFileNames.at(fNumber).c_str());
+        
+        TTree* runTree = (TTree*) f->Get("runTree");
+        TTree* eventTree = (TTree*) f->Get("eventTree");
+        
+        PracticalEvent * pracEvt = new PracticalEvent(eventTree,runTree);
+        pracEvt->eventTree->SetBranchStatus("*", 1);
+
+        std::cout<<"beforeLoop"<<std::endl;
+
+        int ievt = 0;
+        
+        while (pracEvt->Next()) {
+
+//                continue;
+            double lumiWeight3D = 1;
+
+//            cout<<lumiWeight3D<<endl;
+            nInit+=lumiWeight3D;
+//            nInit++;
+            ievt++;
+            if(verbosity > 0)
+                cout<<"*******************************************************************"<<endl;
+
+            std::vector<TRootPFJet>  myJets_;
+            myJets_.clear();
+//            cout<<"I am going to Jet Correction "<<isData<<endl;
+            myJets_ = pracEvt->ScaledPFJetCollection(1,isData);
+
+            Event myEvent_tmp( myJets_, *pracEvt->ElectronCollection()
+            ,pracEvt->TypeICorrMET(),*pracEvt->MuonCollection(),*pracEvt->VertexCollection());
+            if(verbosity > 0)
+                cout<<"PV size: "<<myEvent_tmp.pvs.size()<<"\n"
+                    <<"Muon size: "<<myEvent_tmp.muons.size()<<"\n"
+                    <<"Electron size: "<<myEvent_tmp.electrons.size()<<"\n"
+                    <<"Jet size: "<<myEvent_tmp.PFJets.size()<<"\n"<<endl;
+            myEvent_tmp.verbose(verbosity);
+            if(verbosity > 0)
+                cout<<"ScrapFilterMaker-------------------------------------------------------------------"<<endl;
+            double scrapFilterer = (double)(pracEvt->Event()->nHighPurityTracks())/(double)(pracEvt->Event()->nTracks());
+            if(verbosity > 0)
+                cout<<"HBHEnoiseFilterMaker-------------------------------------------------------------------"<<endl;//?????
+            if(verbosity > 0)
+                cout<<"Vertex Makers ---------------------------------------------------------------------"<<endl;
+            myEvent_tmp.VertexMaker();
+            if(verbosity > 0)
+                cout<<"Electron Maker ---------------------------------------------------------------------"<<endl;
+            myEvent_tmp.ElectronMaker();
+            /*pt = 30., eta = 2.5,  Exc_Low = 1.4442 , Exc_High = 1.5660, Id = "VBTF70", IdSecond = "VBTF95" (not applied),
+             * D0 = 0.02, IsoCut = 0.125, drToPV = 10000.,  secondEIso = 0.2, secPt=15 GeV 
+             */
+            
+                  
+            if(verbosity > 0)
+                cout<<"Jet Makers ---------------------------------------------------------------------"<<endl;
+            myEvent_tmp.PFJetMaker(/*bTagAlgo*/"TCHP",/*pt*/30.,/*eta*/4.5);
+            if(verbosity > 0)
+                cout<<"Muon Maker ---------------------------------------------------------------------"<<endl;
+            myEvent_tmp.MuonMaker();
+            /*
+             * pt = 20.,  eta = 2.1, chi2 = 10,  D0 = 0.02,  nvh = 10, isoCut_ = 0.15,  doGL = false,  
+             * nPixWithMeasuredHits = 1,  nSegM = 1
+             */
+
+            double mt = 0;
+            double metT = sqrt((myEvent_tmp.mets.at(0).Px()*myEvent_tmp.mets.at(0).Px())+
+                            (myEvent_tmp.mets.at(0).Py()*myEvent_tmp.mets.at(0).Py()));
+
+            double muT =  sqrt((myEvent_tmp.Dmuons.at(0).Px()*myEvent_tmp.Dmuons.at(0).Px())+
+                            (myEvent_tmp.Dmuons.at(0).Py()*myEvent_tmp.Dmuons.at(0).Py()));
+            mt = sqrt(pow(muT+metT,2) - pow(myEvent_tmp.mets.at(0).Px()+myEvent_tmp.Dmuons.at(0).Px(),2)
+                                                - pow(myEvent_tmp.mets.at(0).Py()+myEvent_tmp.Dmuons.at(0).Py(),2));
+
+//            nFinal++;
+            nFinal+=lumiWeight3D;
+            SemiLepTopQuark myLeptonicTopFirst(myEvent_tmp.GPFJets.at(0),myEvent_tmp.mets.at(0),myEvent_tmp.Dmuons.at(0),
+                    myEvent_tmp.GPFJets.at(1), myEvent_tmp.GPFJets.at(0),METResolutions);
+            
+            SemiLepTopQuark myLeptonicTopSecond(myEvent_tmp.GPFJets.at(1),myEvent_tmp.mets.at(0),myEvent_tmp.Dmuons.at(0),
+                    myEvent_tmp.GPFJets.at(0), myEvent_tmp.GPFJets.at(0),METResolutions);
+            
+            TRandom myRand(SeedGenerator.Integer(10000000));
+            int index = myRand.Integer(2);
+            
+            if(index == 0)
+                RandomB.Fill(myLeptonicTopFirst,lumiWeight3D);
+            else if(index == 1)
+                RandomB.Fill(myLeptonicTopSecond,lumiWeight3D);
+            else 
+                cout<<"BAD RANDOM NUMBER"<<endl;
+            
+            double btag1 = myEvent_tmp.GPFJets.at(0).btag_simpleSecondaryVertexHighPurBJetTags();
+            double btag2 = myEvent_tmp.GPFJets.at(1).btag_simpleSecondaryVertexHighPurBJetTags();
+            
+            if(btag1 > btag2)
+                BtagOrderedB.Fill(myLeptonicTopFirst, lumiWeight3D);
+            else
+                BtagOrderedB.Fill(myLeptonicTopSecond, lumiWeight3D);
+
+            if(myEvent_tmp.GPFJets.at(0).Pt() > myEvent_tmp.GPFJets.at(1).Pt())
+                PtOrderedB.Fill(myLeptonicTopFirst, lumiWeight3D);
+            else
+                PtOrderedB.Fill(myLeptonicTopSecond, lumiWeight3D);
+ 
+            double ht = myEvent_tmp.GPFJets.at(0).Pt()+ myEvent_tmp.GPFJets.at(1).Pt();
+            
+            
+            ht+=myEvent_tmp.Dmuons.at(0).Pt();
+            ht+=myEvent_tmp.mets.at(0).Pt();
+            HT->Fill(ht,lumiWeight3D);
+
+
+            Jets.FillPFJets(myEvent_tmp.GPFJets,myEvent_tmp.GPFJets.size(),myEvent_tmp.BPFJets.size(),false,lumiWeight3D);
+            MetHist.Fill(&myEvent_tmp.mets.at(0),lumiWeight3D);
+            finalMT->Fill(mt,lumiWeight3D);
+
+            
+
+        }
+
+        cout<<"before closing file input "<<f->GetName()<<endl;
+        f->Close();
+        delete f;
+
+    }
+    cout<<"before endjob"<<endl;
+    TFile * fout = new TFile(plotFileName.c_str(),"recreate");
+    fout->cd();
+    Jets.WriteAll(fout);
+
+    RandomB.Write(fout);
+    PtOrderedB.Write(fout);
+    BtagOrderedB.Write(fout);
+    fout->cd();
+    finalMT->Write();
+    HT->Write();
+    fout->Write();
+    fout->Close();
+    
+    cout<<nInit<<"\n"<<nHLTrunB<<"\n"<<nMt<<"\n"<<nFinal<<endl;
+    return 0;
+}
+

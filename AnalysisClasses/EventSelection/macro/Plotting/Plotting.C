@@ -78,7 +78,11 @@ int main(int argc, char** argv) {
 //          Xsec = "./IsoMu17/PU3TypeIMET/vNotFlatMC/PU3TypeIMET_"+Xsec+"_plots.root";
 //          Xsec = "./WmassSmeared/CorrPU3TypeIMET/PU3Corr_TypeIMET_"+Xsec+"_plots.root";
 //          Xsec = "./both_newMassPlot/TypeIMETII_"+Xsec+"_plots.root";
-          Xsec ="./Wshape/Wshape_" + Xsec + "_plots.root";
+//          Xsec ="~/archive/2012/AnalysisClasses/EventSelection/macro/Plotting/May/Wshape/Wshape_" + Xsec + "_plots.root";
+//          Xsec ="./for2Dfit/WithGenInfo_" + Xsec + "_plots.root";
+          Xsec ="./for2Dfit/2D_CreateWeighedHists_" + Xsec + "_plots.root";
+//          Xsec ="CreateWeighedHists_" + Xsec + "_plots.root";
+//          Xsec ="./Converted/CovertedSel_" + Xsec + "_plots.root";
           TFile * tmp = TFile::Open(Xsec.c_str());
           MCfiles.push_back(tmp);
 	}else if(arg_fth == "beta"){
@@ -97,7 +101,11 @@ int main(int argc, char** argv) {
           std::string preSelEff(*(argv + f));
 //          preSelEff ="./IsoMu17/TypeIMET/TypeIMET_" + preSelEff + ".root";
 //          preSelEff ="./both_newMassPlot/TypeIMETII_" + preSelEff + "_plots.root";
-          preSelEff ="./Wshape/Wshape_" + preSelEff + "_plots.root";
+//          preSelEff ="~/archive/2012/AnalysisClasses/EventSelection/macro/Plotting/May/Wshape/Wshape_" + preSelEff + "_plots.root";
+          preSelEff ="./for2Dfit/WithGenInfo_" + preSelEff + "_plots.root";
+//          preSelEff ="./for2Dfit/2D_CreateWeighedHists_" + preSelEff + "_plots.root";
+//          preSelEff ="CreateWeighedHists_" + preSelEff + "_plots.root";
+//          preSelEff ="./Converted/CovertedSel_" + preSelEff + "_plots.root";
           data = TFile::Open(preSelEff.c_str());
         }else if(arg_fth == "xsec"){
 	  f++;
@@ -113,7 +121,7 @@ int main(int argc, char** argv) {
 //		W = W*0.108*9 * 0.982 * 0.950;
 //	  }
 //	  else
-//		W = W * 0.982 * 0.950;
+		W = W * 0.999; //for lepton id
 	  cout<<"Corrected Weight: "<<W<<endl;
 	  cout<<"Beta Value: "<<beta.at(beta.size()-1)<<endl;
 	  cout<<"Normalized for beta: "<<W<<endl;
@@ -129,13 +137,19 @@ int main(int argc, char** argv) {
     cout<<"LumiA: "<<LumiA<<endl;
     cout<<"LumiB: "<<LumiB<<endl;
 //    HistogramPlotter histPlot(Lumi,true);
-//    HistogramPlotter histPlot(true);
-//    histPlot.StructureFinder(data);
-//    histPlot.printStructure();
-//    TFile * out = new TFile(outFileName.c_str(),"recreate");
-//    histPlot.plot(MCfiles,weights,Colors,MCnames,out,data);
+    for(unsigned int i = 0; i< MCfiles.size(); i++)
+	  cout<<MCnames.at(i)<<"\t";
+    cout<<endl;
+/*    for(unsigned int i = 0; i< MCfiles.size(); i++)
+	  cout<<((TH1D*)MCfiles.at(i)->Get("finalMT"))->GetEntries()<<"\t";
+    cout<<endl;*/
+/*    HistogramPlotter histPlot(true);
+    histPlot.StructureFinder(data);
+    histPlot.printStructure();
+    TFile * out = new TFile(outFileName.c_str(),"recreate");
+    histPlot.plot(MCfiles,weights,Colors,MCnames,out,data);*/
     
-//    HistogramAdder histPlot(Lumi,true);
+
     HistogramAdder histPlot(false);
     histPlot.StructureFinder(data);
     histPlot.printStructure();

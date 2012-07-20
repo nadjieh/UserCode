@@ -19,6 +19,7 @@
 #include "../../interface/MuonVetoSelector.h"
 #include "../../interface/MetHists.h"
 #include "../../interface/PrimaryVertexSelector.h"
+#include "../../interface/BTagWeight.h"
 
 #include "../../../PhysicsObjects/interface/SemiLepTopQuark.h"
 
@@ -103,17 +104,19 @@ public:
         topMass->Fill(myLeptonicTop.top().M(),lumiWeight3D);
         WmassII->Fill(myLeptonicTop.W(2).M(),lumiWeight3D);
         topMassII->Fill(myLeptonicTop.top(2).M(),lumiWeight3D);
+        cout<<genTop->isSemiMuSingleTop<<endl;
         if(genTop == 0){
-//            cout<<"I am data like!!!"<<endl;
+            cout<<"I am data like!!!"<<endl;
             cosTheta->Fill(myLeptonicTop.cosThetaStar(),lumiWeight3D);
             cosThetaII->Fill(myLeptonicTop.cosThetaStar(2),lumiWeight3D);
-        }else if(!genTop->isSemiMuSingleTop){//Other top decays
+        }else if(!genTop->isSemiMuSingleTop){//cout<<"//Other top decays"<<endl;
             cosTheta->Fill(myLeptonicTop.cosThetaStar(),lumiWeight3D);
             cosThetaII->Fill(myLeptonicTop.cosThetaStar(2),lumiWeight3D);
-        }else if(genTop->genSingleTop.MuCharge() != myLeptonicTop.MuCharge()){// fake muons
+        }else if(genTop->genSingleTop.MuCharge() != myLeptonicTop.MuCharge()){//cout<<"// fake muons"<<endl;
             cosTheta->Fill(myLeptonicTop.cosThetaStar(),lumiWeight3D);
             cosThetaII->Fill(myLeptonicTop.cosThetaStar(2),lumiWeight3D);
         }else{
+            //cout<<"// OK"<<endl;
             cosTheta2D->Fill(genTop->genSingleTop.cosThetaStar(0),myLeptonicTop.cosThetaStar(), lumiWeight3D);
             cosTheta2DII->Fill(genTop->genSingleTop.cosThetaStar(0),myLeptonicTop.cosThetaStar(2), lumiWeight3D);
         }
@@ -189,7 +192,7 @@ int main(int argc, char** argv) {
     JetHists BJets("final_BJet",2);
     JetHists nonBJets("final_nonBJet",2);
     JetHists Light("final_Light",2);
-    MuonHists GoldenFinalMuons("final_Muon");
+    MuonHists GoldenFinalPUMuons("final_Muon");
     MetHists MetHist("finalMet");
     
     SingleTopHistograms Default("Default");
@@ -203,7 +206,7 @@ int main(int argc, char** argv) {
     SingleTopHistograms HtCutTrue("HtCutTrue");
     SingleTopHistograms AntiEtaCutTrue("antiEtaFwDTrue");
     SingleTopHistograms AntiHtCutTrue("antiHtCutTrue");
-    
+
     TH1D * HT = new TH1D("HT","H_{T};H_{T}(GeV)",500, 0.,500.);
     TH1D * finalMT = new TH1D("finalMT","final-W-neutrino transverse mass",100, 0.,200.);
     finalMT->GetXaxis()->SetTitle("M_{T}(W,#nu)");
@@ -216,7 +219,7 @@ int main(int argc, char** argv) {
     int verbosity = 0;
     TH1D * METResolutions = 0;
     std::string HLTname = "HLT_IsoMu17_v*";
-    bool pu3D =false;//true;
+    bool pu3D =true;
     string PUWeightFileName="";
     double XSec = 1; double Luminosity = 1; double PreSelEff = 1; double doJES = 1;
     bool isData = false;
@@ -280,6 +283,9 @@ int main(int argc, char** argv) {
     TFile* f = 0;
     TApplication theApp("App", &argc, argv);
     double nInit = 0;
+    double nFinalPU = 0;
+    double nFinalHLT = 0;
+    double nFinalbTag = 0;
     double nFinal = 0;
     double nHLTrunB = 0;
     double nMt = 0;
@@ -289,14 +295,14 @@ int main(int argc, char** argv) {
 //        Lumi3DWeights.weight3D_set("../../../../TopBrussels/TopTreeAnalysis/macros/PileUpReweighting//MC_Fall11.root",
 //    "../../../../TopBrussels/TopTreeAnalysis/macros/PileUpReweighting/RunAB.root", "pileup", "pileup");
         Lumi3DWeights.weight3D_set("../../../../TopBrussels/TopTreeAnalysis/macros/PileUpReweighting//MC_Fall11.root",
-    "../../../../TopBrussels/TopTreeAnalysis/macros/PileUpReweighting/pileup_2011Data_finebin_true.root", "pileup", "pileup");
+    "../../../../TopBrussels/TopTreeAnalysis/macros/PileUpReweighting/runA_finebin_Pileup_unPrescaledIsoMu17_true.root", "pileup", "pileup");
         Lumi3DWeights.setWFileName(PUWeightFileName);
         Lumi3DWeights.weight3D_init(1.0);
 //    Lumi3DWeights.weight3D_init(PUWeightFileName);
     }
-    
+    TFile * HLTweights = TFile::Open("../HLT_IsoMu17_W.root");
+    TH1D * HLTWeights = (TH1D*)HLTweights->Get("weight");
     GenSingleTopMaker* genSingleTop = 0;
-    
     for(unsigned int fNumber = 0; fNumber<inputFileNames.size(); fNumber++){
         cout<<"file number "<<fNumber+1<<": "<<inputFileNames.at(fNumber)<<endl;
         f = TFile::Open(inputFileNames.at(fNumber).c_str());
@@ -315,15 +321,15 @@ int main(int argc, char** argv) {
         
         while (pracEvt->Next()) {
 //
-//            if(ievt > 10)
+//            if(ievt > 2)
 //                break;
             /* for single top genAnalysis
              * not to be used for real one
              */
             if(!isData && pracEvt->NPGenEvtCollection() != 0){
+//                cout<<"I am here"<<endl;
                     genSingleTop = new GenSingleTopMaker((TRootNPGenEvent*)pracEvt->NPGenEvtCollection()->At(0), verbosity);
             }
-
             double lumiWeight3D = 1;
             if(pu3D){
 
@@ -337,8 +343,8 @@ int main(int argc, char** argv) {
             nInit+=lumiWeight3D;
 //            nInit++;
             ievt++;
-//            if(verbosity > 0)
-//                cout<<ievt<<"\t*******************************************************************"<<endl;
+            if(verbosity > 0)
+                cout<<"*******************************************************************"<<endl;
 
             std::vector<TRootPFJet>  myJets_;
             myJets_.clear();
@@ -379,13 +385,27 @@ int main(int argc, char** argv) {
              * pt = 20.,  eta = 2.1, chi2 = 10,  D0 = 0.02,  nvh = 10, isoCut_ = 0.15,  doGL = false,  
              * nPixWithMeasuredHits = 1,  nSegM = 1
              */
-            /*if(verbosity > 0)
+            if(verbosity > 0)
                 cout<<"START TO SELECT : "<<endl;
             if(scrapFilterer > 0.2){
                 if(verbosity>0)
                     cout<<"\tPassed!! scrapFilterer is "<<scrapFilterer<<endl;
             }else
                 continue;
+
+//            TopTree::TRootHLTInfo hltInfo = pracEvt->RunInfo()->getHLTinfo(pracEvt->Event()->runId());
+//            int trigID = hltInfo.hltPath(HLTname);
+//
+//            if(pracEvt->Event()->trigHLT(trigID)){
+////		nHLTrunB++;
+//		nHLTrunB+=lumiWeight3D;
+//                if(verbosity > 0){
+//                    cout<<hltInfo.hltNames(trigID)<<"\t"<<hltInfo.hltWasRun(trigID)<<
+//                    "\t"<<hltInfo.hltAccept(trigID)<<endl;
+//                    cout<<"\tHLT is passed"<<endl;
+//                }
+//            }else 
+//                continue;
             
             if(myEvent_tmp.Gpvs.size() > 0){
                 if(verbosity > 0)
@@ -416,7 +436,7 @@ int main(int argc, char** argv) {
                         cout<<"\t==2 Jet Passed"<<endl;
                 }
             } else
-                continue;*/
+                continue;
             double mt = 0;
             double metT = sqrt((myEvent_tmp.mets.at(0).Px()*myEvent_tmp.mets.at(0).Px())+
                             (myEvent_tmp.mets.at(0).Py()*myEvent_tmp.mets.at(0).Py()));
@@ -433,47 +453,62 @@ int main(int argc, char** argv) {
             }else
                 continue;
 
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//            if(myEvent_tmp.BPFJets.size() == 1){
-            if(myEvent_tmp.BPFJets.size() != 0){
+            if(myEvent_tmp.BPFJets.size() == 1){
                 if(verbosity > 0)
                     cout<<"\t== 1bTag Passed"<<endl;
             } else
                 continue;
+            /*btag sf*/
+            nFinalPU+=lumiWeight3D;
+//            cout<<"pu: "<<lumiWeight3D<<"\t";
+	    double bw = 1;
+	    if(!isData){
+                double sf, eff;
+                BTagWeight myBtagWeight;
+                vector< vector<BTagWeight::JetInfo> > jInfosToReWeight(myEvent_tmp.GPFJets.size());
+                for (int iJet = 0; iJet < myEvent_tmp.GPFJets.size(); iJet++) {
+                    BTagWeight::GetEffSF_TCHPT(myEvent_tmp.GPFJets[iJet].Pt(), 
+                                            myEvent_tmp.GPFJets[iJet].Eta(), 
+                                            myEvent_tmp.GPFJets[iJet].btag_trackCountingHighPurBJetTags(),
+                                            myEvent_tmp.GPFJets[iJet].partonFlavour(),
+                                            eff, sf , 0);
+                    BTagWeight::JetInfo jinfo(eff, sf);
+                    jInfosToReWeight[iJet].push_back(jinfo);
+                }
+                bw *= myBtagWeight.weight(jInfosToReWeight);
+	    }
+//            cout<<"bw: "<<bw<<"\t";
+            lumiWeight3D *= bw;
+
+            nFinalbTag+=bw;
+            /*HLT sf*/
+	    double hltW = 1;
+//	    if(!isData){
+//                int bin = HLTWeights->GetXaxis()->FindBin(myEvent_tmp.Dmuons.at(0).Eta());
+//                hltW=HLTWeights->GetBinContent(bin);
+//	    }
+            lumiWeight3D*=hltW;
+//            cout<<"hlt: "<<hltW<<endl;
+            nFinalHLT+=hltW;
             
-//            nFinal++;
             nFinal+=lumiWeight3D;
             
             int mySecondJetIndex = 0;
             if(mySecondJetIndex == myEvent_tmp.firstBtagIndex)
                 mySecondJetIndex = 1;
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++            
-            if(myEvent_tmp.GPFJets.at(mySecondJetIndex).btag_trackCountingHighPurBJetTags() <= 1.93)
-                continue;
-            if(fabs(myEvent_tmp.GPFJets.at(0).Eta()) > 2.4 ||fabs(myEvent_tmp.GPFJets.at(1).Eta()) > 2.4 )
-                continue;
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             std::vector<TRootPFJet> nonBs ; nonBs.push_back(myEvent_tmp.GPFJets.at(mySecondJetIndex));
             std::vector<TRootPFJet> sortedJetsbyEta; sortedJetsbyEta.push_back(myEvent_tmp.SortedJetsByEta().at(0));
             //Reweighting process
             SemiLepTopQuark myLeptonicTop(myEvent_tmp.BPFJets.at(0),myEvent_tmp.mets.at(0),myEvent_tmp.Dmuons.at(0),
                     myEvent_tmp.GPFJets.at(mySecondJetIndex), sortedJetsbyEta.at(0),METResolutions);
-//            if(!myLeptonicTop.keepEvent())
-//                continue;
             myLeptonicTop.setMuCharge((int)myEvent_tmp.Dmuons.at(0).charge());
             double eta = fabs(sortedJetsbyEta.at(0).Eta());
             double ht = myEvent_tmp.GPFJets.at(0).Pt()+ myEvent_tmp.GPFJets.at(1).Pt();
             
+            
             ht+=myEvent_tmp.Dmuons.at(0).Pt();
             ht+=myEvent_tmp.mets.at(0).Pt();
             HT->Fill(ht,lumiWeight3D);
-            
             if(myLeptonicTop.hasNeutrinoSolution()){
                 nGoodSolution++;
                 DefaultTrue.Fill(myLeptonicTop,lumiWeight3D,genSingleTop);
@@ -498,6 +533,18 @@ int main(int argc, char** argv) {
             
             if(genSingleTop != NULL)
                 delete genSingleTop;
+
+//            atLeastOnGPV.Fill(myEvent_tmp.Gpvs,myEvent_tmp.Gpvs.size(),lumiWeight3D);
+//            GoldenFinalPUMuons.Fill(myEvent_tmp.Dmuons,myEvent_tmp.Dmuons.size(),lumiWeight3D);
+//            Jets.FillPFJets(myEvent_tmp.GPFJets,myEvent_tmp.GPFJets.size(),myEvent_tmp.BPFJets.size(),false,lumiWeight3D);
+//            BJets.FillPFJets(myEvent_tmp.BPFJets,myEvent_tmp.BPFJets.size(),myEvent_tmp.BPFJets.size(),false,lumiWeight3D);
+//
+//            MetHist.Fill(&myEvent_tmp.mets.at(0),lumiWeight3D);
+//            finalMT->Fill(mt,lumiWeight3D);
+
+
+            
+
         }
 
         cout<<"before closing file input "<<f->GetName()<<endl;
@@ -508,6 +555,13 @@ int main(int argc, char** argv) {
     cout<<"before endjob"<<endl;
     TFile * fout = new TFile(plotFileName.c_str(),"recreate");
     fout->cd();
+//    atLeastOnGPV.WriteAll(fout);
+//    GoldenFinalPUMuons.WriteAll(fout);
+//    Jets.WriteAll(fout);
+//    BJets.WriteAll(fout);
+//    MetHist.WriteAll(fout);  
+//    finalMT->Write();
+//    Default.Write(fout);
     Default.Write(fout);
     EtaCut.Write(fout);
     AntiEtaCut.Write(fout);
@@ -522,7 +576,9 @@ int main(int argc, char** argv) {
     fout->Write();
     fout->Close();
     
-    cout<<nInit<<"\n"<<nHLTrunB<<"\n"<<nMt<<"\n"<<nFinal<<"\n"<<nGoodSolution<<endl;
+    cout<<nInit<<"\n"<<nHLTrunB<<"\n"<<nMt<<"\n"<<nFinal<<endl;
+    cout<<"only pu weight:\t"<<nFinalPU<<"\n"<<"only btag sf:\t"<<nFinalbTag<<endl;
+    cout<<"only HLT weight:\t"<<nFinalHLT<<"\n"<<"all sf's:\t"<<nFinal<<endl;
     return 0;
 }
 

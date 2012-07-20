@@ -34,6 +34,7 @@
 #include "../../../../TopBrussels/TopTreeProducer/interface/TRootHLTInfo.h"
 #include "../../../../AnalysisClasses/EventSelection/interface/PracticalEvent.h"
 #include "../../../../TopBrussels/TopTreeAnalysis/MCInformation/interface/Lumi3DReWeighting.h"
+#include "../../interface/BTagWeight.h"
 
 
 
@@ -102,10 +103,10 @@ double PreSelEff;
 bool pu3D;
 bool saveTypeIMET;
 bool Wtemplate;
-bool TopPairtemplate;
 int sin_nWlike;
 bool isData;
 double sin_weight;
+bool isRunA;
 
 int sin_verbosity;
 TH1D * MT;
@@ -136,41 +137,23 @@ bool isWJetLike(Event evt){
         return false;
     return true;
 }
-bool isTtLike(Event evt, double bdisc = 3.41, int nTagged = 2){
-    if(evt.GPFJets.size() < 3)
-        return false;
-    int nTag = 0;
-    int nJets = 0;
-    for(unsigned int i = 0; i < evt.GPFJets.size(); i++){
-        if(fabs(evt.GPFJets.at(i).Eta()) > 2.4)
-            continue;
-        nJets++;
-        if(evt.GPFJets.at(i).btag_trackCountingHighPurBJetTags() > bdisc)
-            nTag++;
-    }
-    if(nJets < 3)
-        return false;
-    if(nTag < nTagged)
-        return false;
-    return true;
-}
 
 void beginJob(){
      sin_n0 = 0;
      sin_nScrapFilter = 0;
-     sin_doScrapFilter = true;
+     sin_doScrapFilter = false;//true;
      sin_nHCALnoiseFilter = 0;
-     sin_doHCALnoiseFilter = true;
+     sin_doHCALnoiseFilter = false;//true;
      sin_nHlt = 0;
-     sin_doHLT = true;
+     sin_doHLT = false;//true;
      sin_nPV = 0;
-     sin_doPV = true;//
+     sin_doPV = false;//true;//
      sin_nMu = 0;
-     sin_doMuon = true;//
+     sin_doMuon = false;//true;//
      sin_nNoLMu = 0;
-     sin_doLMuVeto = true;//
+     sin_doLMuVeto = false;// true;//
      sin_nNoLE = 0;
-     sin_doLEVeto = true;//
+     sin_doLEVeto = false;//true;//
      sin_doConv = false;// Specific to electron selection.
      sin_nConv_a= 0;
      sin_nConv_b= 0;
@@ -179,17 +162,17 @@ void beginJob(){
      sin_nJet= 0;
      sin_dojet = false;//true;//
      sin_nMT = 0;
-     sin_doMT = false;//
+     sin_doMT = true;//
      sin_nBtag= 0;
      sin_doBtag = false;//   
      sin_verbosity = 0;
      fillTree = true;
      pu3D = false;//false;
-     fillHists = false;//true;
+     fillHists = true;
      saveTypeIMET=false;//true;
-     Wtemplate = false;
-     TopPairtemplate = true;
+     Wtemplate = true;
      sin_nWlike = 0;
+     isRunA = false;
      MT = new TH1D("MT","W-neutrino transverse mass",100, 0.,200.);
      MT->GetXaxis()->SetTitle("M_{T}(W,#nu)");
      finalMT = new TH1D("finalMT","final-W-neutrino transverse mass",100, 0.,200.);
@@ -332,6 +315,11 @@ int main(int argc, char** argv){
             std::string in(*(argv + f));
             HLTname = in;
             std::cout<<HLTname<<endl;
+        }else if (arg_fth == "isRunA") {
+            f++;
+            std::string in(*(argv + f));
+            if(in == "yes" || in == "YES" || in == "Yes" || in == "y" || in == "Y")
+                isRunA = true;
         }
     }
 //    cout<<doJES<<endl;
@@ -342,7 +330,8 @@ int main(int argc, char** argv){
 
     beginJob();
     TApplication theApp("App", &argc, argv);
-    
+    TFile * HLTweights = TFile::Open("HLT_IsoMu17_W.root");
+    TH1D * HLTWeights = (TH1D*)HLTweights->Get("weight");
     for(unsigned int fNumber = 0; fNumber<sin_inputFileNames.size(); fNumber++){
         cout<<"file number "<<fNumber+1<<": "<<sin_inputFileNames.at(fNumber)<<endl;
         f = TFile::Open(sin_inputFileNames.at(fNumber).c_str());
@@ -512,17 +501,7 @@ int main(int argc, char** argv){
                 }else 
                     continue;
             }
-            if(TopPairtemplate && !isTtLike(myEvent_tmp,3.41,2))
-                continue;
-            if(fillTree){
-                if(saveTypeIMET)
-                    if(sin_verbosity>0) cout << endl << "Analyzing ParticleFlow Missing Et..." << endl;
-                if(saveTypeIMET)
-                    new( (*corrMET)[0] ) TRootPFMET(pracEvt->TypeICorrMET());
-                eventTree_f->Fill();
-                if(saveTypeIMET) 
-                    (*corrMET).Delete();
-            }
+
             if(sin_dojet){
                 if(fillHists)
                     sin_Jets.FillPFJets(myEvent_tmp.PFJets,myEvent_tmp.GPFJets.size(),myEvent_tmp.BPFJets.size());
@@ -534,6 +513,15 @@ int main(int argc, char** argv){
                 } else
                     continue;
             }
+//            if(fillTree){
+//                if(saveTypeIMET)
+//                    if(sin_verbosity>0) cout << endl << "Analyzing ParticleFlow Missing Et..." << endl;
+//                if(saveTypeIMET)
+//                    new( (*corrMET)[0] ) TRootPFMET(pracEvt->TypeICorrMET());
+//                eventTree_f->Fill();
+//                if(saveTypeIMET) 
+//                    (*corrMET).Delete();
+//            }
             double mt = 0;
             if(sin_doMT){
                 double metT = sqrt((myEvent_tmp.mets.at(0).Px()*myEvent_tmp.mets.at(0).Px())+
@@ -562,18 +550,38 @@ int main(int argc, char** argv){
                 } else
                     continue;
             }
+            if(sin_doBtag && isData){
+                double sf, eff;
+                BTagWeight myBtagWeight;
+                vector< vector<BTagWeight::JetInfo> > jInfosToReWeight(myEvent_tmp.GPFJets.size());
+                for (int iJet = 0; iJet < myEvent_tmp.GPFJets.size(); iJet++) {
+                    BTagWeight::GetEffSF_TCHPT(myEvent_tmp.GPFJets[iJet].Pt(), 
+                                               myEvent_tmp.GPFJets[iJet].Eta(), 
+                                               myEvent_tmp.GPFJets[iJet].btag_trackCountingHighPurBJetTags(),
+                                               myEvent_tmp.GPFJets[iJet].partonFlavour(),
+                                               eff, sf , 0);
+                    BTagWeight::JetInfo jinfo(eff, sf);
+                    jInfosToReWeight[iJet].push_back(jinfo);
+                }
+                double bw = myBtagWeight.weight(jInfosToReWeight);
+                lumiWeight3D *= bw;
+            }
+            if(sin_doHLT && sin_doMuon && !isData && isRunA){
+                int bin = HLTWeights->GetXaxis()->FindBin(myEvent_tmp.Dmuons.at(0).Eta());
+                lumiWeight3D*=HLTWeights->GetBinContent(bin);
+            }
             if(Wtemplate && !isWJetLike(myEvent_tmp))
                 continue;
 	    sin_nWlike+= lumiWeight3D;
-//            if(fillTree){
-//                if(saveTypeIMET)
-//                    if(sin_verbosity>0) cout << endl << "Analyzing ParticleFlow Missing Et..." << endl;
-//                if(saveTypeIMET)
-//                    new( (*corrMET)[0] ) TRootPFMET(pracEvt->TypeICorrMET());
-//                eventTree_f->Fill();
-//                if(saveTypeIMET) 
-//                    (*corrMET).Delete();
-//            }
+            if(fillTree){
+                if(saveTypeIMET)
+                    if(sin_verbosity>0) cout << endl << "Analyzing ParticleFlow Missing Et..." << endl;
+                if(saveTypeIMET)
+                    new( (*corrMET)[0] ) TRootPFMET(pracEvt->TypeICorrMET());
+                eventTree_f->Fill();
+                if(saveTypeIMET) 
+                    (*corrMET).Delete();
+            }
             if(fillHists){
                 sin_GoldenFinalMuons.Fill(myEvent_tmp.Dmuons,myEvent_tmp.Dmuons.size(),lumiWeight3D);
                 finalMT->Fill(mt,lumiWeight3D);
