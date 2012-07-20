@@ -24,10 +24,10 @@ LDFLAGS 	= -g
 SOFLAGS 	= -shared
 
 CXXFLAGS	+= $(ROOTCFLAGS)
-TROOTLIB	=-L$(HOMELIB) -lToto
-PHYSOBJLIB	=-L$(HOMELIB) -lPhysObj
-TOYANLIB	=-L$(HOMELIB) -lToyAnalysis
-BASELIB		=-L$(HOMELIB) -lBaseBaseAnalysis
+TROOTLIB	=-L$(HOMELIB) -lToto.2011
+PHYSOBJLIB	=-L$(HOMELIB) -lPhysObj.2011
+TOYANLIB	=-L$(HOMELIB) -lToyAnalysis.2011
+BASELIB		=-L$(HOMELIB) -lBaseBaseAnalysis.2011
 
 HEADERS 	=$(MYHEADERS)
 
@@ -56,7 +56,7 @@ HEADERS		+=$(PHYSOBJINC)
 HEADERS		+=$(TOYANAINC)
 HEADERS		+=$(BASEINC)
 
-all: libBkgStudies.so clean ; cp libBkgStudies.so $(HOMELIB)
+all: libBkgStudies.2011.so clean ; cp libBkgStudies.2011.so $(HOMELIB)
 
 clean:
 	@echo "Cleaning..."
@@ -70,6 +70,6 @@ clean:
 .$(SrcSuf).$(ObjSuf):
 	$(CXX) $(CXXFLAGS) -c $<
 
-libBkgStudies.so: $(OBJECTS)
+libBkgStudies.2011.so: $(OBJECTS)
 	$(LD) $(LIBS) $(SOFLAGS) $(LDFLAGS) $+ -o $@
 	@echo "$@ done"

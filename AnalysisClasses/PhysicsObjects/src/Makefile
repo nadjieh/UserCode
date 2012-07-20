@@ -21,7 +21,7 @@ LDFLAGS 	= -g
 SOFLAGS 	= -shared
 
 CXXFLAGS	+= $(ROOTCFLAGS)
-TROOTLIB	=-L$(HOMELIB) -lToto
+TROOTLIB	=-L$(HOMELIB) -lToto.2011
 
 
 HEADERS 	=$(MYHEADERS)
@@ -46,7 +46,7 @@ SOBJECTS	= $(SOURCES:.$(SrcSuf)=.$(DllSuf))
 HEADERS		+=$(TROOTINC)
 #PROGRAMS	=  $(SOBJECTS)
 
-all: libPhysObj.so clean ; cp libPhysObj.so $(HOMELIB)
+all: libPhysObj.2011.so clean ; cp libPhysObj.2011.so $(HOMELIB)
 
 clean:
 	@echo "Cleaning..."
@@ -60,6 +60,6 @@ clean:
 .$(SrcSuf).$(ObjSuf):
 	$(CXX) $(CXXFLAGS) -c $<
 
-libPhysObj.so: $(OBJECTS)
+libPhysObj.2011.so: $(OBJECTS)
 	$(LD) $(LIBS) $(SOFLAGS) $(LDFLAGS) $+ -o $@
 	@echo "$@ done"
