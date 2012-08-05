@@ -107,6 +107,7 @@ public:
         }
         signal = 0;
         signal2D = 0;
+        
     }
 
     ~LikelihoodFunction(){}
@@ -115,11 +116,13 @@ public:
 //        x[1] = f_Neg
 //        x[2] = rec_gen factor
 //        no parameter is needed
-
+//        cout<<"operator is called"<<endl;
         double LL = 0.0;
         int nbins = data->GetXaxis()->GetNbins();
         for(int i = 0; i<nbins; i++){
+//            cout<<"------------ bin number "<<i+1<<endl;
             std::pair<double, double>  numbers = this->getNdataNmc(i+1, x[0],x[1],x[2]);
+//            cout<<"++++++++++ log LL calculator "<<i+1<<endl;
             LL += this->logLikelihood(numbers.first, numbers.second);
         }
         return LL;
@@ -154,15 +157,8 @@ protected:
     TH2* signal2D;
     std::pair<TF1, WeightFunctionCreator*> WeightFunc;
     std::vector<TH2*> signals2D;
-
-    std::pair<double, double> getNdataNmc(int bin, double f0 = 6.64263e-01, double f_ = 3.03734e-01, double rec_gen = 1.){
-        int nbins = data->GetXaxis()->GetNbins();
-        if(bin > nbins || nbins < 0){
-            cout<<"No value for this cos(theta) bin"<<endl;
-            return make_pair(-100,-100);
-        }
-        double nData = data->GetBinContent(bin);
-        double costheta = data->GetBinCenter(bin);
+    
+    double nSignalRW(double costheta, int bin, double f0 = 6.64263e-01, double f_ = 3.03734e-01, double rec_gen = 1.){
         double nSignal = -100.;
         if(signal != 0 && signal2D == 0 && signals2D.size() == 0){
             double weight = getWeight(costheta,f0,f_)*rec_gen;
@@ -186,15 +182,29 @@ protected:
             for(unsigned int p = 0; p < signals2D.size(); p++){
                 s.str("");
                 s<<p<<"_pX";
+//                cout<<"sample number "<<p+1<<endl;
                 hithrecbin = signals2D.at(p)->ProjectionX(s.str().c_str() , bin , bin , "o");
 //                cout<<"In general: "<<hithrecbin->GetName()<<endl;
                 hithrecbin->Multiply( &(WeightFunc.first) , rec_gen);
                 nSignal += hithrecbin->Integral();
-            }
-            if(hithrecbin != NULL)
                 delete hithrecbin;
+            }
+               
         }
-        if(nSignal == -100.){cout<<"************** FATAL ERROR: nSignal is not set ...."<<endl;}
+        if(nSignal == -100.){
+            cout<<"************** FATAL ERROR: nSignal is not set ...."<<endl;
+        }
+        return nSignal;
+    }
+    std::pair<double, double> getNdataNmc(int bin, double f0 = 6.64263e-01, double f_ = 3.03734e-01, double rec_gen = 1.){
+        int nbins = data->GetXaxis()->GetNbins();
+        if(bin > nbins || nbins < 0){
+            cout<<"No value for this cos(theta) bin"<<endl;
+            return make_pair(-100,-100);
+        }
+        double nData = data->GetBinContent(bin);
+        double costheta = data->GetBinCenter(bin);
+        double nSignal = nSignalRW(costheta, bin, f0, f_, rec_gen);
         double nMC = bkg->GetBinContent(bin) + nSignal;
 //        cout<<"****** "<<nData<<"\t"<<nMC<<endl;
         return make_pair(nData,nMC);        
@@ -328,6 +338,9 @@ void GetMinimum(TF3 F,double * x, double * xerr,double & corr12 ,bool CalcError 
     //    based on the documentation of TF3::GetMinimumXYZ from
     //    http://root.cern.ch/root/html532/src/TF3.cxx.html#QUjxjE
 //    F.Print("all");
+    F.SetNpx(5);
+    F.SetNpy(5);
+    F.SetNpz(5);
     F.GetMinimumXYZ(x[0] , x[1] , x[2]);
 //    cout<<x[0]<<"\t"<<x[1]<<"\t"<<x[2]<<endl;
     if(!CalcError)
@@ -343,8 +356,13 @@ void GetMinimum(TF3 F,double * x, double * xerr,double & corr12 ,bool CalcError 
     double xl = 0.0;    double xu = 0.0;
     double yl = 0.0;    double yu = 0.0;
     double zl = 0.0;    double zu = 0.0;
+    x[0] = 0.593245;
     minuit->SetParameter(0, "x", x[0], 0.1, xl , xu );
+//    minuit->FixParameter(0      );
+//    x[1] = 3.03734e-01;
     minuit->SetParameter(1, "y", x[1], 0.1, yl , yu );
+//    minuit->FixParameter(1      );
+//    x[2] = 0.925322;
     minuit->SetParameter(2, "z", x[2], 0.1, zl , zu );
 //    minuit->SetParameter(2, "z", 1, 0.1, zl , zu );
 //    minuit->FixParameter(2      );

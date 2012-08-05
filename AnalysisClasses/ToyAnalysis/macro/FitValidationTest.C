@@ -86,6 +86,7 @@ int main(int argc, char** argv){
     string prefix;
     string suffix;
     string histName;
+    string dirName;
     for (int f = 1; f < argc; f++) {
         std::string arg_fth(*(argv + f));
         if (arg_fth == "StartPEX") {
@@ -120,9 +121,13 @@ int main(int argc, char** argv){
             f++;
             std::string out(*(argv + f));
             histName = out;            
+        }else if (arg_fth == "dirName") {
+            f++;
+            std::string out(*(argv + f));
+            dirName = out;            
         }
     }
-
-    RunFitValidation(StartPEX, LPEX, StartPEXPull, LPEXPull,prefix,suffix,histName);
+    
+    RunFitValidation(StartPEX, LPEX, StartPEXPull, LPEXPull,prefix,suffix,histName,dirName,3793,true);
     return 0;
 }
