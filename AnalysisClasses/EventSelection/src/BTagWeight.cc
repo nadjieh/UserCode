@@ -55,7 +55,7 @@ double BTagWeight::weight(vector<vector<JetInfo> >jets) {
             pData += data;
             //n    std::cout << std::endl<< "mc, data,ratioThis,ratioTot " <<  mc << " " << data << " " << data/mc << " " << pData/pMC << endl;
         }
-        while (comb[idx] == max - 1 && idx + 1 < (int )jets.size()) idx++; // find first jets for which we did not already test all configs 
+        while (comb[idx] == max - 1 && idx + 1 < (int) jets.size()) idx++; // find first jets for which we did not already test all configs 
         // next combination
         comb[idx]++; // test a new config for that jet
         for (int i = 0; i < idx; i++) {
@@ -72,7 +72,7 @@ bool BTagWeight::filter(std::vector<int> t) {
     // return (t >= minTags && t <= maxTags);
 }
 
-void BTagWeight::GetEffSF_TCHEL(double pt, double eta, double discriminator_value, double& eff, double& sf,int Systematics) {
+void BTagWeight::GetEffSF_TCHEL(double pt, double eta, double discriminator_value, double& eff, double& sf, int Systematics) {
     TF1 BTagScaleFactor("fSFB", "0.603913*((1.+(0.286361*x))/(1.+(0.170474*x)))", 30, 1000);
 
     TF1 EffB("EffB", "3.90732786802e-06*x*x*x*x +  -0.000239934437355*x*x*x +  0.00664986827287*x*x +  -0.112578996016*x +  1.00775721404", -100, 100);
@@ -97,15 +97,15 @@ void BTagWeight::GetEffSF_TCHEL(double pt, double eta, double discriminator_valu
         //systematics : 0=the exact bsf values ; 1 = 4%; -1 = -4% PAS-11-003
         double four_percent = (((Systematics > 0) ? 1.0 : -1.0) * 4.0 * sf / 100.0);
         sf += four_percent;
-//        if (Systematics != 0) {
-//            if (fabs(eta) < 1.2)
-//                sf += four_percent;
-//            else
-//                sf -= four_percent;
-//        }
-        
+        //        if (Systematics != 0) {
+        //            if (fabs(eta) < 1.2)
+        //                sf += four_percent;
+        //            else
+        //                sf -= four_percent;
+        //        }
+
         eff = EffB.Eval(discriminator_value);
-    }        /*else if (discriminator_value > 1.0) //???? is it C????
+    }/*else if (discriminator_value > 1.0) //???? is it C????
         {
             sf = BTagScaleFactor.Eval(pt);
             eff = EffC.Eval(disc);
@@ -128,7 +128,7 @@ void BTagWeight::GetEffSF_TCHEL(double pt, double eta, double discriminator_valu
     }
 }
 
-void BTagWeight::GetEffSF_SSVHEM(double pt, double eta, double discriminator_value, double& eff, double& sf,int Systematics) {
+void BTagWeight::GetEffSF_SSVHEM(double pt, double eta, double discriminator_value, double& eff, double& sf, int Systematics) {
     TF1 BTagScaleFactor("fSFB", "0.896462*((1.+(0.00957275*x))/(1.+(0.00837582*x)))", 30, 1000);
 
     TF1 EffB("EffB", "0.00559749726591*x*x*x*x +  -0.0250942917873*x*x*x +  -0.07343076238*x*x +  0.209954428241*x +  0.587277178178", -100, 100);
@@ -159,7 +159,7 @@ void BTagWeight::GetEffSF_SSVHEM(double pt, double eta, double discriminator_val
                 sf -= four_percent;
         }
         eff = EffB.Eval(discriminator_value);
-    }        /*else if (discriminator_value > 1.0) //???? is it C????
+    }/*else if (discriminator_value > 1.0) //???? is it C????
         {
             sf = BTagScaleFactor.Eval(pt);
             eff = EffC.Eval(disc);
@@ -178,8 +178,25 @@ void BTagWeight::GetEffSF_SSVHEM(double pt, double eta, double discriminator_val
         }
     }
 }
+
+double BTagScaleFactorErr(double pt) {
+    /*https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-mujet_payload.txt*/
+    double err = 0;
+    float ptmin[] = {30, 40, 50, 60, 70, 80, 100, 120, 160, 210, 260, 320, 400, 500};
+    float ptmax[] = {40, 50, 60, 70, 80, 100, 120, 160, 210, 260, 320, 400, 500, 670};
+    SFb_error[] = {0.0543376, 0.0534339, 0.0266156, 0.0271337, 0.0276364, 0.0308838, 0.0381656,
+        0.0336979, 0.0336773, 0.0347688, 0.0376865, 0.0556052, 0.0598105, 0.0861122};
+    for (int i = 0; i < 14; i++) {
+        if (pt < ptmax[i] && pt > ptmin[i]) {
+            err = SFb_error[i];
+            break;
+        }
+    }
+    return err;
+}
+
 void BTagWeight::GetEffSF_TCHPT(double pt, double eta, int partonFlavour, double discriminator_value,
-                                double& eff, double& sf,int Systematics) {
+        double& eff, double& sf, int Systematics) {
     /*https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-mujet_payload.txt*/
     TF1 BTagScaleFactor("fSFB", "0.895596*((1.+(9.43219e-05*x))/(1.+(-4.63927e-05*x)))", 30, 670);
 
@@ -188,13 +205,17 @@ void BTagWeight::GetEffSF_TCHPT(double pt, double eta, int partonFlavour, double
     TF1 EffC("EffC", "0.451288118581*exp(-0.0213290505241*x*x*x + 0.356020789904*x*x + -2.20158883207*x + 1.84838018633 )", -100, 100);
 
     /*https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/MistagFuncs.C*/
-    TF1 MisTag_Eta0_24("MistagTCHPT","(-0.00101+(4.70405e-05*x))+(8.3338e-09*(x*x))", 20.,670.);
+    TF1 MisTag_Eta0_24("MistagTCHPT", "(-0.00101+(4.70405e-05*x))+(8.3338e-09*(x*x))", 20., 670.);
+
     /*https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs.C*/
     TF1 SFlight_Eta0_24("SFlightTCHP", "((1.20711+(0.000681067*x))+(-1.57062e-06*(x*x)))+(2.83138e-10*(x*(x*x)))", 20., 670.);
+    TF1 SFlight_Eta0_24_UncDown("SFlightTCHP_UncDown", "((1.03418+(0.000428273*x))+(-5.43024e-07*(x*x)))+(-6.18061e-10*(x*(x*x)))", 20., 670.);
+    TF1 SFlight_Eta0_24_UncUp("SFlightTCHP_UncUp", "((1.38002+(0.000933875*x))+(-2.59821e-06*(x*x)))+(1.18434e-09*(x*(x*x)))", 20., 670.);
+
     /*https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-mujet_payload.txt*/
     /*+ btag recipe: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2011_Data_and_MC*/
     TF1 SFc_Eta0_24("fSFC", "0.895596*((1.+(9.43219e-05*x))/(1.+(-4.63927e-05*x)))", 30., 670.);
-    
+
 
 
     sf = 1.0;
@@ -204,36 +225,35 @@ void BTagWeight::GetEffSF_TCHPT(double pt, double eta, int partonFlavour, double
     if (fabs(partonFlavour) == 5)//it is b        
     {
         sf = BTagScaleFactor.Eval(pt);
-        //systematics : 0=the exact bsf values ; 1 = 4%; -1 = -4% PAS-11-003
-        double four_percent = (((Systematics > 0) ? 1.0 : -1.0) * 4.0 * sf / 100.0);
-        sf += four_percent;
-
+        //systematics : 0=the exact bsf ; 1=upper limit -1=lower limit
+        double SFerr = (((Systematics > 0) ? 1.0 : -1.0) * BTagScaleFactorErr(pt) * sf / 100.0);
+        sf += SFerr;
         eff = EffB.Eval(discriminator_value);
-    }        
-    else if(fabs(partonFlavour) == 4)// it is a c quark
+    } else if (fabs(partonFlavour) == 4)// it is a c quark
     {
         eff = EffC.Eval(discriminator_value);
         /*
-         * systematics : 0=the exact bsf values ; 1 = 8%; -1 = -8% PAS-11-003
+         * systematics : 0=the exact bsf ; 1=upper limit -1=lower limit
          * twice the b_SF: 
-         * https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#Recommendation_for_b_c_tagging_a
+         * https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG
          */
-        double four_percent = (((Systematics > 0) ? 1.0 : -1.0) * 4.0 * sf / 100.0);
-        sf = SFc_Eta0_24.Eval(pt);   
-        sf += 2*four_percent;
-    }
-    else // it is a light quark
+        double SFerr = (((Systematics > 0) ? 1.0 : -1.0) * BTagScaleFactorErr(pt) * sf / 100.0);
+        sf = SFc_Eta0_24.Eval(pt);
+        sf += 2 * SFerr;
+    } else // it is a light quark
     {
         eff = MisTag_Eta0_24.Eval(pt);
         /*
-         * Confusing a bit! From BTV-11-001 Absolute Unc is 0.21 for jets with 50 GeV < pt < 80 GeV
+         * systematics : 0=the exact bsf ; 1=upper limit -1=lower limit
          */
-        sf = SFlight_Eta0_24.Eval(pt);   
-        if(pt > 50 && pt < 80){
-            double unc = (((Systematics > 0) ? 1.0 : -1.0) * 21.0 * sf / 100.0);
-            sf+=unc;
-        }            
+        sf = SFlight_Eta0_24.Eval(pt);
+
+        if(Systematics < 0)
+            sf+=SFlight_Eta0_24_UncDown.Eval(pt);
+        else if(Systematics > 0)
+            sf+=SFlight_Eta0_24_UncUp.Eval(pt);
+
     }
-    if(fabs(eta) > 2.6)
-        eff = 0;
+//    if (fabs(eta) > 2.6)
+//        eff = 0;
 }
