@@ -94,14 +94,16 @@ void BTagWeight::GetEffSF_TCHEL(double pt, double eta, double discriminator_valu
     if (discriminator_value > 1.7)//it is b        
     {
         sf = BTagScaleFactor.Eval(pt);
-        //systematics : 0=the exact bsf values ; 1 = 4%B -4%E ; -1 = -4%B 4%
+        //systematics : 0=the exact bsf values ; 1 = 4%; -1 = -4% PAS-11-003
         double four_percent = (((Systematics > 0) ? 1.0 : -1.0) * 4.0 * sf / 100.0);
-        if (Systematics != 0) {
-            if (fabs(eta) < 1.2)
-                sf += four_percent;
-            else
-                sf -= four_percent;
-        }
+        sf += four_percent;
+//        if (Systematics != 0) {
+//            if (fabs(eta) < 1.2)
+//                sf += four_percent;
+//            else
+//                sf -= four_percent;
+//        }
+        
         eff = EffB.Eval(discriminator_value);
     }        /*else if (discriminator_value > 1.0) //???? is it C????
         {
@@ -178,13 +180,19 @@ void BTagWeight::GetEffSF_SSVHEM(double pt, double eta, double discriminator_val
 }
 void BTagWeight::GetEffSF_TCHPT(double pt, double eta, int partonFlavour, double discriminator_value,
                                 double& eff, double& sf,int Systematics) {
+    /*https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-mujet_payload.txt*/
     TF1 BTagScaleFactor("fSFB", "0.895596*((1.+(9.43219e-05*x))/(1.+(-4.63927e-05*x)))", 30, 670);
 
+    /*https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/eff_b_c-ttbar_payload.txt*/
     TF1 EffB("EffB", "1.26119661124e-05*x*x*x*x +  -0.000683198597977*x*x*x +  0.0145106168149*x*x +  -0.159575511553*x +  0.887707865272", -100, 100);
     TF1 EffC("EffC", "0.451288118581*exp(-0.0213290505241*x*x*x + 0.356020789904*x*x + -2.20158883207*x + 1.84838018633 )", -100, 100);
 
+    /*https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/MistagFuncs.C*/
     TF1 MisTag_Eta0_24("MistagTCHPT","(-0.00101+(4.70405e-05*x))+(8.3338e-09*(x*x))", 20.,670.);
+    /*https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs.C*/
     TF1 SFlight_Eta0_24("SFlightTCHP", "((1.20711+(0.000681067*x))+(-1.57062e-06*(x*x)))+(2.83138e-10*(x*(x*x)))", 20., 670.);
+    /*https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-mujet_payload.txt*/
+    /*+ btag recipe: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2011_Data_and_MC*/
     TF1 SFc_Eta0_24("fSFC", "0.895596*((1.+(9.43219e-05*x))/(1.+(-4.63927e-05*x)))", 30., 670.);
     
 
@@ -196,16 +204,36 @@ void BTagWeight::GetEffSF_TCHPT(double pt, double eta, int partonFlavour, double
     if (fabs(partonFlavour) == 5)//it is b        
     {
         sf = BTagScaleFactor.Eval(pt);
+        //systematics : 0=the exact bsf values ; 1 = 4%; -1 = -4% PAS-11-003
+        double four_percent = (((Systematics > 0) ? 1.0 : -1.0) * 4.0 * sf / 100.0);
+        sf += four_percent;
+
         eff = EffB.Eval(discriminator_value);
     }        
     else if(fabs(partonFlavour) == 4)// it is a c quark
     {
         eff = EffC.Eval(discriminator_value);
+        /*
+         * systematics : 0=the exact bsf values ; 1 = 8%; -1 = -8% PAS-11-003
+         * twice the b_SF: 
+         * https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#Recommendation_for_b_c_tagging_a
+         */
+        double four_percent = (((Systematics > 0) ? 1.0 : -1.0) * 4.0 * sf / 100.0);
         sf = SFc_Eta0_24.Eval(pt);   
+        sf += 2*four_percent;
     }
     else // it is a light quark
     {
         eff = MisTag_Eta0_24.Eval(pt);
+        /*
+         * Confusing a bit! From BTV-11-001 Absolute Unc is 0.21 for jets with 50 GeV < pt < 80 GeV
+         */
         sf = SFlight_Eta0_24.Eval(pt);   
+        if(pt > 50 && pt < 80){
+            double unc = (((Systematics > 0) ? 1.0 : -1.0) * 21.0 * sf / 100.0);
+            sf+=unc;
+        }            
     }
+    if(fabs(eta) > 2.6)
+        eff = 0;
 }
