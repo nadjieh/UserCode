@@ -226,18 +226,26 @@ void BTagWeight::GetEffSF_TCHPT(double pt, double eta, int partonFlavour, double
     {
         sf = BTagScaleFactor.Eval(pt);
         //systematics : 0=the exact bsf ; 1=upper limit -1=lower limit
-        double SFerr = (((Systematics > 0) ? 1.0 : -1.0) * BTagScaleFactorErr(pt) * sf / 100.0);
+        double SFerr = (((Systematics > 0) ? 1.0 : -1.0) * BTagScaleFactorErr(pt) * sf );
         sf += SFerr;
         eff = EffB.Eval(discriminator_value);
+        if (discriminator_value < -0.5)
+            eff = 1;
+        if (discriminator_value > 20)
+            eff = 0;
     } else if (fabs(partonFlavour) == 4)// it is a c quark
     {
         eff = EffC.Eval(discriminator_value);
+        if (discriminator_value < 0.5)
+            eff = 0.99;
+        if (discriminator_value > 20)
+            eff = 0;
         /*
          * systematics : 0=the exact bsf ; 1=upper limit -1=lower limit
          * twice the b_SF: 
          * https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG
          */
-        double SFerr = (((Systematics > 0) ? 1.0 : -1.0) * BTagScaleFactorErr(pt) * sf / 100.0);
+        double SFerr = (((Systematics > 0) ? 1.0 : -1.0) * BTagScaleFactorErr(pt) * sf );
         sf = SFc_Eta0_24.Eval(pt);
         sf += 2 * SFerr;
     } else // it is a light quark
@@ -248,12 +256,12 @@ void BTagWeight::GetEffSF_TCHPT(double pt, double eta, int partonFlavour, double
          */
         sf = SFlight_Eta0_24.Eval(pt);
 
-        if(Systematics < 0)
-            sf+=SFlight_Eta0_24_UncDown.Eval(pt);
-        else if(Systematics > 0)
-            sf+=SFlight_Eta0_24_UncUp.Eval(pt);
+        if (Systematics < 0)
+            sf += SFlight_Eta0_24_UncDown.Eval(pt);
+        else if (Systematics > 0)
+            sf += SFlight_Eta0_24_UncUp.Eval(pt);
 
     }
-//    if (fabs(eta) > 2.6)
-//        eff = 0;
+    //    if (fabs(eta) > 2.6)
+    //        eff = 0;
 }
