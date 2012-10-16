@@ -85,19 +85,22 @@ int main(int argc, char** argv) {
             f++;
             std::string out(*(argv + f));
             file = new TFile(out.c_str(), "read");
-            //                cout<<"signal: "<<out<<endl;
+            cout << "signal: " << out << endl;
             //            signalIID.push_back ((TH2*)file->Get("EtaFwD/EtaFwDcosTheta2D"));
-            signalIID.push_back((TH2*) file->Get("Default/DefaultcosTheta2D"));
-            //            signalIID.push_back ((TH2*)file->Get("DefaultTrue/DefaultTruecosTheta2D"));
-            cout << out << endl;
+            //            signalIID.push_back((TH2*) file->Get("Default/DefaultcosTheta2D"));
+            signalIID.push_back(((TH2*) file->Get("Default_allW/Default_allWcosTheta2D"))->RebinY(1));
+            //            signalIID.push_back ((TH2*)file->Get("Default/DefaultcosTheta2D"));
+            cout << signalIID.at(signalIID.size() - 1)->GetName() << endl;
             if (bkginsignal == 0)
                 //                bkginsignal = ((TH1*)file->Get("EtaFwD/EtaFwDcosTheta"));
-                bkginsignal = ((TH1*) file->Get("Default/DefaultcosTheta"));
-                //                bkginsignal = ((TH1*)file->Get("DefaultTrue/DefaultTruecosTheta"));
+                //                bkginsignal = ((TH1*) file->Get("Default/DefaultcosTheta"));
+                bkginsignal = ((TH1*) file->Get("Default_allW/Default_allWcosTheta"))->Rebin(1);
+                //                bkginsignal = ((TH1*)file->Get("Default/DefaultcosTheta"));
             else
                 //                bkginsignal->Add((TH1*)file->Get("EtaFwD/EtaFwDcosTheta"));
-                bkginsignal->Add((TH1*) file->Get("Default/DefaultcosTheta"));
-            //                bkginsignal->Add((TH1*)file->Get("DefaultTrue/DefaultTruecosTheta"));
+                //                bkginsignal->Add((TH1*) file->Get("Default/DefaultcosTheta"));
+                bkginsignal->Add(((TH1*) file->Get("Default_allW/Default_allWcosTheta"))->Rebin(1));
+            //                bkginsignal->Add((TH1*)file->Get("Default/DefaultcosTheta"));
             //            delete file;
         } else if (arg_fth == "data") {
             f++;
@@ -105,8 +108,10 @@ int main(int argc, char** argv) {
             file = new TFile(out.c_str(), "read");
             cout << "data" << endl;
             //            data = ((TH1*)file->Get("EtaFwD/EtaFwDcosTheta"));
-            data = ((TH1*) file->Get("Default/DefaultcosTheta"));
-            //            data = ((TH1*)file->Get("DefaultTrue/DefaultTruecosTheta"));
+            //            data = ((TH1*) file->Get("Default/DefaultcosTheta"));
+            data = ((TH1*) file->Get("Default_Def/Default_DefcosTheta"))->Rebin(1);
+            //            data->Add(((TH2*) file->Get("Default_allW/Default_allWcosTheta2D"))->ProjectionY());
+            //            data = ((TH1*)file->Get("Default/DefaultcosTheta"));
             //            delete file;
         } else if (arg_fth == "bkg") {
             f++;
@@ -114,8 +119,12 @@ int main(int argc, char** argv) {
             file = new TFile(out.c_str(), "read");
             cout << "bkg" << endl;
             //            bkg = ((TH1*)file->Get("EtaFwD/EtaFwDcosTheta"));
-            bkg = ((TH1*) file->Get("Default/DefaultcosTheta"));
-            //            bkg = ((TH1*)file->Get("DefaultTrue/DefaultTruecosTheta"));
+            //            bkg = ((TH1*) file->Get("Default/DefaultcosTheta"));
+            if(bkg == NULL)
+                bkg = ((TH1*) file->Get("Default_allW/Default_allWcosTheta"))->Rebin(1);
+            else
+                bkg->Add(((TH1*) file->Get("Default_allW/Default_allWcosTheta"))->Rebin(1));
+            //            bkg = ((TH1*)file->Get("Default/DefaultcosTheta"));
             //            delete file;
         } else if (arg_fth == "singleMatrix") {
             f++;
@@ -139,12 +148,22 @@ int main(int argc, char** argv) {
     if (is2Drecgen && !singleMatrix) {
 
         cout << "In Generalized fit: \n\tsize of signal is " << signalIID.size() << endl;
-        if (bkg != NULL && bkginsignal != NULL)
+        if (bkg != NULL && bkginsignal != NULL) {
             bkg->Add(bkginsignal);
+        } else if (bkg == NULL && bkginsignal != NULL) {
+            bkg = (TH1*) bkginsignal->Clone("myBkg");
+        }
+        TFile * test = new TFile("test2D.root", "recreate");
+        test->cd();
+        bkg->Write();
+        data->Write();
+        signalIID.at(0)->Write();
+        test->Close();
 #ifdef DIAGONALIT_CHECK
+        cout << "in diagonal" << endl;
         std::vector<TH2*> diagonalSignal;
         for (unsigned int j = 0; j < signalIID.size(); j++) {
-            diagonalSignal.push_back(DiagonalMaker(signalIID.at(j)));
+            diagonalSignal.push_back(DiagonalMaker(signalIID.at(j), j));
             delete signalIID.at(j);
         }
         signalIID.clear();
@@ -212,3 +231,9 @@ int main(int argc, char** argv) {
     //    delete myChi2.second;
     return 0;
 }
+
+
+
+
+
+

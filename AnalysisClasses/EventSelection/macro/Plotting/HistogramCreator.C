@@ -296,7 +296,7 @@ int main(int argc, char** argv) {
     }
     
     GenSingleTopMaker* genSingleTop = 0;
-    
+    TH1D * ntag = new TH1D("ntag","ntag",10, -0.5, 9.5);
     for(unsigned int fNumber = 0; fNumber<inputFileNames.size(); fNumber++){
         cout<<"file number "<<fNumber+1<<": "<<inputFileNames.at(fNumber)<<endl;
         f = TFile::Open(inputFileNames.at(fNumber).c_str());
@@ -379,7 +379,7 @@ int main(int argc, char** argv) {
              * pt = 20.,  eta = 2.1, chi2 = 10,  D0 = 0.02,  nvh = 10, isoCut_ = 0.15,  doGL = false,  
              * nPixWithMeasuredHits = 1,  nSegM = 1
              */
-            /*if(verbosity > 0)
+            if(verbosity > 0)
                 cout<<"START TO SELECT : "<<endl;
             if(scrapFilterer > 0.2){
                 if(verbosity>0)
@@ -387,7 +387,8 @@ int main(int argc, char** argv) {
             }else
                 continue;
             
-            if(myEvent_tmp.Gpvs.size() > 0){
+//            if(myEvent_tmp.Gpvs.size() > 0){
+            if(myEvent_tmp.passPVsel){
                 if(verbosity > 0)
                     cout<<"\tPVCut Passed"<<endl;
             } else
@@ -416,7 +417,7 @@ int main(int argc, char** argv) {
                         cout<<"\t==2 Jet Passed"<<endl;
                 }
             } else
-                continue;*/
+                continue;
             double mt = 0;
             double metT = sqrt((myEvent_tmp.mets.at(0).Px()*myEvent_tmp.mets.at(0).Px())+
                             (myEvent_tmp.mets.at(0).Py()*myEvent_tmp.mets.at(0).Py()));
@@ -433,39 +434,25 @@ int main(int argc, char** argv) {
             }else
                 continue;
 
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//            if(myEvent_tmp.BPFJets.size() == 1){
-            if(myEvent_tmp.BPFJets.size() != 0){
+            if(myEvent_tmp.BPFJets.size() == 1){
                 if(verbosity > 0)
                     cout<<"\t== 1bTag Passed"<<endl;
             } else
                 continue;
-            
+            ntag->Fill(myEvent_tmp.BPFJets.size());
 //            nFinal++;
             nFinal+=lumiWeight3D;
             
             int mySecondJetIndex = 0;
             if(mySecondJetIndex == myEvent_tmp.firstBtagIndex)
                 mySecondJetIndex = 1;
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++            
-            if(myEvent_tmp.GPFJets.at(mySecondJetIndex).btag_trackCountingHighPurBJetTags() <= 1.93)
-                continue;
-            if(fabs(myEvent_tmp.GPFJets.at(0).Eta()) > 2.4 ||fabs(myEvent_tmp.GPFJets.at(1).Eta()) > 2.4 )
-                continue;
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
             std::vector<TRootPFJet> nonBs ; nonBs.push_back(myEvent_tmp.GPFJets.at(mySecondJetIndex));
             std::vector<TRootPFJet> sortedJetsbyEta; sortedJetsbyEta.push_back(myEvent_tmp.SortedJetsByEta().at(0));
             //Reweighting process
             SemiLepTopQuark myLeptonicTop(myEvent_tmp.BPFJets.at(0),myEvent_tmp.mets.at(0),myEvent_tmp.Dmuons.at(0),
                     myEvent_tmp.GPFJets.at(mySecondJetIndex), sortedJetsbyEta.at(0),METResolutions);
-//            if(!myLeptonicTop.keepEvent())
-//                continue;
+
             myLeptonicTop.setMuCharge((int)myEvent_tmp.Dmuons.at(0).charge());
             double eta = fabs(sortedJetsbyEta.at(0).Eta());
             double ht = myEvent_tmp.GPFJets.at(0).Pt()+ myEvent_tmp.GPFJets.at(1).Pt();
@@ -519,6 +506,7 @@ int main(int argc, char** argv) {
     HtCutTrue.Write(fout);
     AntiHtCutTrue.Write(fout);
     HT->Write();
+    ntag->Write();
     fout->Write();
     fout->Close();
     

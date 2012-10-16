@@ -65,7 +65,7 @@ class MuonHists{
     virtual void WriteAll(TDirectory * dir){
         if (dir == 0)
             return;
-        TDirectory* my_dir = dir->mkdir((Name+"_Electron").c_str());
+        TDirectory* my_dir = dir->mkdir((Name+"_Muon").c_str());
         my_dir->cd();
 	relIso->Write();
 	isGood->Write();

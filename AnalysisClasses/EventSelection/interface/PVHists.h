@@ -53,7 +53,7 @@ class PVHists{
   };
   virtual ~PVHists(){};
   virtual void Fill(std::vector<TRootVertex> pvs, int nGpv = 10.,double weight=1){
-	for(unsigned int i = 0; i<1/*pvs.size()*/; i++){
+	for(unsigned int i = 0; i<pvs.size(); i++){
 		TRootVertex pv = pvs.at(i);
 		double Rho = sqrt((pv.x() * pv.x()) + (pv.y() * pv.y()));
 	        rho->Fill(Rho,weight);
