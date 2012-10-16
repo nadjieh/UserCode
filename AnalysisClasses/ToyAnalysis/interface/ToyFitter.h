@@ -160,12 +160,15 @@ protected:
     
     double nSignalRW(double costheta, int bin, double f0 = 6.64263e-01, double f_ = 3.03734e-01, double rec_gen = 1.){
         double nSignal = -100.;
+        WeightFunc.first.SetParameters(f0, f_);
         if(signal != 0 && signal2D == 0 && signals2D.size() == 0){
-            double weight = getWeight(costheta,f0,f_)*rec_gen;
+//            cout<<"In 1D: "<<endl;
+//            double weight = getWeight(costheta,f0,f_)*rec_gen;
+            double weight = WeightFunc.first.Eval(costheta)*rec_gen;
             nSignal = weight*signal->GetBinContent(bin);
         }else if(signal == 0 && signal2D != 0 && signals2D.size() == 0){
+//            cout<<"In semi-general: "<<endl;
             nSignal = 0;
-            WeightFunc.first.SetParameters(f0, f_);
             gROOT->cd();
             TH1* hithrecbin = this->signal2D->ProjectionX("_pX" , bin , bin , "o");
             hithrecbin->Multiply( &(WeightFunc.first) , rec_gen);
@@ -175,7 +178,6 @@ protected:
         }else if(signal == 0 && signal2D == 0 && signals2D.size() != 0){
 //            cout<<"In general: "<<endl;
             nSignal = 0;
-            WeightFunc.first.SetParameters(f0, f_);
             gROOT->cd();
             TH1* hithrecbin = 0;
             stringstream s;

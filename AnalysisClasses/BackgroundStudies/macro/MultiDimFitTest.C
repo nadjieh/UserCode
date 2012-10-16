@@ -35,39 +35,47 @@ int main(int argc, char** argv) {
             std::string out(*(argv + f));
 		cout<<"signal"<<endl;
             file = new TFile(out.c_str(),"read");
-            signalIID.push_back ((TH2*)file->Get("Default/DefaultcosTheta2D"));
-            cout<<signalIID.at(signalIID.size()-1)->GetEntries()<<endl;
+            signalIID.push_back (((TH2*)file->Get("Default_allW/Default_allWcosTheta2D"))->RebinY(1));
+            cout<<signalIID.at(signalIID.size()-1)->GetNbinsY()<<endl;
             if (bkginsignal == 0)
-                bkginsignal = ((TH1*)file->Get("Default/DefaultcosTheta"));
+                bkginsignal = (((TH1*)file->Get("Default_allW/Default_allWcosTheta"))->Rebin(1));
             else
-                bkginsignal->Add((TH1*)file->Get("Default/DefaultcosTheta"));
+                bkginsignal->Add(((TH1*)file->Get("Default_allW/Default_allWcosTheta"))->Rebin(1));
 
         }else if(arg_fth == "data"){
             f++;
             std::string out(*(argv + f));
 		cout<<"data"<<endl;
             file = new TFile(out.c_str(),"read");
-            data = ((TH1*)file->Get("Default/DefaultcosTheta"));
+            data = ((TH1*)file->Get("Default_allW/Default_allWcosTheta"))->Rebin(1);
         }else if (arg_fth == "bkg") {
             f++;
             std::string out(*(argv + f));
 		cout<<"bkg"<<endl;
             file = new TFile(out.c_str(),"read");
-            bkg = ((TH1*)file->Get("Default/DefaultcosTheta"));
+            if(bkg == NULL)
+                bkg = ((TH1*)file->Get("Default_allW/Default_allWcosTheta"))->Rebin(1);
+            else
+                bkg->Add(((TH1*)file->Get("Default_allW/Default_allWcosTheta"))->Rebin(1));
         }else if (arg_fth == "wtemplate") {
             f++;
             std::string out(*(argv + f));
 		cout<<"w template"<<endl;
             file = new TFile(out.c_str(),"read");
-            wtemplate = ((TH1*)file->Get("Default/DefaultcosTheta"));
-            //wtemplate = ((TH1*)file->Get("BtagOrderedB/BtagOrderedBcosTheta"));
-	    //wtemplate = ((TH1*)file->Get("PtOrderedB/PtOrderedBcosTheta"));
+            wtemplate = ((TH1*)file->Get("bb05"));
+//            cout<<file->GetName()<<endl;
+//            file->ls();
+//            wtemplate = ((TH1*)file->Get("Default_allW/Default_allWcosTheta"))->Rebin(1);
+//            wtemplate = ((TH1*)file->Get("Default_Def/Default_DefcosTheta"));
+//            wtemplate = ((TH1*)file->Get("BtagOrderedB/BtagOrderedBcosTheta"));
+//            wtemplate = ((TH1*)file->Get("RandomB/RandomBcosTheta"));
+//	    wtemplate = ((TH1*)file->Get("PtOrderedB/PtOrderedBcosTheta"));
         }else if (arg_fth == "toptemplate") {
             f++;
             std::string out(*(argv + f));
 		cout<<"top template"<<endl;
             file = new TFile(out.c_str(),"read");
-            toptemplate = ((TH1*)file->Get("Default/DefaultcosTheta"));
+            toptemplate = ((TH1*)file->Get("Default_allW/Default_allWcosTheta"));
             //wtemplate = ((TH1*)file->Get("BtagOrderedB/BtagOrderedBcosTheta"));
 	    //wtemplate = ((TH1*)file->Get("PtOrderedB/PtOrderedBcosTheta"));
         }else if (arg_fth == "singleMatrix") {
@@ -92,20 +100,24 @@ int main(int argc, char** argv) {
 //    toptemplate->Sumw2();
 //    toptemplate->Scale((double)1./(double)toptemplate->Integral());
 
-    
+    data->Print();
     double x[4]    = {0.7,0.3,1.,1.};
     double xerr[4] = {-1.,-1.,-1.,-1.};
     double correlation;
     if(is2Drecgen && !singleMatrix){        
         cout<<"In Generalized fit: \n\tsize of signal is "<<signalIID.size()<<endl;
         if(bkg != NULL && bkginsignal != NULL)
-            bkg->Add(bkginsignal);        
+            bkg->Add(bkginsignal); 
+        cout<<"bkg bins: "<<bkg->GetNbinsX()<<endl;
+        cout<<"w bins: "<<wtemplate->GetNbinsX()<<endl;
+        cout<<"data bins: "<<data->GetNbinsX()<<endl;
         std::pair<ROOT::Math::Functor,MultiDimensionalFitLiklihood*>  myLL = 
         MultiDimensionalFitLiklihood::getMDLLFunctionGeneralized("MDLL" , bkg , data , signalIID,wtemplate);
         GetMinimumMD(myLL.first,x,xerr,correlation);
         delete myLL.second;       
     }
     else if(is2Drecgen && singleMatrix){  
+        cout<<"single rec_gen matrix fit"<<endl;
         if(bkg != NULL && bkginsignal != NULL)
             bkg->Add(bkginsignal);        
         TH2* SingMSignal = 0;
@@ -114,14 +126,14 @@ int main(int argc, char** argv) {
                 SingMSignal = signalIID.at(p);
             else
                 SingMSignal->Add(signalIID.at(p));
-        }            
+        }    
         std::pair<ROOT::Math::Functor,MultiDimensionalFitLiklihood*>  myLL =
         MultiDimensionalFitLiklihood::getMDLLFunction("LL", bkg, data, SingMSignal,wtemplate,true);
         GetMinimumMD(myLL.first,x,xerr,correlation);
         delete myLL.second;
     }
     else if(!is2Drecgen){
-        
+        cout<<"no rec_gen matrix fit"<<endl;
         TH1* Signal1D = 0;
         stringstream s;
         for(unsigned int p = 0; p < signalIID.size(); p++ ){

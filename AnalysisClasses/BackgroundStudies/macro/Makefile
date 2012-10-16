@@ -49,13 +49,13 @@ temp: templatefit clean
 
 fit:
 	@echo "Compiling the MultiDimFitTest .... \n"
-	$(CXX) MultiDimFitTest.C -c -o MultiDimFitTest.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
+	$(CXX) MultiDimFitTest.C -c -o MultiDimFitTest.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS) -g 
 	@echo "Linking ...... \n"
 	g++ MultiDimFitTest.o -o TestMDFit $(ROOTGLIBS) -lEG $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
 
 templatefit:
 	@echo "Compiling the TemplateFit .... \n"
-	$(CXX) TemplateFit.C -c -o TemplateFit.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
+	$(CXX) TemplateFit.C -c -o TemplateFit.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS) -g
 	@echo "Linking ...... \n"
 	g++ TemplateFit.o -o FitTemplates $(ROOTGLIBS) -lEG $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
 
