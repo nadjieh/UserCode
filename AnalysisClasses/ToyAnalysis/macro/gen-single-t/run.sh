@@ -1,1 +1,0 @@
-./CheckCosThetaInGenT input Downloads/genT_1.root  out genT_notSelected.root nSteps 5 f0 6.64263e-01 fminus 3.03734e-01 isFixed f0 XSec 1 Lumi 1 preSelEff 1 JES 1 isData no METResolFileName /home/nadjieh/work/AnalysisClasses/ToyAnalysis/macro/METResolution/METresolutions.root
