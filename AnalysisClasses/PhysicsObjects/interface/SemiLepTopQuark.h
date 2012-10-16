@@ -39,8 +39,8 @@ public:
 //        met.SetPxPyPzE(nu.Px(),nu.Py(),nu.Pz(),sqrt(nu.Px()*nu.Px()+nu.Py()*nu.Py()+nu.Pz()*nu.Pz()));    
         muonCharge = 1000;
     };
-    SemiLepTopQuark(TLorentzVector b, TLorentzVector mis, TLorentzVector Mu, TLorentzVector b2, TRootPFJet FwD, TH1D * res ,int v = 0, bool nuCalc_ = true):
-    bJet(b),unTagged(b2),FwDJet(FwD) ,met(mis),mu(Mu),resolutions(res),verbosity(v),nuCalc(nuCalc_){
+    SemiLepTopQuark(TLorentzVector b, TLorentzVector mis, TLorentzVector Mu, TLorentzVector b2, TRootPFJet FwD, TH1D * res ,int v = 0, bool nuCalc_ = true, bool solutionfound = false):
+    bJet(b),unTagged(b2),FwDJet(FwD) ,met(mis),mu(Mu),resolutions(res),verbosity(v),nuCalc(nuCalc_), nuSolutionFound_FixedWmass(solutionfound){
         goodEvent = true;
         if(nuCalc){
             met_W = this->neutrino_W();
