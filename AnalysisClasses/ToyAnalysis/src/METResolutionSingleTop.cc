@@ -1,1 +1,0 @@
-#include "../interface/METResolutionSingleTop.h"
