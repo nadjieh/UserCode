@@ -38,33 +38,45 @@ public:
         Xsections["tbar"] = 22.6; //1
         Xsections["tW"] = 7.9; //2
         Xsections["tWbar"] = 7.9; //3
-        Xsections["tt"] = 165; //4
+//        Xsections["tt"] = 165; //4
+        Xsections["dimu"] = 2.04; //4
+        Xsections["mue"] = 4.07; //4
+        Xsections["mutau"] = 4.07; //4
+        Xsections["others"] = 154.82; //4
         Xsections["s"] = 3.19; //5
         Xsections["sbar"] = 1.44; //6
         Xsections["w"] = 31314; //7
         Xsections["dy"] = 3048; //8
-        Xsections["qcd"] = 84679; //9
+//        Xsections["qcd"] = 84679; //9
         N0["t"] = 3857900;
         N0["tbar"] = 1943627;
         N0["tW"] = 813134;
         N0["tWbar"] = 689462;
-        N0["tt"] = 3698723;
+//        N0["tt"] = 3698723;
+        N0["dimu"] = 45663;
+        N0["mue"] = 91326; 
+        N0["mutau"] = 91326; 
+        N0["others"] = 3470408; 
         N0["s"] = 259777;
         N0["sbar"] = 137889;
         N0["w"] = 80388662;
         N0["dy"] = 35526705;
-        N0["qcd"] = 25026537;
+//        N0["qcd"] = 25026537;
 
         NSelected["t"] = 35223;
         NSelected["tbar"] = 19903;
         NSelected["tW"] = 7016;
         NSelected["tWbar"] = 5980;
-        NSelected["tt"] = 17068;
+//        NSelected["tt"] = 17068;
+        NSelected["dimu"] = 1450;
+        NSelected["mue"] = 1506;
+        NSelected["mutau"] = 4898;
+        NSelected["others"] = 9214;
         NSelected["s"] = 2503;
         NSelected["sbar"] = 1414;
         NSelected["w"] = 4196;
         NSelected["dy"] = 1873;
-        NSelected["qcd"] = 24;
+//        NSelected["qcd"] = 24;
 
         //        NHt["t"]= 31180;
         //        NHt["tbar"]= 17232;
@@ -106,9 +118,17 @@ public:
 
 class DistributionProducerFromSelected {
 public:
-
+    TH1D * hMeanDiff;
+    TH1D * hSigmaDiff;
+    TH1D * hSkewDiff;
+    TH1D * hNDiff;
     DistributionProducerFromSelected(TH1* hSelected, string MCName, double lumi, bool is2D = false) :
     hInput(hSelected), mcName(MCName), Lumi(lumi), isTwoD(is2D) {
+	gROOT->cd();
+        hMeanDiff= new TH1D(string(MCName+"_MeanDiff").c_str(),string(MCName+"_MeanDiff").c_str(),400,-2.,2.);
+        hSigmaDiff= new TH1D(string(MCName+"_SigmaDiff").c_str(),string(MCName+"_SigmaDiff").c_str(),400,-2.,2.);
+        hSkewDiff= new TH1D(string(MCName+"_SkewDiff").c_str(),string(MCName+"_SkewDiff").c_str(),400,-2.,2.);
+        hNDiff= new TH1D(string(MCName+"_NDiff").c_str(),string(MCName+"_NDiff").c_str(),400,-2.,2.);
 
         TRandom RandomGenerator(SeedGenerator.Integer(10000000));
         if (!isTwoD) {
@@ -159,7 +179,7 @@ public:
 #endif /*TEST*/
         SamplesInfo mySampleInfo;
         Xsec = mySampleInfo.Xsections[MCName];
-        N0 = mySampleInfo.N0[MCName];
+        N0 = (int)mySampleInfo.N0[MCName];
         //        selEff = (double)mySampleInfo.NSelected[MCName]/(double)N0;
         selEff = (double) (hInput->GetEntries()) / (double) N0;
     }
@@ -197,6 +217,11 @@ public:
             hRet->Sumw2();
             for (unsigned int i = 0; i < selectedValues.size(); i++)
                 hRet->Fill(sampleContent[selectedValues.at(i)], Weight);
+            hMeanDiff->Fill(hInput->GetMean() - hRet->GetMean());
+    	    hSigmaDiff->Fill(hInput->GetRMS() - hRet->GetRMS());
+    	    hSkewDiff->Fill(hInput->GetSkewness() - hRet->GetSkewness());
+    	    hNDiff->Fill(((double)hInput->GetEntries() - ((double)hRet->GetEntries()/fraction))/(double)hInput->GetEntries());
+
         } else {
             hRet = new TH2D(hName.c_str(), hTitle.c_str(), hInput->GetXaxis()->GetNbins()
                     , hInput->GetXaxis()->GetXmin(), hInput->GetXaxis()->GetXmax(),
@@ -209,7 +234,14 @@ public:
         }
         return hRet;
     }
-
+void WriteChecks(TDirectory * d){
+	(d->mkdir(string(mcName+"_checks").c_str()))->cd();
+	hMeanDiff->Write();
+	hSigmaDiff->Write();
+	hSkewDiff->Write();
+	hNDiff->Write();
+	d->cd();
+}
     TH1* GeneratePartialSampleLumiEQ(int nPEX) {
         TRandom RandomGenerator(SeedGeneratorLumiEQ.Integer(10000000));
         double nSelectedEventsInLumi_ = Lumi * Xsec*selEff;
