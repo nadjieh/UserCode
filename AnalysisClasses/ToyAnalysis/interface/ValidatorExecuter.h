@@ -452,7 +452,7 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull, int LPEXPull, st
                 std::cout<<"all: "<<signalIID.size()<<endl;
                 for (unsigned int iTwoD = 0; iTwoD < signalIID.size(); iTwoD++) {
                     int position = string(signalIID.at(iTwoD)->GetName()).find("mu");
-                    if (position != 0 && position < string(signalIID.at(iTwoD)->GetName()).size())
+                    if (position != 0 && position < (int)string(signalIID.at(iTwoD)->GetName()).size())
                         tmpVec2D.push_back((TH2*)signalIID.at(iTwoD)->Clone());
                     delete signalIID.at(iTwoD);
                 }

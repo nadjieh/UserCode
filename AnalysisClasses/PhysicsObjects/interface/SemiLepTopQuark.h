@@ -171,13 +171,18 @@ public:
     }
 
     TLorentzVector W(int skim = 1)const{
+//        cout<<"skim: "<<skim<<endl;
         if(skim == 2)
             return (met_MET + mu);
         if (skim == 1)
             return (met_W + mu);
+//        cout<<met.Px()<<" "<<met.Py()<<" "<<met.Pz()<<endl;
+//        cout<<mu.Px()<<" "<<mu.Py()<<" "<<mu.Pz()<<endl;
         return met + mu;
     }
     TLorentzVector top(int skim = 1)const{
+//        cout<<"skim in top: "<<skim<<endl;
+//        cout<<bJet.Px()<<" "<<bJet.Py()<<" "<<bJet.Pz()<<endl;
         return (this->W(skim)+bJet);
     }
     double cosThetaStar(int skim = 1)const{

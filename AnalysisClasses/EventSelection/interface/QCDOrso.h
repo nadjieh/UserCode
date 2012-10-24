@@ -256,210 +256,203 @@ public:
 
     QCDOrso(TTree *tree = 0, TFile * f = 0) : fChain(0) {
         if (tree == 0) {
-            cout<<"tree = 0!"<<endl;
-//            cout<<(gROOT->GetListOfFiles())->At(0)->GetName()<<endl;
-//            TFile *f = (TFile*) gROOT->GetListOfFiles()->FindObject(fName.c_str());
-            cout<<"file = "<<f<<endl;
-            
+            cout << "tree = 0!" << endl;
+            //            cout<<(gROOT->GetListOfFiles())->At(0)->GetName()<<endl;
+            //            TFile *f = (TFile*) gROOT->GetListOfFiles()->FindObject(fName.c_str());
+            cout << "file = " << f << endl;
+
             TDirectory * dir = (TDirectory*) f->Get("TreesMu");
-//            dir->GetObject("Data_noSystQCD", tree);
-//            dir->GetObject("Data_noSystWSample", tree);
+            //            dir->GetObject("Data_noSystQCD", tree);
+            //            dir->GetObject("Data_noSystWSample", tree);
             dir->GetObject("Data_noSystWSampleQCD", tree);
 
         }
         Init(tree);
     };
-    virtual ~QCDOrso();
-    virtual Int_t Cut(Long64_t entry);
-    virtual Int_t GetEntry(Long64_t entry);
-    virtual Long64_t LoadTree(Long64_t entry);
-    virtual void Init(TTree *tree);
-    virtual void Loop();
-    virtual Bool_t Notify();
-    virtual void Show(Long64_t entry = -1);
+
+    virtual ~QCDOrso() {
+        if (!fChain) return;
+        delete fChain->GetCurrentFile();
+    };
+
+    virtual Int_t Cut(Long64_t entry) {
+        // This function may be called from Loop.
+        // returns  1 if entry is accepted.
+        // returns -1 otherwise.
+        return 1;
+    };
+
+    virtual Int_t GetEntry(Long64_t entry) {
+        // Read contents of entry.
+        if (!fChain) return 0;
+        return fChain->GetEntry(entry);
+    };
+
+    virtual Long64_t LoadTree(Long64_t entry) {
+        // Set the environment to read one entry
+        if (!fChain) return -5;
+        Long64_t centry = fChain->LoadTree(entry);
+        if (centry < 0) return centry;
+        if (fChain->GetTreeNumber() != fCurrent) {
+            fCurrent = fChain->GetTreeNumber();
+            Notify();
+        }
+        return centry;
+    };
+
+    virtual void Init(TTree *tree) {
+        // The Init() function is called when the selector needs to initialize
+        // a new tree or chain. Typically here the branch addresses and branch
+        // pointers of the tree will be set.
+        // It is normally not necessary to make changes to the generated
+        // code, but the routine can be extended by the user if needed.
+        // Init() will be called many times when running on PROOF
+        // (once per file to be processed).
+
+        // Set branch addresses and branch pointers
+        if (!tree) return;
+        fChain = tree;
+        fCurrent = -1;
+        fChain->SetMakeClass(1);
+
+        fChain->SetBranchAddress("eta", &eta, &b_eta);
+        fChain->SetBranchAddress("costhetalj", &costhetalj, &b_costhetalj);
+        fChain->SetBranchAddress("topMass", &topMass, &b_topMass);
+        fChain->SetBranchAddress("mtwMass", &mtwMass, &b_mtwMass);
+        fChain->SetBranchAddress("charge", &charge, &b_charge);
+        fChain->SetBranchAddress("runid", &runid, &b_runid);
+        fChain->SetBranchAddress("lumiid", &lumiid, &b_lumiid);
+        fChain->SetBranchAddress("eventid", &eventid, &b_eventid);
+        fChain->SetBranchAddress("weight", &weight, &b_weight);
+        fChain->SetBranchAddress("totalWeight", &totalWeight, &b_totalWeight);
+        fChain->SetBranchAddress("bWeight", &bWeight, &b_bWeight);
+        fChain->SetBranchAddress("bWeightBTagUp", &bWeightBTagUp, &b_bWeightBTagUp);
+        fChain->SetBranchAddress("bWeightBTagDown", &bWeightBTagDown, &b_bWeightBTagDown);
+        fChain->SetBranchAddress("bWeightMisTagUp", &bWeightMisTagUp, &b_bWeightMisTagUp);
+        fChain->SetBranchAddress("bWeightMisTagDown", &bWeightMisTagDown, &b_bWeightMisTagDown);
+        fChain->SetBranchAddress("PUWeight", &PUWeight, &b_PUWeight);
+        fChain->SetBranchAddress("PUWeightPUUp", &PUWeightPUUp, &b_PUWeightPUUp);
+        fChain->SetBranchAddress("PUWeightPUDown", &PUWeightPUDown, &b_PUWeightPUDown);
+        fChain->SetBranchAddress("turnOnWeight", &turnOnWeight, &b_turnOnWeight);
+        fChain->SetBranchAddress("turnOnReWeight", &turnOnReWeight, &b_turnOnReWeight);
+        fChain->SetBranchAddress("turnOnWeightJetTrig1Up", &turnOnWeightJetTrig1Up, &b_turnOnWeightJetTrig1Up);
+        fChain->SetBranchAddress("turnOnWeightJetTrig1Down", &turnOnWeightJetTrig1Down, &b_turnOnWeightJetTrig1Down);
+        fChain->SetBranchAddress("turnOnWeightJetTrig2Up", &turnOnWeightJetTrig2Up, &b_turnOnWeightJetTrig2Up);
+        fChain->SetBranchAddress("turnOnWeightJetTrig2Down", &turnOnWeightJetTrig2Down, &b_turnOnWeightJetTrig2Down);
+        fChain->SetBranchAddress("turnOnWeightJetTrig3Up", &turnOnWeightJetTrig3Up, &b_turnOnWeightJetTrig3Up);
+        fChain->SetBranchAddress("turnOnWeightJetTrig3Down", &turnOnWeightJetTrig3Down, &b_turnOnWeightJetTrig3Down);
+        fChain->SetBranchAddress("turnOnWeightBTagTrig1Up", &turnOnWeightBTagTrig1Up, &b_turnOnWeightBTagTrig1Up);
+        fChain->SetBranchAddress("turnOnWeightBTagTrig1Down", &turnOnWeightBTagTrig1Down, &b_turnOnWeightBTagTrig1Down);
+        fChain->SetBranchAddress("turnOnWeightBTagTrig2Up", &turnOnWeightBTagTrig2Up, &b_turnOnWeightBTagTrig2Up);
+        fChain->SetBranchAddress("turnOnWeightBTagTrig2Down", &turnOnWeightBTagTrig2Down, &b_turnOnWeightBTagTrig2Down);
+        fChain->SetBranchAddress("turnOnWeightBTagTrig3Up", &turnOnWeightBTagTrig3Up, &b_turnOnWeightBTagTrig3Up);
+        fChain->SetBranchAddress("turnOnWeightBTagTrig3Down", &turnOnWeightBTagTrig3Down, &b_turnOnWeightBTagTrig3Down);
+        fChain->SetBranchAddress("leptonPt", &leptonPt, &b_leptonPt);
+        fChain->SetBranchAddress("leptonEta", &leptonEta, &b_leptonEta);
+        fChain->SetBranchAddress("leptonPhi", &leptonPhi, &b_leptonPhi);
+        fChain->SetBranchAddress("leptonRelIso", &leptonRelIso, &b_leptonRelIso);
+        fChain->SetBranchAddress("fJetPt", &fJetPt, &b_fJetPt);
+        fChain->SetBranchAddress("fJetE", &fJetE, &b_fJetE);
+        fChain->SetBranchAddress("fJetEta", &fJetEta, &b_fJetEta);
+        fChain->SetBranchAddress("fJetPhi", &fJetPhi, &b_fJetPhi);
+        fChain->SetBranchAddress("fJetBtag", &fJetBtag, &b_fJetBtag);
+        fChain->SetBranchAddress("bJetPt", &bJetPt, &b_bJetPt);
+        fChain->SetBranchAddress("bJetE", &bJetE, &b_bJetE);
+        fChain->SetBranchAddress("bJetEta", &bJetEta, &b_bJetEta);
+        fChain->SetBranchAddress("bJetPhi", &bJetPhi, &b_bJetPhi);
+        fChain->SetBranchAddress("bJetBtag", &bJetBtag, &b_bJetBtag);
+        fChain->SetBranchAddress("bJetFlavour", &bJetFlavour, &b_bJetFlavour);
+        fChain->SetBranchAddress("metPt", &metPt, &b_metPt);
+        fChain->SetBranchAddress("metPhi", &metPhi, &b_metPhi);
+        fChain->SetBranchAddress("topPt", &topPt, &b_topPt);
+        fChain->SetBranchAddress("topPhi", &topPhi, &b_topPhi);
+        fChain->SetBranchAddress("topEta", &topEta, &b_topEta);
+        fChain->SetBranchAddress("topE", &topE, &b_topE);
+        fChain->SetBranchAddress("ID", &ID, &b_ID);
+        fChain->SetBranchAddress("nVertices", &nVertices, &b_nVertices);
+        fChain->SetBranchAddress("totalEnergy", &totalEnergy, &b_totalEnergy);
+        fChain->SetBranchAddress("totalMomentum", &totalMomentum, &b_totalMomentum);
+        fChain->SetBranchAddress("lowBTag", &lowBTag, &b_lowBTag);
+        fChain->SetBranchAddress("highBTag", &highBTag, &b_highBTag);
+        fChain->SetBranchAddress("PDFWeight1", &PDFWeight1, &b_PDFWeight1);
+        fChain->SetBranchAddress("PDFWeight2", &PDFWeight2, &b_PDFWeight2);
+        fChain->SetBranchAddress("PDFWeight3", &PDFWeight3, &b_PDFWeight3);
+        fChain->SetBranchAddress("PDFWeight4", &PDFWeight4, &b_PDFWeight4);
+        fChain->SetBranchAddress("PDFWeight5", &PDFWeight5, &b_PDFWeight5);
+        fChain->SetBranchAddress("PDFWeight6", &PDFWeight6, &b_PDFWeight6);
+        fChain->SetBranchAddress("PDFWeight7", &PDFWeight7, &b_PDFWeight7);
+        fChain->SetBranchAddress("PDFWeight8", &PDFWeight8, &b_PDFWeight8);
+        fChain->SetBranchAddress("PDFWeight9", &PDFWeight9, &b_PDFWeight9);
+        fChain->SetBranchAddress("PDFWeight10", &PDFWeight10, &b_PDFWeight10);
+        fChain->SetBranchAddress("PDFWeight11", &PDFWeight11, &b_PDFWeight11);
+        fChain->SetBranchAddress("PDFWeight12", &PDFWeight12, &b_PDFWeight12);
+        fChain->SetBranchAddress("PDFWeight13", &PDFWeight13, &b_PDFWeight13);
+        fChain->SetBranchAddress("PDFWeight14", &PDFWeight14, &b_PDFWeight14);
+        fChain->SetBranchAddress("PDFWeight15", &PDFWeight15, &b_PDFWeight15);
+        fChain->SetBranchAddress("PDFWeight16", &PDFWeight16, &b_PDFWeight16);
+        fChain->SetBranchAddress("PDFWeight17", &PDFWeight17, &b_PDFWeight17);
+        fChain->SetBranchAddress("PDFWeight18", &PDFWeight18, &b_PDFWeight18);
+        fChain->SetBranchAddress("PDFWeight19", &PDFWeight19, &b_PDFWeight19);
+        fChain->SetBranchAddress("PDFWeight20", &PDFWeight20, &b_PDFWeight20);
+        fChain->SetBranchAddress("PDFWeight21", &PDFWeight21, &b_PDFWeight21);
+        fChain->SetBranchAddress("PDFWeight22", &PDFWeight22, &b_PDFWeight22);
+        fChain->SetBranchAddress("PDFWeight23", &PDFWeight23, &b_PDFWeight23);
+        fChain->SetBranchAddress("PDFWeight24", &PDFWeight24, &b_PDFWeight24);
+        fChain->SetBranchAddress("PDFWeight25", &PDFWeight25, &b_PDFWeight25);
+        fChain->SetBranchAddress("PDFWeight26", &PDFWeight26, &b_PDFWeight26);
+        fChain->SetBranchAddress("PDFWeight27", &PDFWeight27, &b_PDFWeight27);
+        fChain->SetBranchAddress("PDFWeight28", &PDFWeight28, &b_PDFWeight28);
+        fChain->SetBranchAddress("PDFWeight29", &PDFWeight29, &b_PDFWeight29);
+        fChain->SetBranchAddress("PDFWeight30", &PDFWeight30, &b_PDFWeight30);
+        fChain->SetBranchAddress("PDFWeight31", &PDFWeight31, &b_PDFWeight31);
+        fChain->SetBranchAddress("PDFWeight32", &PDFWeight32, &b_PDFWeight32);
+        fChain->SetBranchAddress("PDFWeight33", &PDFWeight33, &b_PDFWeight33);
+        fChain->SetBranchAddress("PDFWeight34", &PDFWeight34, &b_PDFWeight34);
+        fChain->SetBranchAddress("PDFWeight35", &PDFWeight35, &b_PDFWeight35);
+        fChain->SetBranchAddress("PDFWeight36", &PDFWeight36, &b_PDFWeight36);
+        fChain->SetBranchAddress("PDFWeight37", &PDFWeight37, &b_PDFWeight37);
+        fChain->SetBranchAddress("PDFWeight38", &PDFWeight38, &b_PDFWeight38);
+        fChain->SetBranchAddress("PDFWeight39", &PDFWeight39, &b_PDFWeight39);
+        fChain->SetBranchAddress("PDFWeight40", &PDFWeight40, &b_PDFWeight40);
+        fChain->SetBranchAddress("PDFWeight41", &PDFWeight41, &b_PDFWeight41);
+        fChain->SetBranchAddress("PDFWeight42", &PDFWeight42, &b_PDFWeight42);
+        fChain->SetBranchAddress("PDFWeight43", &PDFWeight43, &b_PDFWeight43);
+        fChain->SetBranchAddress("PDFWeight44", &PDFWeight44, &b_PDFWeight44);
+        fChain->SetBranchAddress("PDFWeight45", &PDFWeight45, &b_PDFWeight45);
+        fChain->SetBranchAddress("PDFWeight46", &PDFWeight46, &b_PDFWeight46);
+        fChain->SetBranchAddress("PDFWeight47", &PDFWeight47, &b_PDFWeight47);
+        fChain->SetBranchAddress("PDFWeight48", &PDFWeight48, &b_PDFWeight48);
+        fChain->SetBranchAddress("PDFWeight49", &PDFWeight49, &b_PDFWeight49);
+        fChain->SetBranchAddress("PDFWeight50", &PDFWeight50, &b_PDFWeight50);
+        fChain->SetBranchAddress("PDFWeight51", &PDFWeight51, &b_PDFWeight51);
+        fChain->SetBranchAddress("PDFWeight52", &PDFWeight52, &b_PDFWeight52);
+        fChain->SetBranchAddress("PDFWeight_Alternate_Set_1", &PDFWeight_Alternate_Set_1, &b_PDFWeight_Alternate_Set_1);
+        fChain->SetBranchAddress("PDFWeight_Alternate_Set_2", &PDFWeight_Alternate_Set_2, &b_PDFWeight_Alternate_Set_2);
+        //    fChain->SetBranchAddress("PDFWeight_Alternate_Set_1", &PDFWeight_Alternate_Set_1, &b_PDFWeight_Alternate_Set_1);
+        //    fChain->SetBranchAddress("PDFWeight_Alternate_Set_2", &PDFWeight_Alternate_Set_2, &b_PDFWeight_Alternate_Set_2);
+        Notify();
+    };
+
+    virtual void Loop() {
+    };
+
+    virtual Bool_t Notify() {
+        // The Notify() function is called when a new file is opened. This
+        // can be either for a new TTree in a TChain or when when a new TTree
+        // is started when using PROOF. It is normally not necessary to make changes
+        // to the generated code, but the routine can be extended by the
+        // user if needed. The return value is currently not used.
+
+        return kTRUE;
+    };
+
+    virtual void Show(Long64_t entry = -1) {
+        // Print contents of entry.
+        // If entry is not specified, print current entry
+        if (!fChain) return;
+        fChain->Show(entry);
+    };
 };
 
 #endif
 
-#ifdef QCDOrso_cxx
-
-QCDOrso::~QCDOrso() {
-    if (!fChain) return;
-    delete fChain->GetCurrentFile();
-}
-
-Int_t QCDOrso::GetEntry(Long64_t entry) {
-    // Read contents of entry.
-    if (!fChain) return 0;
-    return fChain->GetEntry(entry);
-}
-
-Long64_t QCDOrso::LoadTree(Long64_t entry) {
-    // Set the environment to read one entry
-    if (!fChain) return -5;
-    Long64_t centry = fChain->LoadTree(entry);
-    if (centry < 0) return centry;
-    if (fChain->GetTreeNumber() != fCurrent) {
-        fCurrent = fChain->GetTreeNumber();
-        Notify();
-    }
-    return centry;
-}
-
-void QCDOrso::Init(TTree *tree) {
-    // The Init() function is called when the selector needs to initialize
-    // a new tree or chain. Typically here the branch addresses and branch
-    // pointers of the tree will be set.
-    // It is normally not necessary to make changes to the generated
-    // code, but the routine can be extended by the user if needed.
-    // Init() will be called many times when running on PROOF
-    // (once per file to be processed).
-
-    // Set branch addresses and branch pointers
-    if (!tree) return;
-    fChain = tree;
-    fCurrent = -1;
-    fChain->SetMakeClass(1);
-
-    fChain->SetBranchAddress("eta", &eta, &b_eta);
-    fChain->SetBranchAddress("costhetalj", &costhetalj, &b_costhetalj);
-    fChain->SetBranchAddress("topMass", &topMass, &b_topMass);
-    fChain->SetBranchAddress("mtwMass", &mtwMass, &b_mtwMass);
-    fChain->SetBranchAddress("charge", &charge, &b_charge);
-    fChain->SetBranchAddress("runid", &runid, &b_runid);
-    fChain->SetBranchAddress("lumiid", &lumiid, &b_lumiid);
-    fChain->SetBranchAddress("eventid", &eventid, &b_eventid);
-    fChain->SetBranchAddress("weight", &weight, &b_weight);
-    fChain->SetBranchAddress("totalWeight", &totalWeight, &b_totalWeight);
-    fChain->SetBranchAddress("bWeight", &bWeight, &b_bWeight);
-    fChain->SetBranchAddress("bWeightBTagUp", &bWeightBTagUp, &b_bWeightBTagUp);
-    fChain->SetBranchAddress("bWeightBTagDown", &bWeightBTagDown, &b_bWeightBTagDown);
-    fChain->SetBranchAddress("bWeightMisTagUp", &bWeightMisTagUp, &b_bWeightMisTagUp);
-    fChain->SetBranchAddress("bWeightMisTagDown", &bWeightMisTagDown, &b_bWeightMisTagDown);
-    fChain->SetBranchAddress("PUWeight", &PUWeight, &b_PUWeight);
-    fChain->SetBranchAddress("PUWeightPUUp", &PUWeightPUUp, &b_PUWeightPUUp);
-    fChain->SetBranchAddress("PUWeightPUDown", &PUWeightPUDown, &b_PUWeightPUDown);
-    fChain->SetBranchAddress("turnOnWeight", &turnOnWeight, &b_turnOnWeight);
-    fChain->SetBranchAddress("turnOnReWeight", &turnOnReWeight, &b_turnOnReWeight);
-    fChain->SetBranchAddress("turnOnWeightJetTrig1Up", &turnOnWeightJetTrig1Up, &b_turnOnWeightJetTrig1Up);
-    fChain->SetBranchAddress("turnOnWeightJetTrig1Down", &turnOnWeightJetTrig1Down, &b_turnOnWeightJetTrig1Down);
-    fChain->SetBranchAddress("turnOnWeightJetTrig2Up", &turnOnWeightJetTrig2Up, &b_turnOnWeightJetTrig2Up);
-    fChain->SetBranchAddress("turnOnWeightJetTrig2Down", &turnOnWeightJetTrig2Down, &b_turnOnWeightJetTrig2Down);
-    fChain->SetBranchAddress("turnOnWeightJetTrig3Up", &turnOnWeightJetTrig3Up, &b_turnOnWeightJetTrig3Up);
-    fChain->SetBranchAddress("turnOnWeightJetTrig3Down", &turnOnWeightJetTrig3Down, &b_turnOnWeightJetTrig3Down);
-    fChain->SetBranchAddress("turnOnWeightBTagTrig1Up", &turnOnWeightBTagTrig1Up, &b_turnOnWeightBTagTrig1Up);
-    fChain->SetBranchAddress("turnOnWeightBTagTrig1Down", &turnOnWeightBTagTrig1Down, &b_turnOnWeightBTagTrig1Down);
-    fChain->SetBranchAddress("turnOnWeightBTagTrig2Up", &turnOnWeightBTagTrig2Up, &b_turnOnWeightBTagTrig2Up);
-    fChain->SetBranchAddress("turnOnWeightBTagTrig2Down", &turnOnWeightBTagTrig2Down, &b_turnOnWeightBTagTrig2Down);
-    fChain->SetBranchAddress("turnOnWeightBTagTrig3Up", &turnOnWeightBTagTrig3Up, &b_turnOnWeightBTagTrig3Up);
-    fChain->SetBranchAddress("turnOnWeightBTagTrig3Down", &turnOnWeightBTagTrig3Down, &b_turnOnWeightBTagTrig3Down);
-    fChain->SetBranchAddress("leptonPt", &leptonPt, &b_leptonPt);
-    fChain->SetBranchAddress("leptonEta", &leptonEta, &b_leptonEta);
-    fChain->SetBranchAddress("leptonPhi", &leptonPhi, &b_leptonPhi);
-    fChain->SetBranchAddress("leptonRelIso", &leptonRelIso, &b_leptonRelIso);
-    fChain->SetBranchAddress("fJetPt", &fJetPt, &b_fJetPt);
-    fChain->SetBranchAddress("fJetE", &fJetE, &b_fJetE);
-    fChain->SetBranchAddress("fJetEta", &fJetEta, &b_fJetEta);
-    fChain->SetBranchAddress("fJetPhi", &fJetPhi, &b_fJetPhi);
-    fChain->SetBranchAddress("fJetBtag", &fJetBtag, &b_fJetBtag);
-    fChain->SetBranchAddress("bJetPt", &bJetPt, &b_bJetPt);
-    fChain->SetBranchAddress("bJetE", &bJetE, &b_bJetE);
-    fChain->SetBranchAddress("bJetEta", &bJetEta, &b_bJetEta);
-    fChain->SetBranchAddress("bJetPhi", &bJetPhi, &b_bJetPhi);
-    fChain->SetBranchAddress("bJetBtag", &bJetBtag, &b_bJetBtag);
-    fChain->SetBranchAddress("bJetFlavour", &bJetFlavour, &b_bJetFlavour);
-    fChain->SetBranchAddress("metPt", &metPt, &b_metPt);
-    fChain->SetBranchAddress("metPhi", &metPhi, &b_metPhi);
-    fChain->SetBranchAddress("topPt", &topPt, &b_topPt);
-    fChain->SetBranchAddress("topPhi", &topPhi, &b_topPhi);
-    fChain->SetBranchAddress("topEta", &topEta, &b_topEta);
-    fChain->SetBranchAddress("topE", &topE, &b_topE);
-    fChain->SetBranchAddress("ID", &ID, &b_ID);
-    fChain->SetBranchAddress("nVertices", &nVertices, &b_nVertices);
-    fChain->SetBranchAddress("totalEnergy", &totalEnergy, &b_totalEnergy);
-    fChain->SetBranchAddress("totalMomentum", &totalMomentum, &b_totalMomentum);
-    fChain->SetBranchAddress("lowBTag", &lowBTag, &b_lowBTag);
-    fChain->SetBranchAddress("highBTag", &highBTag, &b_highBTag);
-    fChain->SetBranchAddress("PDFWeight1", &PDFWeight1, &b_PDFWeight1);
-    fChain->SetBranchAddress("PDFWeight2", &PDFWeight2, &b_PDFWeight2);
-    fChain->SetBranchAddress("PDFWeight3", &PDFWeight3, &b_PDFWeight3);
-    fChain->SetBranchAddress("PDFWeight4", &PDFWeight4, &b_PDFWeight4);
-    fChain->SetBranchAddress("PDFWeight5", &PDFWeight5, &b_PDFWeight5);
-    fChain->SetBranchAddress("PDFWeight6", &PDFWeight6, &b_PDFWeight6);
-    fChain->SetBranchAddress("PDFWeight7", &PDFWeight7, &b_PDFWeight7);
-    fChain->SetBranchAddress("PDFWeight8", &PDFWeight8, &b_PDFWeight8);
-    fChain->SetBranchAddress("PDFWeight9", &PDFWeight9, &b_PDFWeight9);
-    fChain->SetBranchAddress("PDFWeight10", &PDFWeight10, &b_PDFWeight10);
-    fChain->SetBranchAddress("PDFWeight11", &PDFWeight11, &b_PDFWeight11);
-    fChain->SetBranchAddress("PDFWeight12", &PDFWeight12, &b_PDFWeight12);
-    fChain->SetBranchAddress("PDFWeight13", &PDFWeight13, &b_PDFWeight13);
-    fChain->SetBranchAddress("PDFWeight14", &PDFWeight14, &b_PDFWeight14);
-    fChain->SetBranchAddress("PDFWeight15", &PDFWeight15, &b_PDFWeight15);
-    fChain->SetBranchAddress("PDFWeight16", &PDFWeight16, &b_PDFWeight16);
-    fChain->SetBranchAddress("PDFWeight17", &PDFWeight17, &b_PDFWeight17);
-    fChain->SetBranchAddress("PDFWeight18", &PDFWeight18, &b_PDFWeight18);
-    fChain->SetBranchAddress("PDFWeight19", &PDFWeight19, &b_PDFWeight19);
-    fChain->SetBranchAddress("PDFWeight20", &PDFWeight20, &b_PDFWeight20);
-    fChain->SetBranchAddress("PDFWeight21", &PDFWeight21, &b_PDFWeight21);
-    fChain->SetBranchAddress("PDFWeight22", &PDFWeight22, &b_PDFWeight22);
-    fChain->SetBranchAddress("PDFWeight23", &PDFWeight23, &b_PDFWeight23);
-    fChain->SetBranchAddress("PDFWeight24", &PDFWeight24, &b_PDFWeight24);
-    fChain->SetBranchAddress("PDFWeight25", &PDFWeight25, &b_PDFWeight25);
-    fChain->SetBranchAddress("PDFWeight26", &PDFWeight26, &b_PDFWeight26);
-    fChain->SetBranchAddress("PDFWeight27", &PDFWeight27, &b_PDFWeight27);
-    fChain->SetBranchAddress("PDFWeight28", &PDFWeight28, &b_PDFWeight28);
-    fChain->SetBranchAddress("PDFWeight29", &PDFWeight29, &b_PDFWeight29);
-    fChain->SetBranchAddress("PDFWeight30", &PDFWeight30, &b_PDFWeight30);
-    fChain->SetBranchAddress("PDFWeight31", &PDFWeight31, &b_PDFWeight31);
-    fChain->SetBranchAddress("PDFWeight32", &PDFWeight32, &b_PDFWeight32);
-    fChain->SetBranchAddress("PDFWeight33", &PDFWeight33, &b_PDFWeight33);
-    fChain->SetBranchAddress("PDFWeight34", &PDFWeight34, &b_PDFWeight34);
-    fChain->SetBranchAddress("PDFWeight35", &PDFWeight35, &b_PDFWeight35);
-    fChain->SetBranchAddress("PDFWeight36", &PDFWeight36, &b_PDFWeight36);
-    fChain->SetBranchAddress("PDFWeight37", &PDFWeight37, &b_PDFWeight37);
-    fChain->SetBranchAddress("PDFWeight38", &PDFWeight38, &b_PDFWeight38);
-    fChain->SetBranchAddress("PDFWeight39", &PDFWeight39, &b_PDFWeight39);
-    fChain->SetBranchAddress("PDFWeight40", &PDFWeight40, &b_PDFWeight40);
-    fChain->SetBranchAddress("PDFWeight41", &PDFWeight41, &b_PDFWeight41);
-    fChain->SetBranchAddress("PDFWeight42", &PDFWeight42, &b_PDFWeight42);
-    fChain->SetBranchAddress("PDFWeight43", &PDFWeight43, &b_PDFWeight43);
-    fChain->SetBranchAddress("PDFWeight44", &PDFWeight44, &b_PDFWeight44);
-    fChain->SetBranchAddress("PDFWeight45", &PDFWeight45, &b_PDFWeight45);
-    fChain->SetBranchAddress("PDFWeight46", &PDFWeight46, &b_PDFWeight46);
-    fChain->SetBranchAddress("PDFWeight47", &PDFWeight47, &b_PDFWeight47);
-    fChain->SetBranchAddress("PDFWeight48", &PDFWeight48, &b_PDFWeight48);
-    fChain->SetBranchAddress("PDFWeight49", &PDFWeight49, &b_PDFWeight49);
-    fChain->SetBranchAddress("PDFWeight50", &PDFWeight50, &b_PDFWeight50);
-    fChain->SetBranchAddress("PDFWeight51", &PDFWeight51, &b_PDFWeight51);
-    fChain->SetBranchAddress("PDFWeight52", &PDFWeight52, &b_PDFWeight52);
-    fChain->SetBranchAddress("PDFWeight_Alternate_Set_1", &PDFWeight_Alternate_Set_1, &b_PDFWeight_Alternate_Set_1);
-    fChain->SetBranchAddress("PDFWeight_Alternate_Set_2", &PDFWeight_Alternate_Set_2, &b_PDFWeight_Alternate_Set_2);
-    //    fChain->SetBranchAddress("PDFWeight_Alternate_Set_1", &PDFWeight_Alternate_Set_1, &b_PDFWeight_Alternate_Set_1);
-    //    fChain->SetBranchAddress("PDFWeight_Alternate_Set_2", &PDFWeight_Alternate_Set_2, &b_PDFWeight_Alternate_Set_2);
-    Notify();
-}
-
-Bool_t QCDOrso::Notify() {
-    // The Notify() function is called when a new file is opened. This
-    // can be either for a new TTree in a TChain or when when a new TTree
-    // is started when using PROOF. It is normally not necessary to make changes
-    // to the generated code, but the routine can be extended by the
-    // user if needed. The return value is currently not used.
-
-    return kTRUE;
-}
-
-void QCDOrso::Show(Long64_t entry) {
-    // Print contents of entry.
-    // If entry is not specified, print current entry
-    if (!fChain) return;
-    fChain->Show(entry);
-}
-
-Int_t QCDOrso::Cut(Long64_t entry) {
-    // This function may be called from Loop.
-    // returns  1 if entry is accepted.
-    // returns -1 otherwise.
-    return 1;
-}
-#endif // #ifdef QCDOrso_cxx

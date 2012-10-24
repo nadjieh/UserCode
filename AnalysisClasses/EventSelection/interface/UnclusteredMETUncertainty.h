@@ -20,7 +20,7 @@ public:
         leptons.SetPxPyPzE(0, 0, 0, 0);
         met.SetPxPyPzE(0, 0, 0, 0);
         std::vector<TRootPFJet> unCorrJets = pracEvt->unCorrectedPFJetCollection(false);
-        for (int i = 0; i < unCorrJets.size(); i++) {
+        for (unsigned int i = 0; i < unCorrJets.size(); i++) {
             jets += unCorrJets[i];
         }
         for (int i = 0; i < pracEvt->MuonCollection()->GetEntriesFast(); i++) {

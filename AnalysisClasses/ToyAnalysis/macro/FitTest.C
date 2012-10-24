@@ -57,6 +57,7 @@
 #include <TH1.h>
 #include <TF3.h>
 #include <TH2.h>
+#include <TH3.h>
 #include <TCanvas.h>
 #include <TBranch.h>
 #include <TTree.h>
@@ -75,10 +76,12 @@ int main(int argc, char** argv) {
     TH1* bkginsignal = 0; //for t-processes other than munub
     TH1* bkg = 0; // for non-t processes
     std::vector<TH2*> signalIID; // for munub t-processes
+    std::vector<TH3*> signalIIID; // for munub t-processes
     TH1* signal = 0; // for dij = delta_ij rec-gen matrix.
     TFile * file = 0;
     bool singleMatrix = false;
     bool is2Drecgen = false;
+    bool do3D = false;
     for (int f = 1; f < argc; f++) {
         std::string arg_fth(*(argv + f));
         if (arg_fth == "signal") {
@@ -88,9 +91,17 @@ int main(int argc, char** argv) {
             cout << "signal: " << out << endl;
             //            signalIID.push_back ((TH2*)file->Get("EtaFwD/EtaFwDcosTheta2D"));
             //            signalIID.push_back((TH2*) file->Get("Default/DefaultcosTheta2D"));
-            signalIID.push_back(((TH2*) file->Get("Default_allW/Default_allWcosTheta2D"))->RebinY(1));
+            //            if (file->Get("Default_allW/Default_allWcosTheta3D") == NULL) {
+            if (true) {
+                signalIID.push_back(((TH2*) file->Get("Default_allW/Default_allWcosTheta2D"))->RebinX(1));
+                cout << signalIID.at(signalIID.size() - 1)->GetName() << endl;
+            }                //                else
+                //                signalIID.push_back(((TH2*) ((TH3D*) file->Get("Default_allW/Default_allWcosTheta3D"))->Project3D("yx"))->Rebin2D(1,1));
+            else {
+                signalIIID.push_back(((TH3D*) file->Get("Default_allW/Default_allWcosTheta3D"))->Rebin3D(1, 1, 1, "newname"));
+                cout << signalIIID.at(signalIIID.size() - 1)->GetName() << endl;
+            }
             //            signalIID.push_back ((TH2*)file->Get("Default/DefaultcosTheta2D"));
-            cout << signalIID.at(signalIID.size() - 1)->GetName() << endl;
             if (bkginsignal == 0)
                 //                bkginsignal = ((TH1*)file->Get("EtaFwD/EtaFwDcosTheta"));
                 //                bkginsignal = ((TH1*) file->Get("Default/DefaultcosTheta"));
@@ -120,7 +131,7 @@ int main(int argc, char** argv) {
             cout << "bkg" << endl;
             //            bkg = ((TH1*)file->Get("EtaFwD/EtaFwDcosTheta"));
             //            bkg = ((TH1*) file->Get("Default/DefaultcosTheta"));
-            if(bkg == NULL)
+            if (bkg == NULL)
                 bkg = ((TH1*) file->Get("Default_allW/Default_allWcosTheta"))->Rebin(1);
             else
                 bkg->Add(((TH1*) file->Get("Default_allW/Default_allWcosTheta"))->Rebin(1));
@@ -139,19 +150,50 @@ int main(int argc, char** argv) {
             if (out == "yes" || out == "Yes" || out == "Y" || out == "y"
                     || out == "YES")
                 is2Drecgen = true;
+        } else if (arg_fth == "do3D") {
+            f++;
+            cout << "do3D" << endl;
+            std::string out(*(argv + f));
+            if (out == "yes" || out == "Yes" || out == "Y" || out == "y"
+                    || out == "YES")
+                do3D = true;
         }
     }
 
     double x[3] = {-1., -1., -1};
     double xerr[3] = {-1., -1., -1};
     double correlation;
-    if (is2Drecgen && !singleMatrix) {
+    if (is2Drecgen && !singleMatrix && do3D) {
+        cout << "In Bias fit: \n\tsize of 2D signal is " << signalIID.size() <<
+                "\n\tsize of 3D signal is " << signalIIID.size() << endl;
+        if (bkg != NULL && bkginsignal != NULL) {
+            bkg->Add(bkginsignal);
+        } else if (bkg == NULL && bkginsignal != NULL) {
+            bkg = (TH1*) bkginsignal->Clone("myBkg");
+        }
+        std::pair<TF3, LikelihoodFunction*> myLL = LikelihoodFunction::getLLFunctionForBias("LL", bkg, data, signalIID, signalIIID);
+        cout << "before get minimum simple: " << endl;
+        cout << myLL.first.GetNpx() << " " << myLL.first.GetNpy() << " " << myLL.first.GetNpz() << endl;
+        myLL.first.SetNpx(5);
+        myLL.first.SetNpy(5);
+        myLL.first.SetNpz(5);
+        cout << myLL.first.GetNpx() << " " << myLL.first.GetNpy() << " " << myLL.first.GetNpz() << endl;
+        myLL.first.GetMinimumXYZ(x[0], x[1], x[2]);
+        cout << "simple getMin: " << x[0] << "  " << x[1] << "  " << x[2] << endl;
+        //        GetMinimum(myLL.first, x, xerr, correlation);
+        delete myLL.second;
+    } else if (is2Drecgen && !singleMatrix) {
 
         cout << "In Generalized fit: \n\tsize of signal is " << signalIID.size() << endl;
         if (bkg != NULL && bkginsignal != NULL) {
             bkg->Add(bkginsignal);
         } else if (bkg == NULL && bkginsignal != NULL) {
             bkg = (TH1*) bkginsignal->Clone("myBkg");
+        }
+        if (signalIIID.size() != 0) {
+            for (unsigned int sig3 = 0; sig3 < signalIIID.size(); sig3++) {
+                signalIID.push_back((TH2D*) signalIIID[sig3]->Project3D("yx"));
+            }
         }
         TFile * test = new TFile("test2D.root", "recreate");
         test->cd();

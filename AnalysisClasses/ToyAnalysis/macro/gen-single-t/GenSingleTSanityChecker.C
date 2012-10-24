@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
         } else if (arg_fth == "input") {
             f++;
             std::string in(*(argv + f));
-            inFiles.push_back(string("~/" + in));
+            inFiles.push_back(string("~/work/samples/" + in));
         } else if (arg_fth == "nSteps") {
             f++;
             std::string in(*(argv + f));
@@ -187,7 +187,7 @@ int main(int argc, char** argv) {
                 }
                 if (myGenStMaker.isSemiTauTt && myGenStMaker.nonTopWs[0] == 2) {
                     channel->Fill(4);
-                    top_W_channel->Fill(0., 2.);
+                    top_W_channel->Fill(2., 0.);
                 }
                 if (myGenStMaker.isSemiMuSingleTop && myGenStMaker.nonTopWs[0] == 1) {
                     channel->Fill(5);
@@ -285,56 +285,56 @@ int main(int argc, char** argv) {
                 if (myGenStMaker.isSemiElecTt) {
                     top1_channel->Fill(1);
                     top2_channel->Fill(3);
-                    top_top_channel->Fill(1.,3.);
+                    top_top_channel->Fill(1., 3.);
                 }
                 if (myGenStMaker.isSemiMuSingleTop) {
                     top1_channel->Fill(0);
                     top2_channel->Fill(3);
-                    top_top_channel->Fill(0.,3.);
+                    top_top_channel->Fill(0., 3.);
                 }
                 if (myGenStMaker.isSemiTauTt) {
                     top1_channel->Fill(2);
                     top2_channel->Fill(3);
-                    top_top_channel->Fill(2.,3.);
+                    top_top_channel->Fill(2., 3.);
                 }
                 if (myGenStMaker.isDiMuTt) {
                     top1_channel->Fill(0);
                     top2_channel->Fill(0);
-                    top_top_channel->Fill(0.,0.);
+                    top_top_channel->Fill(0., 0.);
                 }
                 if (myGenStMaker.isDiETt) {
                     top1_channel->Fill(1);
                     top2_channel->Fill(1);
-                    top_top_channel->Fill(1.,1.);
+                    top_top_channel->Fill(1., 1.);
                 }
                 if (myGenStMaker.isDiTauTt) {
                     top1_channel->Fill(2);
                     top2_channel->Fill(2);
-                    top_top_channel->Fill(2.,2.);
+                    top_top_channel->Fill(2., 2.);
                 }
                 if (myGenStMaker.isMuETt) {
                     top1_channel->Fill(0);
                     top2_channel->Fill(1);
-                    top_top_channel->Fill(0.,1.);
+                    top_top_channel->Fill(0., 1.);
                 }
                 if (myGenStMaker.isMuTauTt) {
                     top1_channel->Fill(0);
                     top2_channel->Fill(2);
-                    top_top_channel->Fill(0.,2.);
+                    top_top_channel->Fill(0., 2.);
                 }
                 if (myGenStMaker.isETauTt) {
                     top1_channel->Fill(1);
                     top2_channel->Fill(2);
-                    top_top_channel->Fill(1.,2.);
+                    top_top_channel->Fill(1., 2.);
                 }
                 if (myGenStMaker.isFullHadTt) {
                     top1_channel->Fill(3);
                     top2_channel->Fill(3);
-                    top_top_channel->Fill(3.,3.);
+                    top_top_channel->Fill(3., 3.);
                 }
 
 
-                if (myGenStMaker.isSemiMuSingleTop ) {
+                if (myGenStMaker.isSemiMuSingleTop) {
                     cosThetaGen->Fill(myGenStMaker.genSingleTop.cosThetaStar(0), 1);
                     TLorentzVector q = myGenStMaker.genSingleTop.top(0);
                     topMass->Fill(q.M(), 1);
@@ -348,6 +348,13 @@ int main(int argc, char** argv) {
                 }
 
 
+            } else if (myGenStMaker.isSemiMuSingleTop) {
+                cosThetaGen->Fill(myGenStMaker.genSingleTop.cosThetaStar(0), 1);
+                TLorentzVector q = myGenStMaker.genSingleTop.top(0);
+                topMass->Fill(q.M(), 1);
+                if (q.M() < 150)
+                    cout << "WHATTTTT?" << endl;
+                Wmass->Fill(myGenStMaker.genSingleTop.W(0).M(), 1);
             }
         }
         f->Close();

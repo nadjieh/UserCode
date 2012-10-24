@@ -168,7 +168,7 @@ public:
     LikelihoodFunction(string name, TH1* nonWtbSum, TH1* hData, std::vector<TH2*> restOfSignal,
             std::vector<TH3*> DiW, double f0gen = 6.64263e-01, double fneggen = 3.03734e-01)
     : Name(name), bkg(nonWtbSum), data(hData),
-    TwoDWeightFunc(TwoDWeightFunctionCreator::getWeightFunction("WeightFunc" + name, f0gen, fneggen)) {
+    WeightFunc(WeightFunctionCreator::getWeightFunction("WeightFunc" + name, f0gen, fneggen)) {
         data->Sumw2(); //cout<<"---"<<endl;
         bkg->Sumw2(); //cout<<"----"<<endl;
         for (unsigned int p = 0; p < DiW.size(); p++) {
@@ -237,6 +237,7 @@ public:
             std::vector<TH2*> WtbSum, std::vector<TH3*> DiW) {
         LikelihoodFunction * functor = 0;
         functor = new LikelihoodFunction(name, nonWtbSum, hData, WtbSum, DiW);
+        cout << "I am in bias Likelihood" << endl;
 
         TF3 ret(name.c_str(), functor, 0.0, 1.0, 0.0, 0.1, 0.0, 2.0, 0, "LikelihoodFunctionForBias");
         ret.SetRange(0.0, 0.0, 0.000001, 1.0, 1.0, 2.0);
@@ -251,7 +252,7 @@ protected:
     TH1* signal;
     TH2* signal2D;
     std::pair<TF1, WeightFunctionCreator*> WeightFunc;
-    std::pair<TF2, TwoDWeightFunctionCreator*> TwoDWeightFunc;
+    //    std::pair<TF2, TwoDWeightFunctionCreator*> TwoDWeightFunc;
     std::vector<TH2*> signals2D;
     std::vector<TH3*> signals3D;
 
@@ -304,17 +305,24 @@ protected:
                 nSignal += hithrecbin->Integral();
                 delete hithrecbin;
             }
-            TH2* hithrecbin2D = 0;
+//            TH2* hithrecbin2D = 0;
+            TH1* biasH = 0;
             for (unsigned int p = 0; p < signals3D.size(); p++) {
                 s.str("");
                 s << p << "_pZ";
                 //                cout<<"sample number "<<p+1<<endl;
-                signals3D.at(p)->GetZaxis()->SetRange(bin,bin);
-                hithrecbin2D = signals3D.at(p)->Project3D("xy");
-                //                cout<<"In general: "<<hithrecbin->GetName()<<endl;
-                hithrecbin2D->Multiply(&(TwoDWeightFunc.first), rec_gen);
-                nSignal += hithrecbin2D->Integral();
-                delete hithrecbin2D;
+                TH1D * coefficients = new TH1D("coefficients", "coefficients",
+                        signals3D.at(p)->GetXaxis()->GetNbins(), signals3D.at(p)->GetXaxis()->GetXmin(),
+                        signals3D.at(p)->GetXaxis()->GetXmax());
+                for (int genBin = 0; genBin < signals3D.at(p)->GetXaxis()->GetNbins(); genBin++) {
+                    biasH = (TH1*) signals3D.at(p)->ProjectionZ(s.str().c_str(), genBin + 1, genBin + 1, bin, bin, "o");
+                    biasH->Multiply(&(WeightFunc.first), 1);
+                    coefficients->SetBinContent(genBin + 1, biasH->Integral());
+                    delete biasH;
+                }
+                coefficients->Multiply(&(WeightFunc.first), rec_gen);
+                nSignal += (coefficients->Integral());
+                delete coefficients;
             }
         }
 

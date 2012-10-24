@@ -39,6 +39,7 @@
 #include "../../../../TopBrussels/TopTreeProducer/interface/TRootHLTInfo.h"
 #include "../../../../AnalysisClasses/EventSelection/interface/PracticalEvent.h"
 #include "../../../../AnalysisClasses/EventSelection/interface/UnclusteredMETUncertainty.h"
+#include "../../../../AnalysisClasses/EventSelection/interface/DifferentHistogramsTwb.h"
 #include "../../../../AnalysisClasses/ToyAnalysis/interface/GenSingleTopMaker.h"
 #include "../../../../TopBrussels/TopTreeAnalysis/MCInformation/interface/Lumi3DReWeighting.h"
 
@@ -52,6 +53,7 @@
 #include <TFile.h>
 #include <TH1.h>
 #include <TH2.h>
+#include <TH3.h>
 #include <TCanvas.h>
 #include <TBranch.h>
 #include <TTree.h>
@@ -63,123 +65,9 @@ using namespace TopTree;
 /*
  * 
  */
-class SingleTopHistograms {
-public:
 
-    SingleTopHistograms(string name) : Name(name) {
-        Wmass = new TH1D(string(name + "_Wmass").c_str(), string(name + ": final-W-mass").c_str(), 50, 0., 200.);
-        Wmass->GetXaxis()->SetTitle("M_{W}");
-        WmassII = new TH1D(string(name + "_WmassMET").c_str(), string(name + ": final-W-mass (MET)").c_str(), 50, 0., 200.);
-        WmassII->GetXaxis()->SetTitle("M_{W}");
-        topMass = new TH1D(string(name + "_topMass").c_str(), string(name + ": final-top-mass").c_str(), 50, 50., 500.);
-        topMass->GetXaxis()->SetTitle("M_{top}");
-        topMassII = new TH1D(string(name + "_topMassMET").c_str(), string(name + ": final-top-mass (MET)").c_str(), 50, 50., 500.);
-        topMassII->GetXaxis()->SetTitle("M_{top}");
-        cosTheta = new TH1D(string(name + "cosTheta").c_str(), string(name + ": cos(#theta)").c_str(), 100, -1., 1.);
-        cosTheta->GetXaxis()->SetTitle("cos(#theta*)");
-        cosTheta2D = new TH2D(string(name + "cosTheta2D").c_str(), string(name + ": cos(#theta); cos(#theta)_{gen}; cos(#theta)_{rec}").c_str(), 10000, -1., 1., 100, -1., 1.);
-    };
 
-    virtual ~SingleTopHistograms() {
-    };
 
-    virtual void Fill(SemiLepTopQuark myLeptonicTop, double lumiWeight3D = 1, GenSingleTopMaker* genTop = 0) {
-        Wmass->Fill(myLeptonicTop.W().M(), lumiWeight3D);
-        topMass->Fill(myLeptonicTop.top().M(), lumiWeight3D);
-        WmassII->Fill(myLeptonicTop.W(2).M(), lumiWeight3D);
-        topMassII->Fill(myLeptonicTop.top(2).M(), lumiWeight3D);
-        //        if (genTop != 0)
-        //            cout << genTop->isSemiMuSingleTop << endl;
-        if (genTop == 0) {
-            //            cout<<"I am data like!!!"<<endl;
-            cosTheta->Fill(myLeptonicTop.cosThetaStar(), lumiWeight3D);
-            //            cosThetaII->Fill(myLeptonicTop.cosThetaStar(2),lumiWeight3D);
-        } else if (!genTop->isSemiMuSingleTop) {//cout<<"//Other top decays"<<endl;
-            cosTheta->Fill(myLeptonicTop.cosThetaStar(), lumiWeight3D);
-            //            cosThetaII->Fill(myLeptonicTop.cosThetaStar(2),lumiWeight3D);
-        } else if (genTop->genSingleTop.MuCharge() != myLeptonicTop.MuCharge()) {//cout<<"// fake muons"<<endl;
-            cosTheta->Fill(myLeptonicTop.cosThetaStar(), lumiWeight3D);
-            //            cosThetaII->Fill(myLeptonicTop.cosThetaStar(2),lumiWeight3D);
-        } else {
-            //cout<<"// OK"<<endl;
-            cosTheta2D->Fill(genTop->genSingleTop.cosThetaStar(0), myLeptonicTop.cosThetaStar(), lumiWeight3D);
-            //            cosTheta2DII->Fill(genTop->genSingleTop.cosThetaStar(0),myLeptonicTop.cosThetaStar(2), lumiWeight3D);
-        }
-    }
-
-    void Write(TDirectory * dir) {
-        TDirectory * inDir = dir->mkdir(Name.c_str());
-        inDir->cd();
-        cosTheta->Write();
-        Wmass->Write();
-        topMass->Write();
-        //        cosThetaII->Write();
-        WmassII->Write();
-        topMassII->Write();
-        cosTheta2D->Write();
-        inDir->cd();
-        dir->cd();
-    }
-    string Name;
-    TH1D * Wmass;
-    TH1D * WmassII;
-    TH1D * topMass;
-    TH1D * topMassII;
-    TH1D * cosTheta;
-    TH1D * cosThetaII;
-    TH2D * cosTheta2D;
-    TH2D * cosTheta2DII;
-    TH1D * semiEcosTheta;
-    TH1D * semiTaucosTheta;
-    TH1D * diTaucosTheta;
-    TH1D * diEcosTheta;
-    TH1D * diMucosTheta;
-    TH1D * MuEcosTheta;
-    TH1D * TauEcosTheta;
-    TH1D * MuTaucosTheta;
-    TH1D * fullHadcosTheta;
-
-};
-
-class DiLeptonHistograms : public SingleTopHistograms {
-public:
-
-    DiLeptonHistograms(string name) : SingleTopHistograms(name) {
-    }
-
-    virtual ~DiLeptonHistograms() {
-    }
-
-    void Write(TDirectory * d) {
-        SingleTopHistograms::Write(d);
-    }
-
-    virtual void Fill(SemiLepTopQuark myLeptonicTop, double lumiWeight3D = 1, GenSingleTopMaker* genTop = 0) {
-        SingleTopHistograms::Wmass->Fill(myLeptonicTop.W().M(), lumiWeight3D);
-        SingleTopHistograms::topMass->Fill(myLeptonicTop.top().M(), lumiWeight3D);
-        SingleTopHistograms::WmassII->Fill(myLeptonicTop.W(2).M(), lumiWeight3D);
-        SingleTopHistograms::topMassII->Fill(myLeptonicTop.top(2).M(), lumiWeight3D);
-        //        if (genTop != 0)
-        //            cout << genTop->isSemiMuSingleTop << endl;
-        if (genTop->isMuTauTt || genTop->isMuETt) {//cout<<"//Other top decays"<<endl;
-            if (genTop->genSingleTop.MuCharge() != myLeptonicTop.MuCharge())
-                SingleTopHistograms::cosTheta->Fill(myLeptonicTop.cosThetaStar(), lumiWeight3D);
-            else
-                SingleTopHistograms::cosTheta2D->Fill(genTop->genSingleTop.cosThetaStar(0), myLeptonicTop.cosThetaStar(), lumiWeight3D);
-            //            cosThetaII->Fill(myLeptonicTop.cosThetaStar(2),lumiWeight3D);
-        } else if (genTop->isDiMuTt) {
-            if (genTop->genSingleTop.MuCharge() == myLeptonicTop.MuCharge())
-                SingleTopHistograms::cosTheta2D->Fill(genTop->genSingleTop.cosThetaStar(0), myLeptonicTop.cosThetaStar(), lumiWeight3D);
-            else if (genTop->genSingleTopSecond.MuCharge() == myLeptonicTop.MuCharge())
-                SingleTopHistograms::cosTheta2D->Fill(genTop->genSingleTopSecond.cosThetaStar(0), myLeptonicTop.cosThetaStar(), lumiWeight3D);
-            else {
-                cout << "What a hell is that?!!" << endl;
-                return;
-            }
-
-        } else SingleTopHistograms::Fill(myLeptonicTop, lumiWeight3D, genTop);
-    }
-};
 
 int main(int argc, char** argv) {
 
@@ -301,7 +189,7 @@ int main(int argc, char** argv) {
     int btagSyst = 0;
     bool isData = false;
     int smearingSkim = 1;
-	string puAddress = "~/work/TopBrussels/TopTreeAnalysis/macros/PileUpReweighting/";
+    string puAddress = "~/work/TopBrussels/TopTreeAnalysis/macros/PileUpReweighting/";
     string MCpuFile = "";
     string DataPuFile = "Central-unps_paper_finebin_Pileup.root";
     for (int f = 1; f < argc; f++) {
@@ -379,8 +267,8 @@ int main(int argc, char** argv) {
             btagSyst = atof(in.c_str());
         }
     }
-	MCpuFile = puAddress + MCpuFile;
-	DataPuFile = puAddress + DataPuFile;
+    MCpuFile = puAddress + MCpuFile;
+    DataPuFile = puAddress + DataPuFile;
     TFile* f = 0;
     TApplication theApp("App", &argc, argv);
     double nInit = 0;
@@ -392,53 +280,53 @@ int main(int argc, char** argv) {
     double nMt = 0;
     double nGoodSolution = 0;
     Lumi3DReWeighting Lumi3DWeights;
-	cout<<"====================================================================="<<endl;
-    cout<<"Parameters:\n\tInput: "<<inputFileNames.at(0);
-	if(isData)
-		cout<<"\tis data"<<endl;
-	else
-		cout<<"\tis MC"<<endl;
-    cout<<"\tOutput: "<<plotFileName<<endl;
-	cout<<"\tTop decay mode: "<<ttDecayMode<<endl;
-    cout<<"\tJES: "<<doJES<<"\t\t";
-	if(doJES == 0 )
-		cout<<"No JES systematics"<<endl;
-	else if(doJES > 0) 
-		cout<<"UP JES systematics"<<endl;
-	else 
-		cout<<"DOWN JES systematics"<<endl;
-	cout<<"\tData pile-up: "<<DataPuFile<<"\n\t\t";
-	if(DataPuFile.find("Low") > 0 && DataPuFile.find("Low") < DataPuFile.size())
-		cout<<"DOWN pile-up systematics"<<endl;
-	else if(DataPuFile.find("High") > 0 && DataPuFile.find("High") < DataPuFile.size())
-		cout<<"UP pile-up systematics"<<endl;
-	else 
-		cout<<"No pile-up systematics"<<endl;
-	cout<<"\tMC pile-up: "<<MCpuFile;
-	if(MCpuFile.find("Fall") > 0 && MCpuFile.find("Fall") < MCpuFile.size())
-		cout<<"\n\t\tFall11 pile-up"<<endl;
-	else
-		cout<<"\n\t\tSummer11 pile-up"<<endl;
-	cout<<"\tunclMET: "<<doUnclMET<<"\n\t\t";
-	if(doUnclMET == 0 )
-		cout<<"No unclMET systematics"<<endl;
-	else if(doUnclMET > 0) 
-		cout<<"UP unclMET systematics"<<endl;
-	else 
-		cout<<"DOWN unclMET systematics"<<endl;
-	cout<<"\tbTag: "<<btagSyst<<"\n\t\t";
-	if(btagSyst == 0 )
-		cout<<"No bTag systematics"<<endl;
-	else if(btagSyst > 0) 
-		cout<<"UP bTag systematics"<<endl;
-	else 
-		cout<<"DOWN bTag systematics"<<endl;
-	cout<<"====================================================================="<<endl;
+    cout << "=====================================================================" << endl;
+    cout << "Parameters:\n\tInput: " << inputFileNames.at(0);
+    if (isData)
+        cout << "\tis data" << endl;
+    else
+        cout << "\tis MC" << endl;
+    cout << "\tOutput: " << plotFileName << endl;
+    cout << "\tTop decay mode: " << ttDecayMode << endl;
+    cout << "\tJES: " << doJES << "\t\t";
+    if (doJES == 0)
+        cout << "No JES systematics" << endl;
+    else if (doJES > 0)
+        cout << "UP JES systematics" << endl;
+    else
+        cout << "DOWN JES systematics" << endl;
+    cout << "\tData pile-up: " << DataPuFile << "\n\t\t";
+    if (DataPuFile.find("Low") > 0 && DataPuFile.find("Low") < DataPuFile.size())
+        cout << "DOWN pile-up systematics" << endl;
+    else if (DataPuFile.find("High") > 0 && DataPuFile.find("High") < DataPuFile.size())
+        cout << "UP pile-up systematics" << endl;
+    else
+        cout << "No pile-up systematics" << endl;
+    cout << "\tMC pile-up: " << MCpuFile;
+    if (MCpuFile.find("Fall") > 0 && MCpuFile.find("Fall") < MCpuFile.size())
+        cout << "\n\t\tFall11 pile-up" << endl;
+    else
+        cout << "\n\t\tSummer11 pile-up" << endl;
+    cout << "\tunclMET: " << doUnclMET << "\n\t\t";
+    if (doUnclMET == 0)
+        cout << "No unclMET systematics" << endl;
+    else if (doUnclMET > 0)
+        cout << "UP unclMET systematics" << endl;
+    else
+        cout << "DOWN unclMET systematics" << endl;
+    cout << "\tbTag: " << btagSyst << "\n\t\t";
+    if (btagSyst == 0)
+        cout << "No bTag systematics" << endl;
+    else if (btagSyst > 0)
+        cout << "UP bTag systematics" << endl;
+    else
+        cout << "DOWN bTag systematics" << endl;
+    cout << "=====================================================================" << endl;
 
     if (pu3D) {
         //        Lumi3DWeights.weight3D_set("../../../../TopBrussels/TopTreeAnalysis/macros/PileUpReweighting//MC_Fall11.root",
         //    "../../../../TopBrussels/TopTreeAnalysis/macros/PileUpReweighting/RunAB.root", "pileup", "pileup");
-        Lumi3DWeights.weight3D_set(MCpuFile,DataPuFile, "pileup", "pileup");
+        Lumi3DWeights.weight3D_set(MCpuFile, DataPuFile, "pileup", "pileup");
         Lumi3DWeights.setWFileName(PUWeightFileName);
         Lumi3DWeights.weight3D_init(1.0);
         //    Lumi3DWeights.weight3D_init(PUWeightFileName);
@@ -464,9 +352,9 @@ int main(int argc, char** argv) {
         int ievt = 0;
 
         while (pracEvt->Next()) {
-            //
-            //            if(ievt > 2)
-            //                break;
+
+            ievt++;
+
             /* for single top genAnalysis
              * not to be used for real one
              */
@@ -487,26 +375,25 @@ int main(int argc, char** argv) {
             //            cout<<lumiWeight3D<<endl;
             nInit += lumiWeight3D;
             //            nInit++;
-            ievt++;
             if (verbosity > 0)
-                cout << "*******************************************************************" << endl;
+                cout << ievt << "*******************************************************************" << endl;
 
             if (doUnclMET != 0) {
                 myUnclMET = new UnclusteredEnergyUnc(pracEvt, 0.1);
                 pracEvt->setDefaultMET(myUnclMET->getChangedUncEnergyMET(doUnclMET));
                 delete myUnclMET;
-            }else{
-                pracEvt->setDefaultMET(*(TRootPFMET*)pracEvt->METCollection()->At(0));
+            } else {
+                pracEvt->setDefaultMET(*(TRootPFMET*) pracEvt->METCollection()->At(0));
             }
             std::vector<TRootPFJet> myJets_;
             myJets_.clear();
             //            cout<<"I am going to Jet Correction "<<isData<<endl;
             myJets_ = pracEvt->ScaledPFJetCollection(1, isData, doJES);
 
-//            Event myEvent_tmp(myJets_, *pracEvt->ElectronCollection()
-//                    , pracEvt->TypeICorrMET(), *pracEvt->MuonCollection(), *pracEvt->VertexCollection());
             Event myEvent_tmp(myJets_, *pracEvt->ElectronCollection()
-                    , *pracEvt->METCollection(), *pracEvt->MuonCollection(), *pracEvt->VertexCollection());
+                    , pracEvt->TypeICorrMET(), *pracEvt->MuonCollection(), *pracEvt->VertexCollection());
+            //            Event myEvent_tmp(myJets_, *pracEvt->ElectronCollection()
+            //                    , *pracEvt->Ty(), *pracEvt->MuonCollection(), *pracEvt->VertexCollection());
 
 
             if (verbosity > 0)
@@ -536,7 +423,7 @@ int main(int argc, char** argv) {
             myEvent_tmp.PFJetMaker(/*bTagAlgo*/"TCHP", /*pt*/30., /*eta*/4.5);
             if (verbosity > 0)
                 cout << "Muon Maker ---------------------------------------------------------------------" << endl;
-//            myEvent_tmp.MuonMaker(20, 2.1, 10, 1000, 10, 0.5);
+            //            myEvent_tmp.MuonMaker(20, 2.1, 10, 1000, 10, 0.5);
             myEvent_tmp.MuonMaker();
             /*
              * pt = 20.,  eta = 2.1, chi2 = 10,  D0 = 0.02,  nvh = 10, isoCut_ = 0.15,  doGL = false,  
@@ -596,11 +483,11 @@ int main(int argc, char** argv) {
             } else
                 continue;
 
-//            if (myEvent_tmp.BPFJets.size() == 1) {
-//                if (verbosity > 0)
-//                    cout << "\t== 1bTag Passed" << endl;
-//            } else
-//                continue;
+            if (myEvent_tmp.BPFJets.size() == 1) {
+                if (verbosity > 0)
+                    cout << "\t== 1bTag Passed" << endl;
+            } else
+                continue;
             /*btag sf*/
             nFinalPU += lumiWeight3D;
             //            cout<<"pu: "<<lumiWeight3D<<"\t";
@@ -629,7 +516,10 @@ int main(int argc, char** argv) {
             double hltW = 1;
             if (!isData) {
                 int bin = HLTWeights->GetXaxis()->FindBin(myEvent_tmp.Dmuons.at(0).Eta());
-                hltW = HLTWeights->GetBinContent(bin);
+                if (bin > 0 && bin < 13)
+                    hltW = HLTWeights->GetBinContent(bin);
+                else
+                    hltW = 1.;
             }
             lumiWeight3D *= hltW;
             //            cout<<"hlt: "<<hltW<<endl;
@@ -662,7 +552,6 @@ int main(int argc, char** argv) {
             ht += myEvent_tmp.Dmuons.at(0).Pt();
             ht += myEvent_tmp.mets.at(0).Pt();
             HT->Fill(ht, lumiWeight3D);
-            //            cout<<"genSingletop: "<<genSingleTop<<endl;
             if (ttDecayMode == "") {
                 if (myLeptonicTop.hasNeutrinoSolution()) {
                     nGoodSolution++;

@@ -290,7 +290,8 @@ void endJob() {
 int main(int argc, char** argv) {
     //    sleep(60);
     double doJES = 1.;
-    bool doTopDiff = true;
+    bool doTopDiff = false;
+    bool doTWDiff = true;
     std::string ttDecayMode;
     std::string HLTname = "HLT_IsoMu17_v*"; //"HLT_Mu17_eta2p1_CentralJet30_BTagIP_v1";//
     for (int f = 1; f < argc; f++) {
@@ -300,7 +301,7 @@ int main(int argc, char** argv) {
             f++;
             std::string out(*(argv + f));
             sin_outFileName_FullSelection = string(out + ".root");
-            sin_plotFileName = string("histograms_"+out + ".root");
+            sin_plotFileName = string("histograms_" + out + ".root");
         } else if (arg_fth == "input") {
             f++;
             std::string in(*(argv + f));
@@ -386,17 +387,44 @@ int main(int argc, char** argv) {
         while (pracEvt->Next()) {
             //            if(ievt > 1)
             //                break;
-            if (!isData && pracEvt->NPGenEvtCollection() != 0 && doTopDiff) {
-                //                cout<<"I am here"<<endl;
+            if (!isData && pracEvt->NPGenEvtCollection() != 0) {
                 genSingleTop = new GenSingleTopMaker((TRootNPGenEvent*) pracEvt->NPGenEvtCollection()->At(0), sin_verbosity);
-                if(ttDecayMode == "diMu" && !genSingleTop->isDiMuTt)
-                    continue;
-                if(ttDecayMode == "muE" && !genSingleTop->isMuETt)
-                    continue;
-                if(ttDecayMode == "muTau" && !genSingleTop->isMuTauTt)
-                    continue;
-                if(ttDecayMode == "others" && (genSingleTop->isMuTauTt || genSingleTop->isMuETt || genSingleTop->isDiMuTt))
-                    continue;
+                if (doTopDiff) {
+                    cout<<doTopDiff<<"\tDiffTop"<<endl;
+                    if (ttDecayMode == "diMu" && !genSingleTop->isDiMuTt){
+                        cout<<"diMu"<<endl;
+                        continue;
+                    }
+                    if (ttDecayMode == "muE" && !genSingleTop->isMuETt){
+                        cout<<"muE"<<endl;
+                        continue;
+                    }
+                    if (ttDecayMode == "muTau" && !genSingleTop->isMuTauTt){
+                        cout<<"muTau"<<endl;
+                        continue;
+                    }
+                    if (ttDecayMode == "muHad" && !genSingleTop->isSemiMuSingleTop){
+                        cout<<"muHad"<<endl;
+                        continue;
+                    }
+                    if (ttDecayMode == "others" && (genSingleTop->isMuTauTt || genSingleTop->isMuETt || genSingleTop->isDiMuTt || genSingleTop->isSemiMuSingleTop)){
+                        cout<<"others"<<endl;
+                        continue;
+                    }
+                }
+                if (doTWDiff) {
+                    if (ttDecayMode == "WMuTHad") {
+                        if (genSingleTop->ntops == 1 && genSingleTop->nonTopWs.size() != 0) {
+                            if (!(genSingleTop->nonTopWs[0] == 2 && genSingleTop->isHadSingleTop))
+                                continue;
+                            cout<< genSingleTop->nonTopWs[0]<<"\t"<<genSingleTop->isSemiTauTt<<endl;
+                        }
+                    } else if (genSingleTop->ntops == 1 && genSingleTop->nonTopWs.size() != 0) {
+                        if (genSingleTop->nonTopWs[0] == 2 && (genSingleTop->isHadSingleTop || genSingleTop->isSemiElecTt
+                                || genSingleTop->isSemiTauTt))
+                            continue;
+                    }
+                }
             }
             if (sin_verbosity > 0) {
                 cout << "JES: " << doJES << endl;
@@ -418,7 +446,7 @@ int main(int argc, char** argv) {
             ievt += lumiWeight3D;
             if (sin_verbosity > 0)
                 cout << "*******************************************************************" << endl;
-
+            pracEvt->setDefaultMET(*(TRootPFMET*) pracEvt->METCollection()->At(0));
             std::vector<TRootPFJet> myJets_;
             myJets_.clear();
             //            cout<<"I am going to Jet Correction "<<isData<<endl;
@@ -596,7 +624,7 @@ int main(int argc, char** argv) {
                 sin_GoldenFinalMuons.Fill(myEvent_tmp.Dmuons, myEvent_tmp.Dmuons.size(), lumiWeight3D);
                 finalMT->Fill(mt, lumiWeight3D);
             }
-            if(genSingleTop != NULL)
+            if (genSingleTop != NULL)
                 delete genSingleTop;
         }
         runTree_f->Fill();

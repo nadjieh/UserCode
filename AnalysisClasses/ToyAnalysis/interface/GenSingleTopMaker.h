@@ -38,7 +38,7 @@ public:
         isMuTauTt = false;
         isETauTt = false;
         isDiLep = false;
-        
+
 
 
         if (ntops == 1 && tops.at(0).isLeptonic()) {
@@ -46,12 +46,24 @@ public:
             isSemiElecTt = tops.at(0).isLeptonicEl();
             isSemiTauTt = tops.at(0).isLeptonicTau();
             if (isSemiMuSingleTop) {
+//                cout << "here I am! " << endl;
                 genSingleTop.setMuon(tops.at(0).lepton());
                 genSingleTop.setMET(tops.at(0).neutrino());
                 genSingleTop.setbJet(tops.at(0).bquark());
                 genSingleTop.setMuCharge(tops.at(0).lepton().charge());
                 genSingleTop.setVerbosity(v);
             }
+            if (nonTopWs.size() == 1) {
+                if ((isSemiElecTt || isSemiTauTt) && nonTopWs[0] == 2) {
+//                    cout << "here I am not!!!! " << endl;
+                    genSingleTop.setMuon(tops.at(0).lepton());
+                    genSingleTop.setMET(tops.at(0).neutrino());
+                    genSingleTop.setbJet(tops.at(0).bquark());
+                    genSingleTop.setMuCharge(tops.at(0).W().charge());
+                    genSingleTop.setVerbosity(v);
+                }
+            }
+
             /*
              * for tW-channel
              */
