@@ -199,7 +199,31 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull, int LPEXPull, st
                 else {
                     signalMC->Add(hist1D);
 #endif /*TEST_CHANGE_SIG_BKG*/
-
+#ifdef TEST_CHANGE_SIG_BKG 	 
+	                     /* 	 
+	                      * Special condition to chack: 	 
+	                      * 1D + different sig-back composition 	 
+	                      */ 	 
+	                     TH1* hist1D = GetCosThetaPlot(sampleItr->first, prefix, suffix, histName, dirName, 10); 	 
+	                     hist1D->Sumw2(); 	 
+	                     DistributionProducerFromSelected* myDist = new DistributionProducerFromSelected(hist1D, string(sampleItr->first), Lumi); 	 
+	                     bkg_samples[sampleItr->first] = myDist; 	 
+	                     hist1D->Scale(float(Lumi * sampleItr->second) / float(mySampleInfo.N0[sampleItr->first])); 	 
+	                     bkg->Add(hist1D); 	 
+202 	  	 
+	                     TH2* hist2D = (TH2*) GetCosThetaPlot(sampleItr->first, prefix, suffix, histName, dirName, 10, true); 	 
+	                     hist2D->Sumw2(); 	 
+	                     TH1* tmph2 = hist2D->ProjectionY(); 	 
+	                     delete hist2D; 	 
+	                     DistributionProducerFromSelected* myDist2 = new DistributionProducerFromSelected(tmph2, string(sampleItr->first), Lumi); 	 
+	                     signal_samples[sampleItr->first] = myDist2; 	 
+	                     tmph2->Scale(float(Lumi * sampleItr->second) / float(mySampleInfo.N0[sampleItr->first])); 	 
+	 //                    if (sampleIndex == 2) 	 
+	                     if (signalMC == 0) 	 
+	                         signalMC = ((TH1*) tmph2->Clone(string("signal_" + string(hist1D->GetName())).c_str())); 	 
+	                     else { 	 
+	                         signalMC->Add(tmph2); 	 
+	 #endif   /*TEST_CHANGE_SIG_BKG*/
                 }
             } else if (is2D && !is3D) {
                 TH1* bkginsignal = GetCosThetaPlot(sampleItr->first, prefix, suffix, histName, dirName, 10);
