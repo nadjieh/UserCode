@@ -323,7 +323,7 @@ int main(int argc, char** argv) {
         cout << "DOWN bTag systematics" << endl;
     cout << "=====================================================================" << endl;
 
-    if (pu3D) {
+    if (pu3D && !isData) {
         //        Lumi3DWeights.weight3D_set("../../../../TopBrussels/TopTreeAnalysis/macros/PileUpReweighting//MC_Fall11.root",
         //    "../../../../TopBrussels/TopTreeAnalysis/macros/PileUpReweighting/RunAB.root", "pileup", "pileup");
         Lumi3DWeights.weight3D_set(MCpuFile, DataPuFile, "pileup", "pileup");

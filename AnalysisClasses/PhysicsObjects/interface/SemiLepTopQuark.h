@@ -185,25 +185,50 @@ public:
 //        cout<<bJet.Px()<<" "<<bJet.Py()<<" "<<bJet.Pz()<<endl;
         return (this->W(skim)+bJet);
     }
+//    double cosThetaStar(int skim = 1)const{
+//        TLorentzVector w = this->W(skim);
+//        if(verbosity>0){
+//            cout<<"W boson:"<<w.Px()<<", "<<w.Py()<<", "<<w.Pz()<<endl;
+//        }
+//        TLorentzVector muClone = mu;
+//        TLorentzVector Top = this->top(skim);
+//        if(verbosity>0){
+//            cout<<"top quark:"<<Top.Px()<<", "<<Top.Py()<<", "<<Top.Pz()<<endl;
+//        }
+//        muClone.Boost(- w.BoostVector());
+//        w.Boost(-Top.BoostVector());
+//        if(verbosity>0){
+//            cout<<"Boosted mu:"<<muClone.Px()<<", "<<muClone.Py()<<", "<<muClone.Pz()<<endl;
+//            cout<<"Boosted W:"<<w.Px()<<", "<<w.Py()<<", "<<w.Pz()<<endl;
+//        }
+//        if(ROOT::Math::VectorUtil::CosTheta(w,muClone)>1.0)
+//            cout<<"=================== what a hell!!! "<<endl;
+//        return ROOT::Math::VectorUtil::CosTheta(w,muClone);
+//        /*const TVector3 w3 = w.Vect(); const TVector3 mu3 = muClone.Vect(); 
+//        double res = (double)(w3.Dot(mu3))/(double)(w3.Mag()*mu3.Mag());      
+//        return res;*/
+//    }
     double cosThetaStar(int skim = 1)const{
         TLorentzVector w = this->W(skim);
         if(verbosity>0){
             cout<<"W boson:"<<w.Px()<<", "<<w.Py()<<", "<<w.Pz()<<endl;
         }
-        TLorentzVector muClone = mu;
+        TLorentzVector muIntop = mu;
+        TLorentzVector WIntop = w;
         TLorentzVector Top = this->top(skim);
+        WIntop.Boost(-Top.BoostVector());
+        muIntop.Boost(-Top.BoostVector());
+        muIntop.Boost(-WIntop.BoostVector());
         if(verbosity>0){
             cout<<"top quark:"<<Top.Px()<<", "<<Top.Py()<<", "<<Top.Pz()<<endl;
         }
-        muClone.Boost(- w.BoostVector());
-        w.Boost(-Top.BoostVector());
         if(verbosity>0){
-            cout<<"Boosted mu:"<<muClone.Px()<<", "<<muClone.Py()<<", "<<muClone.Pz()<<endl;
-            cout<<"Boosted W:"<<w.Px()<<", "<<w.Py()<<", "<<w.Pz()<<endl;
+            cout<<"Boosted mu:"<<muIntop.Px()<<", "<<muIntop.Py()<<", "<<muIntop.Pz()<<endl;
+            cout<<"Boosted W:"<<WIntop.Px()<<", "<<WIntop.Py()<<", "<<WIntop.Pz()<<endl;
         }
-        if(ROOT::Math::VectorUtil::CosTheta(w,muClone)>1.0)
+        if(ROOT::Math::VectorUtil::CosTheta(WIntop,muIntop)>1.0)
             cout<<"=================== what a hell!!! "<<endl;
-        return ROOT::Math::VectorUtil::CosTheta(w,muClone);
+        return ROOT::Math::VectorUtil::CosTheta(WIntop,muIntop);
         /*const TVector3 w3 = w.Vect(); const TVector3 mu3 = muClone.Vect(); 
         double res = (double)(w3.Dot(mu3))/(double)(w3.Mag()*mu3.Mag());      
         return res;*/

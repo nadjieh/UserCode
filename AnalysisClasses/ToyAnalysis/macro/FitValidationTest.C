@@ -133,7 +133,7 @@ int main(int argc, char** argv){
         }
     }
     
-    RunFitValidation(StartPEX, LPEX, StartPEXPull, LPEXPull,prefix,suffix,histName,dirName,1312.772,true,outDir);
+    RunFitValidation(StartPEX, LPEX, StartPEXPull, LPEXPull,prefix,suffix,histName,dirName,1312.772,false,outDir,true);
 //    RunFitValidation(StartPEX, LPEX, StartPEXPull, LPEXPull,prefix,suffix,histName,dirName,300,true,outDir);
     return 0;
 }

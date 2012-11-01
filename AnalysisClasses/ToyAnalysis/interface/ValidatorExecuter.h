@@ -32,6 +32,7 @@ using namespace std;
 //#define TEST_DILEPTON_JEANNINE
 //#define TEST_TWBIAS_JEANNINE
 #define TEST_DITOPBIAS_JEANNINE
+//#define TEST_3D_CORRELATION
 
 TH2* DiagonalMaker(TH2* input) {
     TH1* h1 = input->ProjectionY("proY");
@@ -93,18 +94,25 @@ TH1* GetCosThetaPlot(string name, string prefix, string suffix, string histName,
         }
         cout << h->GetXaxis()->GetNbins() << "\t" << h->GetYaxis()->GetNbins() << endl;
     } else if (!is2D && is3D) {
+#ifndef TEST_3D_CORRELATION
         stringstream name;
         name << dirName << "/" << dirName << histName << "3D";
         string newName = histName + "_Rebinned";
         h = ((TH3*) f->Get(name.str().c_str()));
+        TH3* tmph = 0;
         if ((h->GetXaxis()->GetNbins()) == nFinalBin && (h->GetYaxis()->GetNbins()) == nFinalBin
                 && (h->GetZaxis()->GetNbins()) == nFinalBin)
             return h;
         if ((h->GetXaxis()->GetNbins() % nFinalBin) == 0 && (h->GetYaxis()->GetNbins() % nFinalBin) == 0 &&
                 (h->GetZaxis()->GetNbins() % nFinalBin) == 0) {
-            ((TH3*) h)->Rebin3D(((h->GetXaxis()->GetNbins()) / nFinalBin),
+            tmph = ((TH3*) h)->Rebin3D(((h->GetXaxis()->GetNbins()) / nFinalBin),
                     ((h->GetYaxis()->GetNbins()) / nFinalBin),
-                    ((h->GetZaxis()->GetNbins()) / nFinalBin), newName.c_str());
+//                    ((h->GetZaxis()->GetNbins()) / nFinalBin), newName.c_str());
+                    1, newName.c_str());
+            cout << tmph->GetXaxis()->GetNbins() << "\t" << tmph->GetYaxis()->GetNbins()
+                    << "\t" << tmph->GetZaxis()->GetNbins() << endl;
+            delete h;
+            return tmph;
         } else {
             std::cout << nFinalBin << " does not count " << h->GetXaxis()->GetNbins() << std::endl;
             std::cout << nFinalBin << " or does not count " << h->GetYaxis()->GetNbins() << std::endl;
@@ -116,12 +124,36 @@ TH1* GetCosThetaPlot(string name, string prefix, string suffix, string histName,
                         (h->GetZaxis()->GetNbins() % i) == 0)
                     n = i;
             }
-            ((TH3*) h)->Rebin3D(((h->GetXaxis()->GetNbins()) / n), ((h->GetYaxis()->GetNbins()) / n),
+            tmph = ((TH3*) h)->Rebin3D(((h->GetXaxis()->GetNbins()) / n), ((h->GetYaxis()->GetNbins()) / n),
                     ((h->GetZaxis()->GetNbins()) / n), newName.c_str());
+            cout << tmph->GetXaxis()->GetNbins() << "\t" << tmph->GetYaxis()->GetNbins()
+                    << "\t" << tmph->GetZaxis()->GetNbins() << endl;
+            delete h;
+            return tmph;
         }
-        cout << h->GetXaxis()->GetNbins() << "\t" << h->GetYaxis()->GetNbins()
-                << "\t" << h->GetZaxis()->GetNbins() << endl;
-
+#endif /*TEST_3D_CORRELATION*/
+#ifdef TEST_3D_CORRELATION
+        stringstream name;
+        name << dirName << "/" << dirName << histName << "2D";
+        h = ((TH2*) f->Get(name.str().c_str()));
+        if ((h->GetXaxis()->GetNbins()) == nFinalBin && (h->GetYaxis()->GetNbins()) == nFinalBin)
+            return h;
+        if ((h->GetXaxis()->GetNbins() % nFinalBin) == 0 && (h->GetYaxis()->GetNbins() % nFinalBin) == 0) {
+            ((TH2*) h)->RebinX(((h->GetXaxis()->GetNbins()) / nFinalBin));
+            ((TH2*) h)->RebinY(((h->GetYaxis()->GetNbins()) / nFinalBin));
+        }
+        cout << h->GetName() << endl;
+        TF1 * f = new TF1("fFor3D", CosTheta, -1.,1.,2);
+        f->SetParameter(0, 6.64263e-01);
+        f->SetParameter(1, 3.03734e-01);
+        cout << f->GetName() << endl;
+        cout << f->GetParameter(0) << endl;
+        cout << f->GetParameter(1) << endl;
+        TH3 * myH = Make3DRandom((TH2*) h, f);
+        delete f;
+        delete h;
+        return myH;
+#endif /*TEST_3D_CORRELATION*/
     }
     return h;
 }
@@ -199,34 +231,13 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull, int LPEXPull, st
                 else {
                     signalMC->Add(hist1D);
 #endif /*TEST_CHANGE_SIG_BKG*/
-#ifdef TEST_CHANGE_SIG_BKG 	 
-	                     /* 	 
-	                      * Special condition to chack: 	 
-	                      * 1D + different sig-back composition 	 
-	                      */ 	 
-	                     TH1* hist1D = GetCosThetaPlot(sampleItr->first, prefix, suffix, histName, dirName, 10); 	 
-	                     hist1D->Sumw2(); 	 
-	                     DistributionProducerFromSelected* myDist = new DistributionProducerFromSelected(hist1D, string(sampleItr->first), Lumi); 	 
-	                     bkg_samples[sampleItr->first] = myDist; 	 
-	                     hist1D->Scale(float(Lumi * sampleItr->second) / float(mySampleInfo.N0[sampleItr->first])); 	 
-	                     bkg->Add(hist1D); 	 
-202 	  	 
-	                     TH2* hist2D = (TH2*) GetCosThetaPlot(sampleItr->first, prefix, suffix, histName, dirName, 10, true); 	 
-	                     hist2D->Sumw2(); 	 
-	                     TH1* tmph2 = hist2D->ProjectionY(); 	 
-	                     delete hist2D; 	 
-	                     DistributionProducerFromSelected* myDist2 = new DistributionProducerFromSelected(tmph2, string(sampleItr->first), Lumi); 	 
-	                     signal_samples[sampleItr->first] = myDist2; 	 
-	                     tmph2->Scale(float(Lumi * sampleItr->second) / float(mySampleInfo.N0[sampleItr->first])); 	 
-	 //                    if (sampleIndex == 2) 	 
-	                     if (signalMC == 0) 	 
-	                         signalMC = ((TH1*) tmph2->Clone(string("signal_" + string(hist1D->GetName())).c_str())); 	 
-	                     else { 	 
-	                         signalMC->Add(tmph2); 	 
-	 #endif   /*TEST_CHANGE_SIG_BKG*/
+
                 }
             } else if (is2D && !is3D) {
+                cout << "I am in right place\t" << sampleItr->first << endl;
                 TH1* bkginsignal = GetCosThetaPlot(sampleItr->first, prefix, suffix, histName, dirName, 10);
+                //                    if (bkginsignal->GetEntries() != 0) {
+                cout << "Let's get random distribution!!" << endl;
                 bkginsignal->Sumw2();
                 DistributionProducerFromSelected* myDist = new DistributionProducerFromSelected(bkginsignal
                         , string(sampleItr->first), Lumi);
@@ -241,6 +252,7 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull, int LPEXPull, st
                     //                        return;
                 }
                 cout << "bkginSignal is added " << sampleItr->first << endl;
+                //                    }
                 TH2* histIID = (TH2*) GetCosThetaPlot(sampleItr->first, prefix, suffix, histName, dirName, 10, /*is2D*/true);
                 histIID->Sumw2();
 #ifdef TEST_DIAGONALITY
@@ -260,9 +272,7 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull, int LPEXPull, st
                 signalIID.push_back((TH2*) histIID->Clone(("MyTwoD_" + sampleItr->first + "_" + std::string(histIID->GetName())).c_str()));
 
 #ifdef TEST_DILEPTON_JEANNINE
-                int position = string(signalIID.at(signalIID.size() - 1)->GetName()).find("mu");
-                cout << "position: " << position << "\t" << signalIID.at(signalIID.size() - 1)->GetName() << endl;
-                bool isDilep = (position != 0 && position < (int) string(signalIID.at(signalIID.size() - 1)->GetName()).size());
+                bool isDilep = isDesiredSample(string(signalIID.at(signalIID.size() - 1)->GetName()), "mu");
                 if (!isDilep)
                     tmpVec2DDiLep.push_back((TH2*) signalIID.at(signalIID.size() - 1)->Clone());
                 if (isDilep) {
@@ -273,9 +283,7 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull, int LPEXPull, st
                 }
 #endif /*TEST_DILEPTON_JEANNINE*/ 
 #ifdef TEST_TWBIAS_JEANNINE
-                int position = string(signalIID.at(signalIID.size() - 1)->GetName()).find("Mu");
-                cout << "position: " << position << "\t" << signalIID.at(signalIID.size() - 1)->GetName() << endl;
-                bool isDilep = (position != 0 && position < (int) string(signalIID.at(signalIID.size() - 1)->GetName()).size());
+                bool isDilep = isDesiredSample(string(signalIID.at(signalIID.size() - 1)->GetName()), "Mu");
                 if (!isDilep)
                     tmpVec2DDiLep.push_back((TH2*) signalIID.at(signalIID.size() - 1)->Clone());
                 if (isDilep) {
@@ -288,11 +296,8 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull, int LPEXPull, st
 
 #endif /*TEST_DIAGONALITY*/
             } else if (!is2D && is3D) {
-
-                int position = string(sampleItr->first).find("u");
-                cout << "position: " << position << "\t" << sampleItr->first << endl;
-                bool isDitop = (position != 0 && position < (int) string(sampleItr->first).size());
-
+                bool isDitop = isDesiredSample(sampleItr->first, "mu");
+                cout << "for 3D, the name should contain mu: " << sampleItr->first << "\t" << isDitop << endl;
                 TH1* bkginsignal = GetCosThetaPlot(sampleItr->first, prefix, suffix, histName, dirName, 10);
                 bkginsignal->Sumw2();
                 DistributionProducerFromSelected* myDist = new DistributionProducerFromSelected(bkginsignal
@@ -309,6 +314,7 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull, int LPEXPull, st
                 }
                 cout << "bkginSignal is added " << sampleItr->first << endl;
                 if (!isDitop) {
+                    cout << "it is not ditop" << endl;
                     TH2* histIID = (TH2*) GetCosThetaPlot(sampleItr->first, prefix, suffix, histName, dirName, 10, /*is2D*/true);
                     histIID->Sumw2();
                     DistributionProducerFromSelected* myDist2D = new DistributionProducerFromSelected(histIID
@@ -319,6 +325,7 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull, int LPEXPull, st
                             std::string(histIID->GetName())).c_str()));
 
                 } else {
+                    cout << "it is ditop" << endl;
                     TH3* histIIID = (TH3*) GetCosThetaPlot(sampleItr->first, prefix, suffix, histName, dirName,
                             10, /*is2D*/false, /*is3D*/true);
                     histIIID->Sumw2();
@@ -333,6 +340,8 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull, int LPEXPull, st
         }
         sampleIndex++;
     }
+    cout << "Signal 2D size is " << signalIID.size() << endl;
+    cout << "Signal 3D size is " << signalIIID.size() << endl;
 #if defined (TEST_DILEPTON_JEANNINE) || defined (TEST_TWBIAS_JEANNINE)
     bkgTmpDilep->Add(bkg);
 #endif /*TEST_DILEPTON_JEANNINE OR TEST_DILEPTON_JEANNINE*/
@@ -341,6 +350,7 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull, int LPEXPull, st
     TH2D hFinalF0("hFinalF0", "Linearirty Check for F_{0};F_{0} input;F_{0} output", 300, 0., 1., 300, 0., 1.);
     TH2D hFinalFPos("hFinalFPos", "Linearirty Check for F_{+};nPEX;F_{+} output", 300, 0., 300., 1000, -0.5, 0.5);
     int nFSteps = 300;
+    //        int nFSteps = 5;
 
     double FNegValueSteps[nFSteps];
     for (int i = 0; i < nFSteps; i++) {
@@ -399,25 +409,12 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull, int LPEXPull, st
             hSumSIGPartial->Sumw2();
             std::map<string, DistributionProducerFromSelected*> ::iterator sigItr = signal_samples.begin();
             name__ << "CosTheta_signal_" << nPEX;
-#ifdef TEST_2D_Partial
-            stringstream fname;
-            fname << "1DTEST_" << nPEX << ".root";
-            TFile * myf = new TFile(fname.str().c_str(), "recreate");
-#endif /*TEST_2D_Partial*/
             for (; sigItr != signal_samples.end(); sigItr++) {
                 TH1* tmp = sigItr->second->GeneratePartialSample(1.0 / 3.0, nPEX);
                 hSumSIGPartial->Add(tmp);
-#ifdef TEST_2D_Partial
-                myf->cd();
-                tmp->Write();
-#endif /*TEST_2D_Partial*/
                 delete tmp;
             }
-#ifdef TEST_2D_Partial  
-            myf->Write();
-            myf->Close();
-#endif /*TEST_2D_Partial*/
-        } else if (!is2D && !is3D) {
+        } else if (is2D && !is3D) {
             hSumSIGPartial = new TH1D(name__.str().c_str(), title__.str().c_str(), signalIID.at(0)->GetYaxis()->GetNbins()
                     , signalIID.at(0)->GetYaxis()->GetXmin(), signalIID.at(0)->GetYaxis()->GetXmax());
             hSumSIGPartial->Sumw2();
@@ -430,21 +427,7 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull, int LPEXPull, st
                 signalIIDPartial.push_back((TH2*) tmp->Clone(std::string(sigItr->first + "_" + name2D__.str()).c_str()));
                 delete tmp;
             }
-#ifdef TEST_2D_Partial
-            stringstream fname;
-            fname << "2DTEST_" << nPEX << ".root";
-            TFile * myf = new TFile(fname.str().c_str(), "recreate");
-            cout << "*********************************************************************" << endl;
-            cout << myf->GetName() << "**********************************" << endl;
-            cout << "*********************************************************************" << endl;
-            myf->cd();
-            for (unsigned int l = 0; l < signalIIDPartial.size(); l++) {
-                signalIIDPartial.at(l)->Write();
-            }
-            myf->Write();
-            myf->Close();
-#endif
-        } else if (is3D) {
+        } else if (!is2D && is3D) {
             hSumSIGPartial = new TH1D(name__.str().c_str(), title__.str().c_str(), signalIID.at(0)->GetYaxis()->GetNbins()
                     , signalIID.at(0)->GetYaxis()->GetXmin(), signalIID.at(0)->GetYaxis()->GetXmax());
             hSumSIGPartial->Sumw2();
@@ -453,8 +436,7 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull, int LPEXPull, st
             signalIIDPartial.clear();
             signalIIIDPartial.clear();
             for (; sigItr != signal_samples.end(); sigItr++) {
-                int position = string(sigItr->first).find("u");
-                bool isDitop = (position != 0 && position < (int) string(sigItr->first).size());
+                bool isDitop = isDesiredSample(sigItr->first, "mu");
                 if (!isDitop) {
                     TH2* tmp = ((TH2*) sigItr->second->GeneratePartialSample(1.0 / 3.0, nPEX));
                     signalIIDPartial.push_back((TH2*) tmp->Clone(std::string(sigItr->first + "_" + name2D__.str()).c_str()));
@@ -466,7 +448,7 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull, int LPEXPull, st
                 }
             }
         }
-
+        cout << "for different polarization values" << endl;
         for (int i = 0; i < nFSteps; i++) {
             if (FNegValueSteps[i] > (1.0 - FposFixed))
                 continue;
@@ -483,38 +465,7 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull, int LPEXPull, st
                 TH1* SIGinPEX = ((TH1*) hSumSIGPartial->Clone(name__.str().c_str()));
                 SIGinPEX->SetTitle(title__.str().c_str());
                 SIGinPEX->Multiply(&WtbWeightor.first, 1);
-#ifdef TEST
-                TCanvas c;
-                c.cd();
-                WtbWeightor.first.Draw();
-                stringstream canvNme;
-                canvNme << FNegValueSteps[i] << "_" << F0Value << "_";
-                c.SaveAs(string(canvNme.str() + string(WtbWeightor.first.GetName()) + ".C").c_str());
-#endif /*TEST*/
-#ifdef TEST_2D_Partial
-                stringstream fname;
-                fname << "1DSIGinPEX_" << nPEX << ".root";
-                TFile * myf = new TFile(fname.str().c_str(), "recreate");
-
-                myf->cd();
-
-                SIGinPEX->Write();
-
-#endif
                 SIGinPEX->Add(hSumBGPartial);
-#ifdef TEST_2D_Partial
-
-                TH1D * htmp = (TH1D*) SIGinPEX->Clone("allData");
-                myf->cd();
-
-                htmp->Write();
-                signalMC->Write();
-                bkg->Write();
-
-                delete htmp;
-
-                myf->Close();
-#endif                   
                 std::pair<TF3, LikelihoodFunction*> LLinPEXforFNegValueArray = LikelihoodFunction::getLLFunction(
                         string("F_" + name__.str()), bkg, SIGinPEX, signalMC);
                 TF3 LLinPEXforFNegValue = LLinPEXforFNegValueArray.first;
@@ -544,43 +495,8 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull, int LPEXPull, st
                     }
                     SIGinPEX->SetBinContent(iBin + 1, iContent);
                 }
-#ifdef TEST
-                TCanvas c;
-                c.cd();
-                WtbWeightor.first.Draw();
-                stringstream canvNme;
-                canvNme << FNegValueSteps[i] << "_" << F0Value << "_";
-                c.SaveAs(string(canvNme.str() + string(WtbWeightor.first.GetName()) + ".C").c_str());
-#endif /*TEST*/
-#ifdef TEST_2D_Partial
-                stringstream fname;
-                fname << "2DSIGinPEX_" << nPEX << ".root";
-                TFile * myf = new TFile(fname.str().c_str(), "recreate");
 
-
-                myf->cd();
-                SIGinPEX->Write();
-
-
-#endif
                 SIGinPEX->Add(hSumBGPartial);
-#ifdef TEST_2D_Partial
-
-                TH1D * signaltoTest = signalIID.at(0)->ProjectionY((string(signalIID.at(0)->GetName()) + "_toTest").c_str());
-                for (unsigned int iSigTest = 1; iSigTest < signalIID.size(); iSigTest++) {
-                    signaltoTest->Add(signalIID.at(iSigTest)->ProjectionY((string(signalIID.at(iSigTest)->GetName()) + "_toTest").c_str()));
-                }
-                TH1D * htmp = (TH1D*) SIGinPEX->Clone("allData");
-                myf->cd();
-
-                htmp->Write();
-                signaltoTest->Write();
-                bkg->Write();
-
-                delete htmp;
-                delete signaltoTest;
-                myf->Close();
-#endif  
 #if defined (TEST_DILEPTON_JEANNINE) || defined (TEST_TWBIAS_JEANNINE)
                 std::pair<TF3, LikelihoodFunction*> LLinPEXforFNegValueArray = LikelihoodFunction::getLLFunctionGeneralized(
                         string("F_" + name__.str()), bkgTmpDilep, SIGinPEX, tmpVec2DDiLep);
@@ -604,7 +520,7 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull, int LPEXPull, st
                 hFinalFPos.Fill(nPEX, 1.0 - x[0] - x[1]);
                 delete SIGinPEX;
                 delete LLinPEXforFNegValueArray.second;
-            } else if (is3D) {
+            } else if (!is2D && is3D) {
                 TH1* SIGinPEX = ((TH1*) hSumSIGPartial->Clone(name__.str().c_str()));
                 SIGinPEX->SetTitle(title__.str().c_str());
                 for (int iBin = 0; iBin < SIGinPEX->GetXaxis()->GetNbins(); iBin++) {
@@ -619,54 +535,49 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull, int LPEXPull, st
                         delete sigProjectionX;
                     }
                     for (unsigned int iSample = 0; iSample < signalIIIDPartial.size(); iSample++) {
-#ifndef TEST_DITOPBIAS_JEANNINE
                         name2D__.str("");
-                        name2D__ << signalIIIDPartial.at(iSample)->GetName() << "_" << FNegValueSteps[i] << "_" << iBin;
-                        TH1* sigProjectionX = ((TH3*) signalIIIDPartial.at(iSample))->ProjectionX(name2D__.str().c_str(), iBin + 1, iBin + 1);
-                        sigProjectionX->SetTitle(title__.str().c_str());
-                        sigProjectionX->Multiply(&WtbWeightor.first, 1);
-                        iContent += sigProjectionX->Integral();
-                        delete sigProjectionX;
-#endif /*TEST_DITOPBIAS_JEANNINE*/
-#ifdef TEST_DITOPBIAS_JEANNINE
-                        name2D__.str("");
-                        name2D__ << signalIIIDPartial.at(iSample)->GetName() << "_" << FNegValueSteps[i] << "_" << iBin;
-                        TH1D * coefficients = new TH1D("tmp","tmp",signalIIIDPartial.at(iSample)->GetXaxis()->GetNbins(),
-                               signalIIIDPartial.at(iSample)->GetXaxis()->GetXmin(),
-                               signalIIIDPartial.at(iSample)->GetXaxis()->GetXmax() );
+                        name2D__ << signalIIIDPartial.at(iSample)->GetName() << "_" << FNegValueSteps[i]
+                                << "_" << iBin;
+                        TH1D * coefficients = new TH1D("tmp", "tmp", 
+                                signalIIIDPartial.at(iSample)->GetXaxis()->GetNbins(),
+                                signalIIIDPartial.at(iSample)->GetXaxis()->GetXmin(),
+                                signalIIIDPartial.at(iSample)->GetXaxis()->GetXmax());
                         for (int genBin = 0; genBin < signalIIIDPartial.at(iSample)->GetXaxis()->GetNbins(); genBin++) {
                             TH1* sigProjectionZ = ((TH3*) signalIIIDPartial.at(iSample))->ProjectionZ(
-                                    name2D__.str().c_str(),genBin + 1, genBin + 1, iBin + 1, iBin + 1,"o");
+                                    name2D__.str().c_str(), genBin + 1, genBin + 1, iBin + 1, iBin + 1, "o");
+//                            cout<<"PreOld: "<<sigProjectionZ->Integral()<<endl;
                             sigProjectionZ->Multiply(&(WtbWeightor.first), 1);
                             coefficients->SetBinContent(genBin + 1, sigProjectionZ->Integral());
+//                            cout<<"New: "<<coefficients->GetBinContent(genBin+1)<<"\tOld: "<<
+//                                    ((TH3*) signalIIIDPartial.at(iSample))->Integral(genBin+1,genBin+1, iBin+1, iBin+1,0,11)<<endl;
                             delete sigProjectionZ;
                         }
                         coefficients->Multiply(&(WtbWeightor.first), 1);
                         iContent += coefficients->Integral();
                         delete coefficients;
-#endif /*TEST_DITOPBIAS_JEANNINE*/
+                        //#endif /*TEST_DITOPBIAS_JEANNINE*/
 
                     }
                     SIGinPEX->SetBinContent(iBin + 1, iContent);
                 }
+
                 SIGinPEX->Add(hSumBGPartial);
 #ifdef TEST_DITOPBIAS_JEANNINE
-                for(unsigned int iTwoDSignal = 0; iTwoDSignal < signalIIID.size(); iTwoDSignal++){
-                    signalIID.push_back((TH2*)((TH3*)signalIIID.at(iTwoDSignal))->Project3D("yx"));
-                    delete signalIIID.at(iTwoDSignal);
+                std::vector<TH2*> tmp2D3DSignal;
+                for (unsigned int iTwoDSignal = 0; iTwoDSignal < signalIID.size(); iTwoDSignal++) {
+                    tmp2D3DSignal.push_back(new TH2D(*((TH2D*) signalIID.at(iTwoDSignal))));
                 }
-                signalIIID.clear();
+                for (unsigned int iTwoDSignal = 0; iTwoDSignal < signalIIID.size(); iTwoDSignal++) {
+                    tmp2D3DSignal.push_back((TH2*) ((TH3*) signalIIID.at(iTwoDSignal))->Project3D("yx"));
+                }
                 std::pair<TF3, LikelihoodFunction*> LLinPEXforFNegValueArray = LikelihoodFunction::getLLFunctionGeneralized(
-                        string("F_" + name__.str()), bkg, SIGinPEX, signalIID);
+                        string("F_" + name__.str()), bkg, SIGinPEX, tmp2D3DSignal);
 #endif /*TEST_DITOPBIAS_JEANNINE*/
 #ifndef TEST_DITOPBIAS_JEANNINE
                 std::pair<TF3, LikelihoodFunction*> LLinPEXforFNegValueArray = LikelihoodFunction::getLLFunctionForBias(
                         string("F_" + name__.str()), bkg, SIGinPEX, signalIID, signalIIID);
 #endif /*TEST_DITOPBIAS_JEANNINE*/
                 TF3 LLinPEXforFNegValue = LLinPEXforFNegValueArray.first;
-                //            for(int as = 0; as <1; as+=0.01)
-                //                cout<<LLinPEXforFNegValue.Eval(as,1-as,1);
-
                 double x[3] = {-1., -1., -1.};
                 double xerr[3] = {-1., -1., -1.};
                 double correlation12 = -1000;
@@ -678,6 +589,12 @@ void RunFitValidation(int StartPEX, int LPEX, int StartPEXPull, int LPEXPull, st
                 hFinalFPos.Fill(nPEX, 1.0 - x[0] - x[1]);
                 delete SIGinPEX;
                 delete LLinPEXforFNegValueArray.second;
+#ifdef TEST_DITOPBIAS_JEANNINE
+                for (unsigned int g = 0; g < tmp2D3DSignal.size(); g++) {
+                    delete tmp2D3DSignal[g];
+                }
+                tmp2D3DSignal.clear();
+#endif /*TEST_DITOPBIAS_JEANNINE*/
             }
         }//for loop
         delete hSumBGPartial;

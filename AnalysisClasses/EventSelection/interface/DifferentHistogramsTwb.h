@@ -50,9 +50,12 @@ public:
         cosTheta2D = new TH2D(string(name + "cosTheta2D").c_str(),
                 string(name + ": cos(#theta); cos(#theta)_{gen}; cos(#theta)_{rec}").c_str(),
                 10000, -1., 1., 100, -1., 1.);
+//        cosTheta3D = new TH3D(string(name + "cosTheta3D").c_str(),
+//                string(name + ": cos(#theta); cos(#theta)_{gen-lep}; cos(#theta)_{rec};cos(#theta)_{gen-d};").c_str(),
+//                100, -1., 1., 100, -1., 1., 100, -1., 1.);
         cosTheta3D = new TH3D(string(name + "cosTheta3D").c_str(),
                 string(name + ": cos(#theta); cos(#theta)_{gen-lep}; cos(#theta)_{rec};cos(#theta)_{gen-d};").c_str(),
-                100, -1., 1., 100, -1., 1., 100, -1., 1.);
+                10, -1., 1., 100, -1., 1., 1000, -1., 1.);
         top_W_channel1 = new TH2D("top_W_channel1", "top_W_channel", 4, 0, 4, 4, 0, 4);
         top_W_channel1->GetXaxis()->SetBinLabel(1, "top-Mu");
         top_W_channel1->GetXaxis()->SetBinLabel(2, "top-E");
