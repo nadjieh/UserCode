@@ -178,26 +178,14 @@ public:
 		    cout<<"bTagCut "<<bTagCut <<" passed ... "<<endl;
 	    }
             return (jet.btag_trackCountingHighPurBJetTags() > bTagCut);
-        if(btagAlgo == "JP"){
-            if(verbosity > 0){
-		cout<<"-- bTag Value: "<<jet.btag_jetProbabilityBJetTags()<<endl;
-		if(jet.btag_jetProbabilityBJetTags() > bTagCut)
-		    cout<<"bTagCut "<<bTagCut <<" passed ... "<<endl;
-            }
+        if(btagAlgo == "JP")
             return (jet.btag_jetProbabilityBJetTags() > bTagCut);
-        }
         if(btagAlgo == "JBP")
             return (jet.btag_jetBProbabilityBJetTags() > bTagCut);
         if(btagAlgo == "CSVMVA")
             return (jet.btag_combinedSecondaryVertexMVABJetTags() > bTagCut);
-        if(btagAlgo == "CSV"){
-            if(verbosity > 0){
-		cout<<"-- bTag Value: "<<jet.btag_combinedSecondaryVertexBJetTags()<<endl;
-		if(jet.btag_combinedSecondaryVertexBJetTags() > bTagCut)
-		    cout<<"bTagCut "<<bTagCut <<" passed ... "<<endl;
-            }
+        if(btagAlgo == "CSV")
             return (jet.btag_combinedSecondaryVertexBJetTags() > bTagCut);
-        }
        if(btagAlgo == "SSVE")
             return (jet.btag_simpleSecondaryVertexHighEffBJetTags() > bTagCut);
         if(btagAlgo == "SSVP")

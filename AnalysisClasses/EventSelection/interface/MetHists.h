@@ -37,28 +37,33 @@
 
 using namespace TopTree;
 
-class MetHists{
- public:
-  MetHists(std::string name):Name(name){ 
-    kinHists = new KinematicHists<TRootPFMET>(Name);
-  };
-  virtual ~MetHists(){};
-  
-  virtual void Fill(TRootPFMET * MET,double weight=1){
-	kinHists->Fill(MET,weight);
-  };
-  virtual void WriteAll(TDirectory * dir){
-        if(dir == 0)
-          return;
-        TDirectory * my_dir = dir->mkdir((Name+"_MET").c_str());
-	my_dir->cd();
-       
-        kinHists->Write(); 
+class MetHists {
+public:
+
+    MetHists(std::string name, bool sumw2 = false) : Name(name) {
+        kinHists = new KinematicHists<TRootPFMET > (Name, sumw2);
+    };
+
+    virtual ~MetHists() {
+    };
+
+    virtual void Fill(TRootPFMET * MET, double weight = 1) {
+        kinHists->Fill(MET, weight);
+    };
+
+    virtual void WriteAll(TDirectory * dir) {
+        if (dir == 0)
+            return;
+        TDirectory * my_dir = dir->mkdir((Name + "_MET").c_str());
+        my_dir->cd();
+
+        kinHists->Write();
         dir->cd();
-  };
- private:
-  KinematicHists<TRootPFMET> * kinHists;  
-  std::string Name;
+    };
+private:
+    KinematicHists<TRootPFMET> * kinHists;
+    std::string Name;
+
 
 };
 #endif

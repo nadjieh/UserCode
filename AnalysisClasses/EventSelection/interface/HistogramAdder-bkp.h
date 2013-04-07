@@ -19,7 +19,6 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include <math.h>
 #include "TColor.h"
 #include "TColorWheel.h"
 #include "TKey.h"
@@ -79,8 +78,7 @@ public:
                     bool is3D = string(l2->At(j)->GetName()).find("3D") < string(l2->At(j)->GetName()).size();
                     is3D = (is3D && string(l2->At(j)->GetName()).find("3D") > 0);
                     cout << "is3D: " << l2->At(j)->GetName() << "\t" << is3D << endl;
-                    if (string(l2->At(j)->GetName()) == "ttDecayModes"/* || is3D*/) {
-                        //                    if (string(l2->At(j)->GetName()) == "ttDecayModes") {
+                    if (string(l2->At(j)->GetName()) == "ttDecayModes" || is3D) {
                         cout << "I don't take it!" << endl;
                         continue;
                     }
@@ -94,7 +92,7 @@ public:
         }
     }
 
-    void plot(vector<TFile*> files, vector<double> weights, TFile * out, std::vector<double> Unc) {
+    void plot(vector<TFile*> files, vector<double> weights, TFile * out) {
         for (unsigned int q = 0; q < structure.size(); q++) {
             bool mkdir = false;
             TDirectory * tmpdir = 0;
@@ -118,7 +116,6 @@ public:
                         cout << "Directory number " << q << ": " << d->GetName() << endl;
                     }
                     h = (TH1D*) d->Get(structure.at(q).content.at(w).c_str());
-                    cout << h << "\t" << structure.at(q).content.at(w).c_str() << endl;
                     //                    h->Sumw2();
                     bool isQCD = false;
                     int pos1 = string(files.at(e)->GetName()).find("qcd");
@@ -126,9 +123,9 @@ public:
                     isQCD = (pos1 > 0 && pos1 < string(files.at(e)->GetName()).size());
                     if (!isQCD)
                         isQCD = (pos2 > 0 && pos2 < string(files.at(e)->GetName()).size());
-                    if (!isQCD || (isQCD && !dataDrivenQCD)) {
+                    if (!isQCD || (isQCD && !dataDrivenQCD))
                         h->Scale(weights.at(e));
-                    } else if (isQCD && dataDrivenQCD) {
+                    else if (isQCD && dataDrivenQCD) {
                         cout << "I am QCD :-)" << endl;
                         h->Scale(weights.at(e) / h->Integral());
                     }
@@ -169,13 +166,7 @@ public:
                         cout << h->GetName() << endl;
                     }
                     //                    cout<<weights.at(e)<<endl;
-                    if (Unc.size() != 0)
-                        if (Unc[e] > 0) {
-                            for (int nBins = 0; nBins < h->GetXaxis()->GetNbins(); nBins++) {
-                                double errW2 = pow(h->GetBinContent(nBins + 1), 2) * pow((Unc[e] / weights[e]), 2);
-                                h->SetBinError(nBins + 1, sqrt(errW2 + pow(h->GetBinError(nBins + 1), 2)));
-                            }
-                        }
+
                     if (e == 0) {
                         //                        Res = (TH1D*)h->Clone();
                         Res = h;
@@ -237,15 +228,8 @@ public:
                 //                cf->Scale(102.56/cf->Integral());
 
                 //                cf->Sumw2();
-                if (Unc.size() != 0)
-                    if (Unc[e] > 0) {
-                        for (int nBins = 0; nBins < cf->GetXaxis()->GetNbins(); nBins++) {
-                            double errW2 = pow(cf->GetBinContent(nBins + 1), 2) * pow((Unc[e] / weights[e]), 2);
-                            cf->SetBinError(nBins + 1, sqrt(errW2 + pow(cf->GetBinError(nBins + 1), 2)));
-                        }
-                    }
                 if (e == 0) {
-                    Res = cf;
+                    Res = (TH1D*) cf->Clone();
                     //                    Res->Sumw2();
                 } else {
                     Res->Add(cf);
@@ -261,7 +245,6 @@ public:
     }
 
     void printStructure() {
-        cout << "Size of structure: " << structure.size() << endl;
         for (unsigned int i = 0; i < structure.size(); i++) {
             cout << "Part " << i << ", " << structure.at(i).mainName << endl;
             for (unsigned int j = 0; j < structure.at(i).content.size(); j++) {

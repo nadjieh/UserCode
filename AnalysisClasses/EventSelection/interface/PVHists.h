@@ -39,7 +39,7 @@ using namespace TopTree;
 
 class PVHists{
  public:
-  PVHists(std::string name):Name(name){ 
+  PVHists(std::string name, bool sumw2 = false):Name(name),setSumW2(sumw2){ 
     rho = new TH1D((Name+"_Rho").c_str(), (Name+"_Rho").c_str(), 100,0.,10.);
     rho->GetXaxis()->SetTitle("#rho");
     z = new TH1D((Name+"_z").c_str(),( Name+"_z").c_str(), 50,0.,50.);
@@ -48,12 +48,19 @@ class PVHists{
     ndof->GetXaxis()->SetTitle("ndof");
     isFake = new TH1D((Name+"_isFake").c_str(),( Name+"_isFake").c_str(), 2,0.,2.);
     isFake->GetXaxis()->SetTitle("isFake");
-    nGPV = new TH1D((Name+"_nGPV").c_str(),( Name+"_nGPV").c_str(), 2,0.,2.);
+    nGPV = new TH1D((Name+"_nGPV").c_str(),( Name+"_nGPV").c_str(), 200,0.,200.);
     nGPV->GetXaxis()->SetTitle("nGPV");
+    if(setSumW2){
+        rho->Sumw2();
+        z->Sumw2();
+        ndof->Sumw2();
+        isFake->Sumw2();
+        nGPV->Sumw2();
+    }
   };
   virtual ~PVHists(){};
   virtual void Fill(std::vector<TRootVertex> pvs, int nGpv = 10.,double weight=1){
-	for(unsigned int i = 0; i<1/*pvs.size()*/; i++){
+	for(unsigned int i = 0; i<pvs.size(); i++){
 		TRootVertex pv = pvs.at(i);
 		double Rho = sqrt((pv.x() * pv.x()) + (pv.y() * pv.y()));
 	        rho->Fill(Rho,weight);
@@ -86,6 +93,7 @@ class PVHists{
   TH1D * isFake;
   TH1D * nGPV;
   std::string Name;
+  bool setSumW2;
 
 };
 #endif

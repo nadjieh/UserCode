@@ -26,8 +26,9 @@ using namespace ROOT;
 class SemiLepTopQuark{
 public:
     
-    SemiLepTopQuark(TRootPFJet b, TRootPFMET mis, TRootMuon Mu, TRootPFJet b2,TRootPFJet FwD, TH1D * res ,int v = 0, bool nuCalc_ = true):
-    bJet(b),unTagged(b2),FwDJet(FwD),met(mis),mu(Mu),resolutions(res),verbosity(v),nuCalc(nuCalc_){   
+    SemiLepTopQuark(TRootPFJet b, TRootPFMET mis, TRootMuon Mu, TRootPFJet b2,TRootPFJet FwD, TH1D * res ,int v = 0, bool nuCalc_ = true, bool solutionfound = false):
+    bJet(b),unTagged(b2),FwDJet(FwD),met(mis),mu(Mu),resolutions(res),verbosity(v),nuCalc(nuCalc_), nuSolutionFound_FixedWmass(solutionfound){   
+        goodEvent = true;
         if(nuCalc){
             met_W = this->neutrino_W();
             met_MET = this->neutrino_MET();
@@ -36,9 +37,11 @@ public:
             met_MET.SetPxPyPzE(-1,-1,-1,-1);
         }
 //        met.SetPxPyPzE(nu.Px(),nu.Py(),nu.Pz(),sqrt(nu.Px()*nu.Px()+nu.Py()*nu.Py()+nu.Pz()*nu.Pz()));    
+        muonCharge = 1000;
     };
-    SemiLepTopQuark(TLorentzVector b, TLorentzVector mis, TLorentzVector Mu, TLorentzVector b2, TRootPFJet FwD, TH1D * res ,int v = 0, bool nuCalc_ = true):
-    bJet(b),unTagged(b2),FwDJet(FwD) ,met(mis),mu(Mu),resolutions(res),verbosity(v),nuCalc(nuCalc_){
+    SemiLepTopQuark(TLorentzVector b, TLorentzVector mis, TLorentzVector Mu, TLorentzVector b2, TRootPFJet FwD, TH1D * res ,int v = 0, bool nuCalc_ = true, bool solutionfound = false):
+    bJet(b),unTagged(b2),FwDJet(FwD) ,met(mis),mu(Mu),resolutions(res),verbosity(v),nuCalc(nuCalc_), nuSolutionFound_FixedWmass(solutionfound){
+        goodEvent = true;
         if(nuCalc){
             met_W = this->neutrino_W();
             met_MET = this->neutrino_MET();
@@ -46,14 +49,25 @@ public:
             met_W.SetPxPyPzE(-1,-1,-1,-1);
             met_MET.SetPxPyPzE(-1,-1,-1,-1);
         }
+        muonCharge = 1000;
         
 //        met.SetPxPyPzE(nu.Px(),nu.Py(),nu.Pz(),sqrt(nu.Px()*nu.Px()+nu.Py()*nu.Py()+nu*nu));    
     };
     SemiLepTopQuark():
-    bJet(-1,-1,-1,-1),unTagged(-1,-1,-1,-1),FwDJet(-1,-1,-1,-1),met(-1,-1,-1,-1),mu(-1,-1,-1,-1),resolutions(0),verbosity(0){};
+    bJet(-1,-1,-1,-1),unTagged(-1,-1,-1,-1),FwDJet(-1,-1,-1,-1),met(-1,-1,-1,-1),mu(-1,-1,-1,-1),resolutions(0),verbosity(0){
+        goodEvent = true;
+        muonCharge = 1000;
+    };
     ~SemiLepTopQuark(){//delete resolutions;
     };
+    bool hasFixedWmassNuSolution()const{return nuSolutionFound_FixedWmass;}
+    bool hasNeutrinoSolution()const{return this->hasFixedWmassNuSolution();}
+    bool keepEvent()const{
+        return goodEvent;
+    }
+    
     TLorentzVector neutrino_MET(){
+        nuSolutionFound_FixedWmass = false;
         double mw = 80.44;
         float solution = -10000;
         double Delta = delta(mw,mu,met);
@@ -67,6 +81,7 @@ public:
             if(verbosity > 0)
                 cout<<"\n\tsolution = "<<solution<<endl;
             nut.SetPxPyPzE(met.Px(),met.Py(),solution,sqrt(met.Px()*met.Px()+met.Py()*met.Py()+solution*solution));
+            nuSolutionFound_FixedWmass = true;
             return nut;
         }
 //        if(verbosity > 0)
@@ -104,6 +119,8 @@ public:
     }
    
     TLorentzVector neutrino_W(){
+        nuSolutionFound_FixedWmass = false;
+        goodEvent = true;
         double mw = 80.44;
         float solution = -10000;
         double Delta = delta(mw,mu,met);
@@ -117,6 +134,7 @@ public:
             if(verbosity > 0)
                 cout<<"\n\tsolution = "<<solution<<endl;
             nut.SetPxPyPzE(met.Px(),met.Py(),solution,sqrt(met.Px()*met.Px()+met.Py()*met.Py()+solution*solution));
+            nuSolutionFound_FixedWmass = true;
             return nut;
         }
 //        if(verbosity > 0)
@@ -142,6 +160,7 @@ public:
     //                
         }
         if(solution == -10000){
+            goodEvent = false;
             std::cout<<"MET does not have solution even after mW smearing.\n";
             std::cout<<"The solution is returned as if Delta was zero ..."<<std::endl;
             mw = 80.44;
@@ -152,32 +171,64 @@ public:
     }
 
     TLorentzVector W(int skim = 1)const{
+//        cout<<"skim: "<<skim<<endl;
         if(skim == 2)
             return (met_MET + mu);
-        return (met_W + mu);
+        if (skim == 1)
+            return (met_W + mu);
+//        cout<<met.Pt()<<" "<<met.Px()<<" "<<met.Py()<<" "<<met.Pz()<<" "<<met.E()<<endl;
+//        cout<<mu.Pt()<<" "<<mu.Px()<<" "<<mu.Py()<<" "<<mu.Pz()<<" "<<mu.E()<<endl;
+        return met + mu;
     }
     TLorentzVector top(int skim = 1)const{
+//        cout<<"skim in top: "<<skim<<endl;
+//        cout<<bJet.Px()<<" "<<bJet.Py()<<" "<<bJet.Pz()<<" "<<bJet.E()<<endl;
         return (this->W(skim)+bJet);
     }
+//    double cosThetaStar(int skim = 1)const{
+//        TLorentzVector w = this->W(skim);
+//        if(verbosity>0){
+//            cout<<"W boson:"<<w.Px()<<", "<<w.Py()<<", "<<w.Pz()<<endl;
+//        }
+//        TLorentzVector muClone = mu;
+//        TLorentzVector Top = this->top(skim);
+//        if(verbosity>0){
+//            cout<<"top quark:"<<Top.Px()<<", "<<Top.Py()<<", "<<Top.Pz()<<endl;
+//        }
+//        muClone.Boost(- w.BoostVector());
+//        w.Boost(-Top.BoostVector());
+//        if(verbosity>0){
+//            cout<<"Boosted mu:"<<muClone.Px()<<", "<<muClone.Py()<<", "<<muClone.Pz()<<endl;
+//            cout<<"Boosted W:"<<w.Px()<<", "<<w.Py()<<", "<<w.Pz()<<endl;
+//        }
+//        if(ROOT::Math::VectorUtil::CosTheta(w,muClone)>1.0)
+//            cout<<"=================== what a hell!!! "<<endl;
+//        return ROOT::Math::VectorUtil::CosTheta(w,muClone);
+//        /*const TVector3 w3 = w.Vect(); const TVector3 mu3 = muClone.Vect(); 
+//        double res = (double)(w3.Dot(mu3))/(double)(w3.Mag()*mu3.Mag());      
+//        return res;*/
+//    }
     double cosThetaStar(int skim = 1)const{
         TLorentzVector w = this->W(skim);
         if(verbosity>0){
             cout<<"W boson:"<<w.Px()<<", "<<w.Py()<<", "<<w.Pz()<<endl;
         }
-        TLorentzVector muClone = mu;
+        TLorentzVector muIntop = mu;
+        TLorentzVector WIntop = w;
         TLorentzVector Top = this->top(skim);
+        WIntop.Boost(-Top.BoostVector());
+        muIntop.Boost(-Top.BoostVector());
+        muIntop.Boost(-WIntop.BoostVector());
         if(verbosity>0){
             cout<<"top quark:"<<Top.Px()<<", "<<Top.Py()<<", "<<Top.Pz()<<endl;
         }
-        muClone.Boost(- w.BoostVector());
-        w.Boost(-Top.BoostVector());
         if(verbosity>0){
-            cout<<"Boosted mu:"<<muClone.Px()<<", "<<muClone.Py()<<", "<<muClone.Pz()<<endl;
-            cout<<"Boosted W:"<<w.Px()<<", "<<w.Py()<<", "<<w.Pz()<<endl;
+            cout<<"Boosted mu:"<<muIntop.Px()<<", "<<muIntop.Py()<<", "<<muIntop.Pz()<<endl;
+            cout<<"Boosted W:"<<WIntop.Px()<<", "<<WIntop.Py()<<", "<<WIntop.Pz()<<endl;
         }
-        if(ROOT::Math::VectorUtil::CosTheta(w,muClone)>1.0)
+        if(ROOT::Math::VectorUtil::CosTheta(WIntop,muIntop)>1.0)
             cout<<"=================== what a hell!!! "<<endl;
-        return ROOT::Math::VectorUtil::CosTheta(w,muClone);
+        return ROOT::Math::VectorUtil::CosTheta(WIntop,muIntop);
         /*const TVector3 w3 = w.Vect(); const TVector3 mu3 = muClone.Vect(); 
         double res = (double)(w3.Dot(mu3))/(double)(w3.Mag()*mu3.Mag());      
         return res;*/
@@ -208,6 +259,12 @@ public:
         cout<<"light b : "<<unTagged.Px()<<", "<<unTagged.Py()<<", "<<unTagged.Pz()<<", "<<unTagged.Pt()<<endl;
         cout<<"FwDJet  : "<<FwDJet.Px()<<", "<<FwDJet.Py()<<", "<<FwDJet.Pz()<<", "<<FwDJet.Pt()<<endl;
         cout<<"neutrino: "<<met.Px()<<", "<<met.Py()<<", "<<met.Pz()<<", "<<met.Pt()<<endl;
+    }
+    void setMuCharge(int c){
+        muonCharge = c;
+    }
+    int MuCharge()const{
+        return muonCharge;
     }
 private:
     double A(double mw, TLorentzVector muon, TLorentzVector Emis){
@@ -302,6 +359,9 @@ private:
     bool nuCalc;
     TLorentzVector met_MET;
     TLorentzVector met_W;
+    bool nuSolutionFound_FixedWmass;
+    bool goodEvent;// based on nu solution
+    int muonCharge;
 };
 
 

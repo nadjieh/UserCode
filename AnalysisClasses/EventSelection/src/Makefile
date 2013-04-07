@@ -4,14 +4,13 @@ ExeSuf        =
 DllSuf        = so
 OutPutOpt     = -o
 HeadSuf       = h
-HOMELIB		= $(HOME)/lib/8TeV
 CLIBS		=-L/usr/lib -lstdc++
 ROOTINC		=-I$(shell root-config --incdir)
 ROOTLIBS	=$(shell root-config --libs) -lMinuit
 ROOTCFLAGS	=$(shell root-config --cflags)
 ROOTGLIBS	=$(shell root-config --glibs) -lMinuit
-TROOTLIBS	= -L$(HOMELIB) -lToto
-JETCORRLIB 	= -L$(HOMELIB) -lJetCorrection385P3
+TROOTLIBS	= -L$(HOMELIB) -lToto.2011
+JETCORRLIB 		= -L$(HOMELIB) -lJetCorrection385P3
 
 TROOTINCLUDES = -I../../../TopBrussels/TopTreeProducer/interface
 JETCORRINCLUDES = -I../../JetCorrections/interface
@@ -49,11 +48,11 @@ HEADERS 	= $(wildcard ../interface/*.h)
 OBJECTS 	= $(SOURCES:.$(SrcSuf)=.$(ObjSuf))
 DEPENDS 	= $(SOURCES:.$(SrcSuf)=.d)
 SOBJECTS	= $(SOURCES:.$(SrcSuf)=.$(DllSuf))
-
+HOMELIB		= $(HOME)/lib
 
 #PROGRAMS	=  $(SOBJECTS)
 
-all: libEventSelection.so clean ; cp libEventSelection.so $(HOMELIB)
+all: libEventSelection.2011.so clean ; cp libEventSelection.2011.so $(HOMELIB)
 
 clean:
 	@echo "Cleaning..."
@@ -70,6 +69,6 @@ clean:
 tst:
 	echo $(LD) $(LIBS) $(SOFLAGS) $(LDFLAGS) $+ -o $@
 
-libEventSelection.so: $(OBJECTS)
+libEventSelection.2011.so: $(OBJECTS)
 	$(LD) $(LIBS) $(SOFLAGS) $(LDFLAGS) $+ -o $@
 	@echo "$@ done"

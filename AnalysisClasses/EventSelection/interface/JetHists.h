@@ -39,7 +39,7 @@
 using namespace TopTree;
 class JetHists{
  public:
-  JetHists(std::string name, int type = 1):Name(name), jetType(type){
+  JetHists(std::string name, int type = 1, bool sumw2 = false):Name(name), jetType(type), setsumw2(sumw2){
       if(this->jetType == 1){
         N90 = new TH1D((Name+"_N90").c_str(),(Name+"_N90").c_str(),30,0.,30.);
         N90->GetXaxis()->SetTitle("N90");
@@ -87,7 +87,7 @@ class JetHists{
     nGoodBJets =  new TH1D((Name+"_nGoodBJets").c_str(),(Name+"_nGoodBJets").c_str(),10,0.,10.);
     nGoodBJets->GetXaxis()->SetTitle("N_{good b-jets}");
 
-    kinHists = new KinematicHists<TRootJet>(Name);
+    kinHists = new KinematicHists<TRootJet>(Name,setsumw2);
     //default is CaloJet=1; PFJet =2;
   };
   virtual ~JetHists(){};
@@ -228,6 +228,7 @@ class JetHists{
 
   std::string Name;
   int jetType;
+  bool setsumw2 ;
 };
 #endif
 

@@ -1,0 +1,1 @@
+./SevenChiSquared signal t.root signal tbar.root signal s.root signal sbar.root signal tW.root signal tWbar.root signal dimu.root signal mutau.root signal mue.root signal muhad.root signal rest.root bkg bkg_noW.root wtemplate BOrderedBTemplateIso.root data Summer11_paper_plots.root > seven.txt
