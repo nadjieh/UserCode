@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
 
         //initiate the output file
         stringstream s("");
-        s<<(fNumber+1)<<"_"<<outFileName;
+        s/*<<(fNumber+1)<<"_"*/<<outFileName;
         outFile = new TFile(s.str().c_str(), "recreate");
         outFile->cd();
         eventTree_f = pracEvt->eventTree->CloneTree(0);
