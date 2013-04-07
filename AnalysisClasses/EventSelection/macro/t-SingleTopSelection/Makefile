@@ -2,12 +2,12 @@ ROOTINC		=-I$(shell root-config --incdir)
 ROOTLIBS	=$(shell root-config --libs) -lMinuit
 ROOTCFLAGS	=$(shell root-config --cflags)
 ROOTGLIBS	=$(shell root-config --glibs) -lMinuit
-HOMELIB		= $(HOME)/lib/8TeV
-TROOTLIBS	= -L$(HOMELIB) -lToto
-ESLIBS 		= -L$(HOMELIB) -lEventSelection
-PULIBS		= -L$(HOMELIB) -lLumi3DRW
-JETTOOLS	= -L$(HOMELIB) -lTools
-RECOLIBS	= -L$(HOMELIB) -lReco
+HOMELIB		= $(HOME)/lib
+TROOTLIBS	= -L$(HOMELIB) -lToto.2011
+ESLIBS 		= -L$(HOMELIB) -lEventSelection.2011
+PULIBS		= -L$(HOMELIB) -lLumi3DRW.2011
+JETTOOLS	= -L$(HOMELIB) -lTools.2011
+RECOLIBS	= -L$(HOMELIB) -lReco.2011
 TROOTINCLUDES   = -I../../../../TopBrussels/TopTreeProducer/interface
 PUINCLUDES	=-I../../../../TopBrussels/TopTreeAnalysis/MCInformation/interface/
 JETINCLUDES	=-I../../../../TopBrussels/TopTreeAnalysis/Tools/interface/
@@ -33,9 +33,9 @@ all:  sas clean
 
 sas:
 	@echo "Compiling the SelectAndSave .... \n"
-	$(CXX) SelectAndSave.C -c -o SelectAndSave.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
+	$(CXX) SelectAndSave.C -c -o SelectAndSave.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS) -g
 	@echo "Linking ...... \n"
-	g++ SelectAndSave.o -o SelectAndSave $(ROOTGLIBS) -lEG $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
+	g++ SelectAndSave.o -o SelectAndSaveTw $(ROOTGLIBS) -lEG $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
 	
 tmp:
 	@echo "Compiling the Test ...."
@@ -47,5 +47,3 @@ clean:
 	@echo "Cleaning..."
 	@rm -f *.o
 	@rm -f *~
-
-
