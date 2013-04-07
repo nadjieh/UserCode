@@ -2,16 +2,16 @@ ROOTINC		=-I$(shell root-config --incdir)
 ROOTLIBS	=$(shell root-config --libs) -lMinuit -lRooFit -lMinuit2 -lRooFitCore
 ROOTCFLAGS	=$(shell root-config --cflags)
 ROOTGLIBS	=$(shell root-config --glibs) -lMinuit  -lRooFit -lMinuit2 -lRooFitCore
-HOMELIB		= $(HOME)/lib/8TeV
-TROOTLIBS	= -L$(HOMELIB) -lToto
-ESLIBS 		= -L$(HOMELIB) -lEventSelection
-PULIBS		= -L$(HOMELIB) -lLumi3DRW
-JETTOOLS	= -L$(HOMELIB) -lTools
-RECOLIBS	= -L$(HOMELIB) -lReco
-PHYSOBJLIBS	= -L$(HOMELIB) -lPhysObj
-TOYLIBS		= -L$(HOMELIB) -lToyAnalysis
-BKGSTUDYLIBS	= -L$(HOMELIB) -lBkgStudies
-BASE		= -L$(HOMELIB) -lBaseBaseAnalysis
+HOMELIB		= $(HOME)/lib
+TROOTLIBS	= -L$(HOMELIB) -lToto.2011
+ESLIBS 		= -L$(HOMELIB) -lEventSelection.2011
+PULIBS		= -L$(HOMELIB) -lLumi3DRW.2011
+JETTOOLS	= -L$(HOMELIB) -lTools.2011
+RECOLIBS	= -L$(HOMELIB) -lReco.2011
+PHYSOBJLIBS	= -L$(HOMELIB) -lPhysObj.2011
+TOYLIBS		= -L$(HOMELIB) -lToyAnalysis.2011
+BKGSTUDYLIBS	= -L$(HOMELIB) -lBkgStudies.2011
+BASE		= -L$(HOMELIB) -lBaseBaseAnalysis.2011
 TROOTINCLUDES   = -I../../../TopBrussels/TopTreeProducer/interface
 PUINCLUDES	=-I../../../TopBrussels/TopTreeAnalysis/MCInformation/interface/
 JETINCLUDES	=-I../../../TopBrussels/TopTreeAnalysis/Tools/interface/
@@ -49,13 +49,13 @@ temp: templatefit clean
 
 fit:
 	@echo "Compiling the MultiDimFitTest .... \n"
-	$(CXX) MultiDimFitTest.C -c -o MultiDimFitTest.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
+	$(CXX) MultiDimFitTest.C -c -o MultiDimFitTest.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS) -g 
 	@echo "Linking ...... \n"
 	g++ MultiDimFitTest.o -o TestMDFit $(ROOTGLIBS) -lEG $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
 
 templatefit:
 	@echo "Compiling the TemplateFit .... \n"
-	$(CXX) TemplateFit.C -c -o TemplateFit.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
+	$(CXX) TemplateFit.C -c -o TemplateFit.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS) -g
 	@echo "Linking ...... \n"
 	g++ TemplateFit.o -o FitTemplates $(ROOTGLIBS) -lEG $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
 
