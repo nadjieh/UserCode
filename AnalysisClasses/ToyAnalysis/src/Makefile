@@ -9,7 +9,7 @@ ROOTINC		=-I$(shell root-config --incdir)
 ROOTLIBS	=$(shell root-config --libs) -lMinuit 
 ROOTCFLAGS	=$(shell root-config --cflags)
 ROOTGLIBS	=$(shell root-config --glibs) -lMinuit
-HOMELIB		= $(HOME)/lib/8TeV
+HOMELIB		= $(HOME)/lib
 TROOTINC	=-I../../../../TopBrussels/TopTreeProducer/interface
 PHYSOBJINC	=-I../../../PhysicsObjects/interface
 BASEINC		=-I../../../../Base/BaseAnalysis/interface
@@ -23,9 +23,9 @@ LDFLAGS 	= -g
 SOFLAGS 	= -shared
 
 CXXFLAGS	+= $(ROOTCFLAGS)
-TROOTLIB	=-L$(HOMELIB) -lToto
-PHYSOBJLIB	=-L$(HOMELIB) -lPhysObj
-BASELIB		=-L$(HOMELIB) -lBaseBaseAnalysis
+TROOTLIB	=-L$(HOMELIB) -lToto.2011
+PHYSOBJLIB	=-L$(HOMELIB) -lPhysObj.2011
+BASELIB		=-L$(HOMELIB) -lBaseBaseAnalysis.2011
 
 HEADERS 	=$(MYHEADERS)
 
@@ -56,7 +56,7 @@ SOBJECTS	= $(SOURCES:.$(SrcSuf)=.$(DllSuf))
 
 #PROGRAMS	=  $(SOBJECTS)
 
-all: libToyAnalysis.so clean ; cp libToyAnalysis.so $(HOMELIB)
+all: libToyAnalysis.2011.so clean ; cp libToyAnalysis.2011.so $(HOMELIB)
 
 clean:
 	@echo "Cleaning..."
@@ -70,6 +70,6 @@ clean:
 .$(SrcSuf).$(ObjSuf):
 	$(CXX) $(CXXFLAGS) -c $<
 
-libToyAnalysis.so: $(OBJECTS)
+libToyAnalysis.2011.so: $(OBJECTS)
 	$(LD) $(LIBS) $(SOFLAGS) $(LDFLAGS) $+ -o $@
 	@echo "$@ done"

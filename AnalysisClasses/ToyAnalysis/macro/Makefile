@@ -2,14 +2,14 @@ ROOTINC		=-I$(shell root-config --incdir)
 ROOTLIBS	=$(shell root-config --libs) -lMinuit
 ROOTCFLAGS	=$(shell root-config --cflags)
 ROOTGLIBS	=$(shell root-config --glibs) -lMinuit
-HOMELIB		= $(HOME)/lib/8TeV
-TROOTLIBS	= -L$(HOMELIB) -lToto
-ESLIBS 		= -L$(HOMELIB) -lEventSelection
-PULIBS		= -L$(HOMELIB) -lLumi3DRW
-JETTOOLS	= -L$(HOMELIB) -lTools
-RECOLIBS	= -L$(HOMELIB) -lReco
-PHYSOBJLIBS	= -L$(HOMELIB) -lPhysObj
-TOYLIBS		= -L$(HOMELIB) -lToyAnalysis
+HOMELIB		= $(HOME)/lib
+TROOTLIBS	= -L$(HOMELIB) -lToto.2011
+ESLIBS 		= -L$(HOMELIB) -lEventSelection.2011
+PULIBS		= -L$(HOMELIB) -lLumi3DRW.2011
+JETTOOLS	= -L$(HOMELIB) -lTools.2011
+RECOLIBS	= -L$(HOMELIB) -lReco.2011
+PHYSOBJLIBS	= -L$(HOMELIB) -lPhysObj.2011
+TOYLIBS		= -L$(HOMELIB) -lToyAnalysis.2011
 TROOTINCLUDES   = -I../../../TopBrussels/TopTreeProducer/interface
 PUINCLUDES	=-I../../../TopBrussels/TopTreeAnalysis/MCInformation/interface/
 JETINCLUDES	=-I../../../TopBrussels/TopTreeAnalysis/Tools/interface/
@@ -50,6 +50,10 @@ ll: LLTEST clean
 
 val: VALTEST clean
 
+jes: JES clean
+
+ac:  Ac clean
+
 sas:
 	@echo "Compiling the ToyAnalysis .... \n"
 	$(CXX) ToyAnalysis.C -c -o ToyAnalysis.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
@@ -68,11 +72,11 @@ SEP:
 	@echo "Linking ...... \n"
 	g++ TA_WeightedCosThetaProducer.o -o ProduceWeightedCosTheta $(ROOTGLIBS) -lEG $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)	
 
-tmp:
-	@echo "Compiling the Test ...."
-	g++ Test.C -c -o test.o -O0  -pthread -m64 -I/opt/root/include -fPIC 
-	@echo "Linking \n\n\n\t"
-	g++ test.o -o Test $(ROOTGLIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread 
+JES:
+	@echo "Compiling the FitTest .... \n"
+	$(CXX) FitTest.C -c -o FitTest.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS) -g
+	@echo "Linking ...... \n"
+	g++ FitTest.o -o doLLJES $(ROOTGLIBS) -lEG $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
 
 PLOT:
 	@echo "Compiling the ChiSquaredPlotter .... \n"
@@ -88,12 +92,20 @@ TEST:
 
 LLTEST:
 	@echo "Compiling the FitTest .... \n"
-	$(CXX) FitTest.C -c -o FitTest.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
+	$(CXX) FitTest.C -c -o FitTest.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS) -g
 	@echo "Linking ...... \n"
 	g++ FitTest.o -o doLL $(ROOTGLIBS) -lEG $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
+
+
+Ac:
+	@echo "Compiling the FitTest .... \n"
+	$(CXX) ACFitTest.C -c -o ACFitTest.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS) -g
+	@echo "Linking ...... \n"
+	g++ ACFitTest.o -o doACLL $(ROOTGLIBS) -lEG $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
+
 VALTEST:
 	@echo "Compiling the FitValidationTest .... \n"
-	$(CXX) FitValidationTest.C -c -o FitValidationTest.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS)
+	$(CXX) FitValidationTest.C -c -o FitValidationTest.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS) -g
 	@echo "Linking ...... \n"
 	g++ FitValidationTest.o -o doValidation $(ROOTGLIBS) -lEG $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
 clean:

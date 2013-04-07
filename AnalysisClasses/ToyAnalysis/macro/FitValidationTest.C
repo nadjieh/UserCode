@@ -86,24 +86,26 @@ int main(int argc, char** argv){
     string prefix;
     string suffix;
     string histName;
+    string dirName;
+    string outDir;
     for (int f = 1; f < argc; f++) {
         std::string arg_fth(*(argv + f));
         if (arg_fth == "StartPEX") {
           f++;
           std::string out(*(argv + f));
-          StartPEX = atof(out.c_str());
+          StartPEX = (int)atof(out.c_str());
         }else if(arg_fth == "LPEX"){
           f++;
           std::string out(*(argv + f));
-          LPEX = atof(out.c_str());
+          LPEX = (int)atof(out.c_str());
         }else if (arg_fth == "StartPEXPull") {
             f++;
             std::string out(*(argv + f));
-            StartPEXPull = atof(out.c_str());
+            StartPEXPull = (int)atof(out.c_str());
         }else if (arg_fth == "LPEXPull") {
             f++;
             std::string out(*(argv + f));
-            LPEXPull = atof(out.c_str());            
+            LPEXPull = (int)atof(out.c_str());            
         }else if (arg_fth == "Lumi") {
             f++;
             std::string out(*(argv + f));
@@ -120,9 +122,20 @@ int main(int argc, char** argv){
             f++;
             std::string out(*(argv + f));
             histName = out;            
+        }else if (arg_fth == "dirName") {
+            f++;
+            std::string out(*(argv + f));
+            dirName = out;            
+        }else if (arg_fth == "outDir") {
+            f++;
+            std::string out(*(argv + f));
+            outDir = out;
         }
     }
-
-    RunFitValidation(StartPEX, LPEX, StartPEXPull, LPEXPull,prefix,suffix,histName);
+    
+    RunFitValidation(StartPEX, LPEX, StartPEXPull, LPEXPull,prefix,suffix,histName,dirName,1312.772,false,outDir,true);
+//    RunFitValidation(StartPEX, LPEX, StartPEXPull, LPEXPull,prefix,suffix,histName,dirName,300,true,outDir);
     return 0;
 }
+
+
