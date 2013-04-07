@@ -9,40 +9,40 @@
 //#define Wtemplate
 #include "TDirectory.h"
 
-#include "../../AnalysisClasses/EventSelection/interface/ElectronSelector.h"
+#include "../../../AnalysisClasses/EventSelection/interface/ElectronSelector.h"
 
-#include "../../AnalysisClasses/EventSelection/interface/Event.h"
+#include "../../../AnalysisClasses/EventSelection/interface/Event.h"
 
-#include "../../AnalysisClasses/EventSelection/interface/ElectronHists.h"
-#include "../../AnalysisClasses/EventSelection/interface/MuonHists.h"
-#include "../../AnalysisClasses/EventSelection/interface/PVHists.h"
-#include "../../AnalysisClasses/EventSelection/interface/JetHists.h"
-#include "../../AnalysisClasses/EventSelection/interface/JetSelector.h"
-#include "../../AnalysisClasses/EventSelection/interface/MuonVetoSelector.h"
-#include "../../AnalysisClasses/EventSelection/interface/MetHists.h"
-#include "../../AnalysisClasses/EventSelection/interface/PrimaryVertexSelector.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootMuon.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootElectron.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootJet.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootPFJet.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootMET.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootGenEvent.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootNPGenEvent.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootEvent.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootRun.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootParticle.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootMCParticle.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootVertex.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootHLTInfo.h"
-#include "../../AnalysisClasses/EventSelection/interface/PracticalEvent.h"
-#include "../../AnalysisClasses/ToyAnalysis/interface/GenSingleTopMaker.h"
-#include "../../AnalysisClasses/PhysicsObjects/interface/SemiLepTopQuark.h"
-#include "../../AnalysisClasses/ChiSquared/interface/DR.h"
-#include "../../AnalysisClasses/EventSelection/interface/DifferentHistogramsTwb.h"
-#include "../interface/MuonTree.h"
-#include "../interface/GenInfoMuonTree.h"
-#include "../interface/TRootGenEventMaker.h"
+#include "../../../AnalysisClasses/EventSelection/interface/ElectronHists.h"
+#include "../../../AnalysisClasses/EventSelection/interface/MuonHists.h"
+#include "../../../AnalysisClasses/EventSelection/interface/PVHists.h"
+#include "../../../AnalysisClasses/EventSelection/interface/JetHists.h"
+#include "../../../AnalysisClasses/EventSelection/interface/JetSelector.h"
+#include "../../../AnalysisClasses/EventSelection/interface/MuonVetoSelector.h"
+#include "../../../AnalysisClasses/EventSelection/interface/MetHists.h"
+#include "../../../AnalysisClasses/EventSelection/interface/PrimaryVertexSelector.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootMuon.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootElectron.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootJet.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootPFJet.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootMET.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootGenEvent.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootNPGenEvent.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootEvent.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootRun.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootParticle.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootMCParticle.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootVertex.h"
+#include "../../../TopBrussels/TopTreeProducer/interface/TRootHLTInfo.h"
+#include "../../../AnalysisClasses/EventSelection/interface/PracticalEvent.h"
+#include "../../../AnalysisClasses/ToyAnalysis/interface/GenSingleTopMaker.h"
+#include "../../../AnalysisClasses/PhysicsObjects/interface/SemiLepTopQuark.h"
+#include "../../../AnalysisClasses/ChiSquared/interface/DR.h"
+#include "../../../AnalysisClasses/EventSelection/interface/DifferentHistogramsTwb.h"
+#include "../../interface/MuonTree.h"
+#include "../../interface/GenInfoMuonTree.h"
+#include "../../interface/TRootGenEventMaker.h"
 
 
 #include <sstream>
@@ -133,99 +133,97 @@ void GetWeightsNoPu(MuonTree* myMuonTree, double& allW, double& puOnly, double& 
 
 int main(int argc, char** argv) {
 
-    PVHists atLeastOnGPV("DefW_PV", true);
-    JetHists Jets("DefW_Jet", 2, true);
-    JetHists BJets("DefW_BJet", 2, true);
-    JetHists nonBJets("DefW_nonBJet", 2, true);
-    JetHists FwDJet("DefW_FwD", 2, true);
+    PVHists atLeastOnGPV("DefW_PV");
+    JetHists Jets("DefW_Jet", 2);
+    JetHists BJets("DefW_BJet", 2);
+    JetHists nonBJets("DefW_nonBJet", 2);
+    JetHists FwDJet("DefW_FwD", 2);
     MuonHists GoldenFinalPUMuons("DefW_Muon", 3);
-    MetHists MetHist("DefW_Met", true);
+    MetHists MetHist("DefW_Met");
 
-    PVHists atLeastOnGPV_PuW("PuW_PV", true);
-    JetHists Jets_PuW("PuW_Jet", 2, true);
-    JetHists BJets_PuW("PuW_BJet", 2, true);
-    JetHists nonBJets_PuW("PuW_nonBJet", 2, true);
-    JetHists FwDJet_PuW("PuW_FwD", 2, true);
+    PVHists atLeastOnGPV_PuW("PuW_PV");
+    JetHists Jets_PuW("PuW_Jet", 2);
+    JetHists BJets_PuW("PuW_BJet", 2);
+    JetHists nonBJets_PuW("PuW_nonBJet", 2);
+    JetHists FwDJet_PuW("PuW_FwD", 2);
     MuonHists GoldenFinalPUMuons_PuW("PuW_Muon", 3);
-    MetHists MetHist_PuW("PuW_Met", true);
+    MetHists MetHist_PuW("PuW_Met");
 
-    PVHists atLeastOnGPV_BtagPuW("BtagPuW_PV", true);
-    JetHists Jets_BtagPuW("BtagPuW_Jet", 2, true);
-    JetHists BJets_BtagPuW("BtagPuW_BJet", 2, true);
-    JetHists nonBJets_BtagPuW("BtagPuW_nonBJet", 2, true);
-    JetHists FwDJet_BtagPuW("BtagPuW_FwD", 2, true);
+    PVHists atLeastOnGPV_BtagPuW("BtagPuW_PV");
+    JetHists Jets_BtagPuW("BtagPuW_Jet", 2);
+    JetHists BJets_BtagPuW("BtagPuW_BJet", 2);
+    JetHists nonBJets_BtagPuW("BtagPuW_nonBJet", 2);
+    JetHists FwDJet_BtagPuW("BtagPuW_FwD", 2);
     MuonHists GoldenFinalPUMuons_BtagPuW("BtagPuW_Muon", 3);
-    MetHists MetHist_BtagPuW("BtagPuW_Met", true);
+    MetHists MetHist_BtagPuW("BtagPuW_Met");
 
-    PVHists atLeastOnGPV_allW("allW_PV", true);
-    JetHists Jets_allW("allW_Jet", 2, true);
-    JetHists BJets_allW("allW_BJet", 2, true);
-    JetHists nonBJets_allW("allW_nonBJet", 2, true);
-    JetHists FwDJet_allW("allW_FwD", 2, true);
+    PVHists atLeastOnGPV_allW("allW_PV");
+    JetHists Jets_allW("allW_Jet", 2);
+    JetHists BJets_allW("allW_BJet", 2);
+    JetHists nonBJets_allW("allW_nonBJet", 2);
+    JetHists FwDJet_allW("allW_FwD", 2);
     MuonHists GoldenFinalPUMuons_allW("allW_Muon", 3);
-    MetHists MetHist_allW("allW_Met", true);
+    MetHists MetHist_allW("allW_Met");
 
-    SingleTopHistograms Default_Def("Default_Def", true);
-    SingleTopHistograms EtaCut_Def("EtaFwD_Def", true);
-    SingleTopHistograms HtCut_Def("HtCut_Def", true);
-    SingleTopHistograms AntiEtaCut_allW("antiEtaFwD_allW", true);
-    SingleTopHistograms AntiHtCut_Def("antiHtCut_Def", true);
+    SingleTopHistograms Default_Def("Default_Def");
+    SingleTopHistograms EtaCut_Def("EtaFwD_Def");
+    SingleTopHistograms HtCut_Def("HtCut_Def");
+    SingleTopHistograms AntiEtaCut_Def("antiEtaFwD_Def");
+    SingleTopHistograms AntiHtCut_Def("antiHtCut_Def");
 
-    SingleTopHistograms DefaultTrue_Def("DefaultTrue_Def", true);
-    SingleTopHistograms EtaCutTrue_Def("EtaFwDTrue_Def", true);
-    SingleTopHistograms HtCutTrue_Def("HtCutTrue_Def", true);
-    SingleTopHistograms AntiEtaCutTrue_Def("antiEtaFwDTrue_Def", true);
-    SingleTopHistograms AntiHtCutTrue_Def("antiHtCutTrue_Def", true);
+    SingleTopHistograms DefaultTrue_Def("DefaultTrue_Def");
+    SingleTopHistograms EtaCutTrue_Def("EtaFwDTrue_Def");
+    SingleTopHistograms HtCutTrue_Def("HtCutTrue_Def");
+    SingleTopHistograms AntiEtaCutTrue_Def("antiEtaFwDTrue_Def");
+    SingleTopHistograms AntiHtCutTrue_Def("antiHtCutTrue_Def");
 
-    SingleTopHistograms Default_PuW("Default_PuW", true);
-    SingleTopHistograms Default_BtagPuW("Default_BtagPuW", true);
-    SingleTopHistograms Default_allW("Default_allW", true);
+    SingleTopHistograms Default_PuW("Default_PuW");
+    SingleTopHistograms Default_BtagPuW("Default_BtagPuW");
+    SingleTopHistograms Default_allW("Default_allW");
 
-    SingleTopHistograms EtaCut_PuW("EtaFwD_PuW", true);
-    SingleTopHistograms EtaCut_BtagPuW("EtaFwD_BtagPuW", true);
-    SingleTopHistograms EtaCut_allW("EtaFwD_allW", true);
+    SingleTopHistograms EtaCut_PuW("EtaFwD_PuW");
+    SingleTopHistograms EtaCut_BtagPuW("EtaFwD_BtagPuW");
+    SingleTopHistograms EtaCut_allW("EtaFwD_allW");
 
-    SingleTopHistograms DefaultTrue_PuW("DefaultTrue_PuW", true);
-    SingleTopHistograms DefaultTrue_BtagPuW("DefaultTrue_BtagPuW", true);
-    SingleTopHistograms DefaultTrue_allW("DefaultTrue_allW", true);
+    SingleTopHistograms DefaultTrue_PuW("DefaultTrue_PuW");
+    SingleTopHistograms DefaultTrue_BtagPuW("DefaultTrue_BtagPuW");
+    SingleTopHistograms DefaultTrue_allW("DefaultTrue_allW");
 
-    SingleTopHistograms EtaCutTrue_PuW("EtaFwDTrue_PuW", true);
-    SingleTopHistograms EtaCutTrue_BtagPuW("EtaFwDTrue_BtagPuW", true);
-    SingleTopHistograms EtaCutTrue_allW("EtaFwDTrue_allW", true);
+    SingleTopHistograms EtaCutTrue_PuW("EtaFwDTrue_PuW");
+    SingleTopHistograms EtaCutTrue_BtagPuW("EtaFwDTrue_BtagPuW");
+    SingleTopHistograms EtaCutTrue_allW("EtaFwDTrue_allW");
 
-    DiLeptonHistograms DiLep_Default_Def("Default_Def", true);
-    DiLeptonHistograms DiLep_EtaCut_Def("EtaFwD_Def", true);
-    DiLeptonHistograms DiLep_HtCut_Def("HtCut_Def", true);
-    DiLeptonHistograms DiLep_AntiEtaCut_allW("antiEtaFwD_allW", true);
-    DiLeptonHistograms DiLep_AntiHtCut_Def("antiHtCut_Def", true);
+    DiLeptonHistograms DiLep_Default_Def("Default_Def");
+    DiLeptonHistograms DiLep_EtaCut_Def("EtaFwD_Def");
+    DiLeptonHistograms DiLep_HtCut_Def("HtCut_Def");
+    DiLeptonHistograms DiLep_AntiEtaCut_Def("antiEtaFwD_Def");
+    DiLeptonHistograms DiLep_AntiHtCut_Def("antiHtCut_Def");
 
-    DiLeptonHistograms DiLep_DefaultTrue_Def("DefaultTrue_Def", true);
-    DiLeptonHistograms DiLep_EtaCutTrue_Def("EtaFwDTrue_Def", true);
-    DiLeptonHistograms DiLep_HtCutTrue_Def("HtCutTrue_Def", true);
-    DiLeptonHistograms DiLep_AntiEtaCutTrue_Def("antiEtaFwDTrue_Def", true);
-    DiLeptonHistograms DiLep_AntiHtCutTrue_Def("antiHtCutTrue_Def", true);
+    DiLeptonHistograms DiLep_DefaultTrue_Def("DefaultTrue_Def");
+    DiLeptonHistograms DiLep_EtaCutTrue_Def("EtaFwDTrue_Def");
+    DiLeptonHistograms DiLep_HtCutTrue_Def("HtCutTrue_Def");
+    DiLeptonHistograms DiLep_AntiEtaCutTrue_Def("antiEtaFwDTrue_Def");
+    DiLeptonHistograms DiLep_AntiHtCutTrue_Def("antiHtCutTrue_Def");
 
-    DiLeptonHistograms DiLep_Default_PuW("Default_PuW", true);
-    DiLeptonHistograms DiLep_Default_BtagPuW("Default_BtagPuW", true);
-    DiLeptonHistograms DiLep_Default_allW("Default_allW", true);
+    DiLeptonHistograms DiLep_Default_PuW("Default_PuW");
+    DiLeptonHistograms DiLep_Default_BtagPuW("Default_BtagPuW");
+    DiLeptonHistograms DiLep_Default_allW("Default_allW");
 
-    DiLeptonHistograms DiLep_EtaCut_PuW("EtaFwD_PuW", true);
-    DiLeptonHistograms DiLep_EtaCut_BtagPuW("EtaFwD_BtagPuW", true);
-    DiLeptonHistograms DiLep_EtaCut_allW("EtaFwD_allW", true);
+    DiLeptonHistograms DiLep_EtaCut_PuW("EtaFwD_PuW");
+    DiLeptonHistograms DiLep_EtaCut_BtagPuW("EtaFwD_BtagPuW");
+    DiLeptonHistograms DiLep_EtaCut_allW("EtaFwD_allW");
 
-    DiLeptonHistograms DiLep_DefaultTrue_PuW("DefaultTrue_PuW", true);
-    DiLeptonHistograms DiLep_DefaultTrue_BtagPuW("DefaultTrue_BtagPuW", true);
-    DiLeptonHistograms DiLep_DefaultTrue_allW("DefaultTrue_allW", true);
+    DiLeptonHistograms DiLep_DefaultTrue_PuW("DefaultTrue_PuW");
+    DiLeptonHistograms DiLep_DefaultTrue_BtagPuW("DefaultTrue_BtagPuW");
+    DiLeptonHistograms DiLep_DefaultTrue_allW("DefaultTrue_allW");
 
-    DiLeptonHistograms DiLep_EtaCutTrue_PuW("EtaFwDTrue_PuW", true);
-    DiLeptonHistograms DiLep_EtaCutTrue_BtagPuW("EtaFwDTrue_BtagPuW", true);
-    DiLeptonHistograms DiLep_EtaCutTrue_allW("EtaFwDTrue_allW", true);
+    DiLeptonHistograms DiLep_EtaCutTrue_PuW("EtaFwDTrue_PuW");
+    DiLeptonHistograms DiLep_EtaCutTrue_BtagPuW("EtaFwDTrue_BtagPuW");
+    DiLeptonHistograms DiLep_EtaCutTrue_allW("EtaFwDTrue_allW");
 
 
     TH1D * HT = new TH1D("HT", " ;p_{T,jet}^{2nd}(second)", 500, 0., 500.);
     HT->Sumw2();
-    TH1D * RMS = new TH1D("RMS", " ;f_{RMS}^{jet}(non-tagged)", 1000, 0., 1.);
-    RMS->Sumw2();
     TH1D * def_finalMT = new TH1D("def_finalMT", "final-W-neutrino transverse mass", 100, 0., 200.);
     def_finalMT->Sumw2();
     def_finalMT->GetXaxis()->SetTitle("M_{T}(W,#nu)");
@@ -260,7 +258,7 @@ int main(int argc, char** argv) {
         } else if (arg_fth == "input") {
             f++;
             std::string in(*(argv + f));
-            inputFileNames.push_back(string("~/work/samples/Orso8TeV/Nov_53X/" + prefix + in + ".root"));
+            inputFileNames.push_back(string("~/work/samples/Orso8TeV/Nov_53X/AC/" + prefix + in + ".root"));
             //            inputFileNames.push_back(string("~/work/samples/Orso8TeV/Nov_53X/" + prefix + in + ".root"));
             sample = in;
             plotFileName = prefix + in + "_plots.root";
@@ -331,10 +329,16 @@ int main(int argc, char** argv) {
             myMuonTree = new GenInfoMuonTree(eventTree, f, sample + "_2J_1T_noSyst", true);
         } else {
             //            cout << "sample name does not have _: " << string(sample + "_2J_0T_noSyst") << endl;
-            if (sample.find("Comphep") != 0 && fabs(sample.find("Comphep")) < sample.size())
+            if (sample.find("Comphep") != 0 && fabs(sample.find("Comphep")) < sample.size()){
                 myMuonTree = new GenInfoMuonTree(eventTree, f, "TChannel_2J_1T_noSyst");
-            else
+            }else if (sample.find("unphys") != 0 && fabs(sample.find("unphys")) < sample.size()){
+                cout << sample <<" :++++"<<endl;
                 myMuonTree = new GenInfoMuonTree(eventTree, f, sample + "_2J_1T_noSyst");
+            }else{
+                cout<<"What?!!"<<endl;
+                myMuonTree = new GenInfoMuonTree(eventTree, f, "Data_2J_1T_noSyst");
+            }
+
         }
 #endif /*ISDATA*/
 #ifdef Wtemplate
@@ -353,9 +357,6 @@ int main(int argc, char** argv) {
             //            cout << "New event: " << eventNumber << "--------------------" << endl;
             myMuonTree->GetEntry(eventNumber);
             HT->Fill(myMuonTree->secondJetPt, 1);
-            if(!(myMuonTree->secondJetPt > 60))
-                continue;
-            RMS->Fill(myMuonTree->fJetRMS, 1);
             if (!myMuonTree->passExtraSelection())
                 continue;
             //            cout << "I passed" << endl;
@@ -493,7 +494,7 @@ int main(int argc, char** argv) {
                     EtaCut_BtagPuW.Fill(myLeptonicTop, btagpuW, genSingleTop);
                     EtaCut_allW.Fill(myLeptonicTop, lumiWeight3D, genSingleTop);
                 } else
-                    AntiEtaCut_allW.Fill(myLeptonicTop, lumiWeight3D, genSingleTop);
+                    AntiEtaCut_Def.Fill(myLeptonicTop, 1, genSingleTop);
             } else {//Dimuon, muTau, muE TtBar
                 if (myLeptonicTop.hasNeutrinoSolution()) {
                     nGoodSolution++;
@@ -533,7 +534,7 @@ int main(int argc, char** argv) {
                     DiLep_EtaCut_BtagPuW.Fill(myLeptonicTop, btagpuW, genSingleTop);
                     DiLep_EtaCut_allW.Fill(myLeptonicTop, lumiWeight3D, genSingleTop);
                 } else
-                    DiLep_AntiEtaCut_allW.Fill(myLeptonicTop, lumiWeight3D, genSingleTop);
+                    DiLep_AntiEtaCut_Def.Fill(myLeptonicTop, 1, genSingleTop);
             }
             //            cout << "After CosTheta Fill" << endl;
 
@@ -647,7 +648,7 @@ int main(int argc, char** argv) {
         EtaCut_BtagPuW.Write(fout);
         EtaCut_allW.Write(fout);
 
-        AntiEtaCut_allW.Write(fout);
+        AntiEtaCut_Def.Write(fout);
         HtCut_Def.Write(fout);
         AntiHtCut_Def.Write(fout);
         DefaultTrue_Def.Write(fout);
@@ -669,7 +670,7 @@ int main(int argc, char** argv) {
         DiLep_EtaCut_BtagPuW.Write(fout);
         DiLep_EtaCut_allW.Write(fout);
 
-        DiLep_AntiEtaCut_allW.Write(fout);
+        DiLep_AntiEtaCut_Def.Write(fout);
         DiLep_HtCut_Def.Write(fout);
         DiLep_AntiHtCut_Def.Write(fout);
         DiLep_DefaultTrue_Def.Write(fout);
@@ -681,9 +682,7 @@ int main(int argc, char** argv) {
         DiLep_AntiHtCutTrue_Def.Write(fout);
     }
     HT->Write();
-    RMS->Write();
     nVtx_cosTheta->Write();
-    
     fout->Write();
     fout->Close();
 

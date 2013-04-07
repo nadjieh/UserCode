@@ -4,8 +4,7 @@
  *
  * Created on October 12, 2012, 12:34 PM
  */
-//#define ISDATA
-//#define QCD
+#define ISDATA
 //#define Wtemplate
 #include "TDirectory.h"
 
@@ -66,9 +65,9 @@ using namespace TopTree;
 Event myEventPreparation(GenInfoMuonTree * input) {
     //    cout << "in myEventPreparation" << endl;
     TRootPFJet BJET(input->GetBJet());
-    BJET.setBtag_combinedSecondaryVertexBJetTags(input->highBTag);
+    BJET.setBtag_trackCountingHighPurBJetTags(input->highBTag);
     TRootPFJet nonBJET(input->GetFJet());
-    nonBJET.setBtag_combinedSecondaryVertexBJetTags(input->lowBTag);
+    nonBJET.setBtag_trackCountingHighPurBJetTags(input->lowBTag);
     TRootMuon MUON(input->GetLepton());
     TRootPFMET MET(input->GetMET());
     TRootVertex VTX;
@@ -86,9 +85,9 @@ Event myEventPreparation(GenInfoMuonTree * input) {
 Event myEventPreparation(MuonTree * input) {
     //    cout << "in myEventPreparation" << endl;
     TRootPFJet BJET(input->GetBJet());
-    BJET.setBtag_combinedSecondaryVertexBJetTags(input->highBTag);
+    BJET.setBtag_trackCountingHighPurBJetTags(input->highBTag);
     TRootPFJet nonBJET(input->GetFJet());
-    nonBJET.setBtag_combinedSecondaryVertexBJetTags(input->lowBTag);
+    nonBJET.setBtag_trackCountingHighPurBJetTags(input->lowBTag);
     TRootMuon MUON(input->GetLepton());
     TRootPFMET MET(input->GetMET());
     TRootVertex VTX;
@@ -138,7 +137,7 @@ int main(int argc, char** argv) {
     JetHists BJets("DefW_BJet", 2, true);
     JetHists nonBJets("DefW_nonBJet", 2, true);
     JetHists FwDJet("DefW_FwD", 2, true);
-    MuonHists GoldenFinalPUMuons("DefW_Muon", 3);
+    MuonHists GoldenFinalPUMuons("DefW_Muon", 3, true);
     MetHists MetHist("DefW_Met", true);
 
     PVHists atLeastOnGPV_PuW("PuW_PV", true);
@@ -146,7 +145,7 @@ int main(int argc, char** argv) {
     JetHists BJets_PuW("PuW_BJet", 2, true);
     JetHists nonBJets_PuW("PuW_nonBJet", 2, true);
     JetHists FwDJet_PuW("PuW_FwD", 2, true);
-    MuonHists GoldenFinalPUMuons_PuW("PuW_Muon", 3);
+    MuonHists GoldenFinalPUMuons_PuW("PuW_Muon", 3, true);
     MetHists MetHist_PuW("PuW_Met", true);
 
     PVHists atLeastOnGPV_BtagPuW("BtagPuW_PV", true);
@@ -154,7 +153,7 @@ int main(int argc, char** argv) {
     JetHists BJets_BtagPuW("BtagPuW_BJet", 2, true);
     JetHists nonBJets_BtagPuW("BtagPuW_nonBJet", 2, true);
     JetHists FwDJet_BtagPuW("BtagPuW_FwD", 2, true);
-    MuonHists GoldenFinalPUMuons_BtagPuW("BtagPuW_Muon", 3);
+    MuonHists GoldenFinalPUMuons_BtagPuW("BtagPuW_Muon", 3, true);
     MetHists MetHist_BtagPuW("BtagPuW_Met", true);
 
     PVHists atLeastOnGPV_allW("allW_PV", true);
@@ -162,70 +161,24 @@ int main(int argc, char** argv) {
     JetHists BJets_allW("allW_BJet", 2, true);
     JetHists nonBJets_allW("allW_nonBJet", 2, true);
     JetHists FwDJet_allW("allW_FwD", 2, true);
-    MuonHists GoldenFinalPUMuons_allW("allW_Muon", 3);
+    MuonHists GoldenFinalPUMuons_allW("allW_Muon", 3, true);
     MetHists MetHist_allW("allW_Met", true);
 
-    SingleTopHistograms Default_Def("Default_Def", true);
-    SingleTopHistograms EtaCut_Def("EtaFwD_Def", true);
-    SingleTopHistograms HtCut_Def("HtCut_Def", true);
-    SingleTopHistograms AntiEtaCut_allW("antiEtaFwD_allW", true);
-    SingleTopHistograms AntiHtCut_Def("antiHtCut_Def", true);
+    WtemplateHistograms RandomB("RandomB");
+    WtemplateHistograms PtOrderedB("PtOrderedB");
+    WtemplateHistograms BtagOrderedB("BtagOrderedB");
+    WtemplateHistograms RandomBTrue("RandomBTrue");
+    WtemplateHistograms PtOrderedBTrue("PtOrderedBTrue");
+    WtemplateHistograms BtagOrderedBTrue("BtagOrderedBTrue");
+    WtemplateHistograms EtaCutRandomB("EtaCutRandomB");
+    WtemplateHistograms EtaCutPtOrderedB("EtaCutPtOrderedB");
+    WtemplateHistograms EtaCutBtagOrderedB("EtaCutBtagOrderedB");
+    WtemplateHistograms EtaCutRandomBTrue("EtaCutRandomBTrue");
+    WtemplateHistograms EtaCutPtOrderedBTrue("EtaCutPtOrderedBTrue");
+    WtemplateHistograms EtaCutBtagOrderedBTrue("EtaCutBtagOrderedBTrue");
 
-    SingleTopHistograms DefaultTrue_Def("DefaultTrue_Def", true);
-    SingleTopHistograms EtaCutTrue_Def("EtaFwDTrue_Def", true);
-    SingleTopHistograms HtCutTrue_Def("HtCutTrue_Def", true);
-    SingleTopHistograms AntiEtaCutTrue_Def("antiEtaFwDTrue_Def", true);
-    SingleTopHistograms AntiHtCutTrue_Def("antiHtCutTrue_Def", true);
-
-    SingleTopHistograms Default_PuW("Default_PuW", true);
-    SingleTopHistograms Default_BtagPuW("Default_BtagPuW", true);
-    SingleTopHistograms Default_allW("Default_allW", true);
-
-    SingleTopHistograms EtaCut_PuW("EtaFwD_PuW", true);
-    SingleTopHistograms EtaCut_BtagPuW("EtaFwD_BtagPuW", true);
-    SingleTopHistograms EtaCut_allW("EtaFwD_allW", true);
-
-    SingleTopHistograms DefaultTrue_PuW("DefaultTrue_PuW", true);
-    SingleTopHistograms DefaultTrue_BtagPuW("DefaultTrue_BtagPuW", true);
-    SingleTopHistograms DefaultTrue_allW("DefaultTrue_allW", true);
-
-    SingleTopHistograms EtaCutTrue_PuW("EtaFwDTrue_PuW", true);
-    SingleTopHistograms EtaCutTrue_BtagPuW("EtaFwDTrue_BtagPuW", true);
-    SingleTopHistograms EtaCutTrue_allW("EtaFwDTrue_allW", true);
-
-    DiLeptonHistograms DiLep_Default_Def("Default_Def", true);
-    DiLeptonHistograms DiLep_EtaCut_Def("EtaFwD_Def", true);
-    DiLeptonHistograms DiLep_HtCut_Def("HtCut_Def", true);
-    DiLeptonHistograms DiLep_AntiEtaCut_allW("antiEtaFwD_allW", true);
-    DiLeptonHistograms DiLep_AntiHtCut_Def("antiHtCut_Def", true);
-
-    DiLeptonHistograms DiLep_DefaultTrue_Def("DefaultTrue_Def", true);
-    DiLeptonHistograms DiLep_EtaCutTrue_Def("EtaFwDTrue_Def", true);
-    DiLeptonHistograms DiLep_HtCutTrue_Def("HtCutTrue_Def", true);
-    DiLeptonHistograms DiLep_AntiEtaCutTrue_Def("antiEtaFwDTrue_Def", true);
-    DiLeptonHistograms DiLep_AntiHtCutTrue_Def("antiHtCutTrue_Def", true);
-
-    DiLeptonHistograms DiLep_Default_PuW("Default_PuW", true);
-    DiLeptonHistograms DiLep_Default_BtagPuW("Default_BtagPuW", true);
-    DiLeptonHistograms DiLep_Default_allW("Default_allW", true);
-
-    DiLeptonHistograms DiLep_EtaCut_PuW("EtaFwD_PuW", true);
-    DiLeptonHistograms DiLep_EtaCut_BtagPuW("EtaFwD_BtagPuW", true);
-    DiLeptonHistograms DiLep_EtaCut_allW("EtaFwD_allW", true);
-
-    DiLeptonHistograms DiLep_DefaultTrue_PuW("DefaultTrue_PuW", true);
-    DiLeptonHistograms DiLep_DefaultTrue_BtagPuW("DefaultTrue_BtagPuW", true);
-    DiLeptonHistograms DiLep_DefaultTrue_allW("DefaultTrue_allW", true);
-
-    DiLeptonHistograms DiLep_EtaCutTrue_PuW("EtaFwDTrue_PuW", true);
-    DiLeptonHistograms DiLep_EtaCutTrue_BtagPuW("EtaFwDTrue_BtagPuW", true);
-    DiLeptonHistograms DiLep_EtaCutTrue_allW("EtaFwDTrue_allW", true);
-
-
-    TH1D * HT = new TH1D("HT", " ;p_{T,jet}^{2nd}(second)", 500, 0., 500.);
+    TH1D * HT = new TH1D("HT", "H_{T};H_{T}(GeV)", 500, 0., 500.);
     HT->Sumw2();
-    TH1D * RMS = new TH1D("RMS", " ;f_{RMS}^{jet}(non-tagged)", 1000, 0., 1.);
-    RMS->Sumw2();
     TH1D * def_finalMT = new TH1D("def_finalMT", "final-W-neutrino transverse mass", 100, 0., 200.);
     def_finalMT->Sumw2();
     def_finalMT->GetXaxis()->SetTitle("M_{T}(W,#nu)");
@@ -238,19 +191,16 @@ int main(int argc, char** argv) {
     TH1D * allW_finalMT = new TH1D("allW_finalMT", "final-W-neutrino transverse mass", 100, 0., 200.);
     allW_finalMT->GetXaxis()->SetTitle("M_{T}(W,#nu)");
     allW_finalMT->Sumw2();
-    TH2D * nVtx_cosTheta = new TH2D("nVtxcosTheta", "nVtxcosTheta;N_{vtx};cos(#theta_{l}*)", 100, 0, 100, 100, -1., 1.);
-    nVtx_cosTheta->Sumw2();
+
     std::vector<std::string> inputFileNames;
     std::string plotFileName;
     TH1D * METResolutions = 0;
-    double doJES = 1;
     bool isData = false;
     int smearingSkim = 1;
     string sample = "";
     string ttDecayMode = "";
     string prefix = "";
-    int nWM = 0;
-    int nWP = 0;
+    int eventFlavor = 0;
     for (int f = 1; f < argc; f++) {
         std::string arg_fth(*(argv + f));
         if (arg_fth == "prefix") {
@@ -261,13 +211,12 @@ int main(int argc, char** argv) {
             f++;
             std::string in(*(argv + f));
             inputFileNames.push_back(string("~/work/samples/Orso8TeV/Nov_53X/" + prefix + in + ".root"));
-            //            inputFileNames.push_back(string("~/work/samples/Orso8TeV/Nov_53X/" + prefix + in + ".root"));
             sample = in;
             plotFileName = prefix + in + "_plots.root";
-        } else if (arg_fth == "JES") {
+        } else if (arg_fth == "eventFlavor") {
             f++;
             std::string in(*(argv + f));
-            doJES = atof(in.c_str());
+            eventFlavor = atof(in.c_str());
         } else if (arg_fth == "isData") {
             f++;
             std::string in(*(argv + f));
@@ -299,10 +248,10 @@ int main(int argc, char** argv) {
     double nHLTrunB = 0;
     double nMt = 0;
     double nGoodSolution = 0;
-#if defined ISDATA || defined   Wtemplate     
+#ifdef ISDATA
     MuonTree * myMuonTree = 0;
 #endif
-#if !defined  ISDATA && !defined   Wtemplate 
+#ifndef ISDATA
     GenInfoMuonTree * myMuonTree = 0;
 #endif
     TTree * eventTree = 0;
@@ -314,120 +263,79 @@ int main(int argc, char** argv) {
     for (unsigned int fNumber = 0; fNumber < inputFileNames.size(); fNumber++) {
         cout << "file number " << fNumber + 1 << ": " << inputFileNames.at(fNumber) << endl;
         TFile* f = TFile::Open(inputFileNames.at(fNumber).c_str());
-#ifdef ISDATA
-#if !defined QCD && !defined Wtemplate
+#if defined ISDATA && defined Wtemplate
+        myMuonTree = new MuonTree(eventTree, f, sample + "_2J_0T_noSyst");
+#endif /*ISDATA && Wtemplate*/
+#if defined ISDATA && !defined Wtemplate
         myMuonTree = new MuonTree(eventTree, f, sample + "_2J_1T_noSyst");
-#endif /*QCD*/
-#ifdef QCD
-        myMuonTree = new MuonTree(eventTree, f, sample + "_2J_1T_QCD_noSyst");
-#endif /*QCD*/
-#ifdef Wtemplate
-        myMuonTree = new MuonTree(eventTree, f, sample + "_2J_0T_noSyst");
-#endif /*Wtemplate*/
-#endif /*ISDATA*/
-#if !defined ISDATA && !defined Wtemplate
-        if (prefix != string("")) {
-            cout << "sample name has _" << endl;
-            myMuonTree = new GenInfoMuonTree(eventTree, f, sample + "_2J_1T_noSyst", true);
-        } else {
-            //            cout << "sample name does not have _: " << string(sample + "_2J_0T_noSyst") << endl;
-            if (sample.find("Comphep") != 0 && fabs(sample.find("Comphep")) < sample.size())
-                myMuonTree = new GenInfoMuonTree(eventTree, f, "TChannel_2J_1T_noSyst");
-            else
-                myMuonTree = new GenInfoMuonTree(eventTree, f, sample + "_2J_1T_noSyst");
-        }
-#endif /*ISDATA*/
-#ifdef Wtemplate
-        myMuonTree = new MuonTree(eventTree, f, sample + "_2J_0T_noSyst");
-        plotFileName = string("WTemp_") + plotFileName;
-#endif
+#endif /*ISDATA && !Wtemplate*/
 
-        if (string(myMuonTree->fChain->GetName()) == string("Data_2J_1T_QCD_noSyst")) {
-            plotFileName = "QCD_plots.root";
-        }
+
         if (string(myMuonTree->fChain->GetName()) == string("Data_2J_0T_noSyst")) {
-            plotFileName = "WTemplateDefFormat_plots.root";
+                    plotFileName = "WTemplate_plots.root";
         }
-        cout << "tree name: " << myMuonTree->fChain->GetName() << endl;
+        if (string(myMuonTree->fChain->GetName()) == string("WJets_2J_0T_noSyst")) {
+            switch (eventFlavor) {
+                case 0:
+                    plotFileName = "WTemplate_plots.root";
+                    break;
+                case 1:
+                    plotFileName = "Light_WTemplate_plots.root";
+                    break;
+                case 2:
+                    plotFileName = "C_WTemplate_plots.root";
+                    break;
+                case 3:
+                    plotFileName = "B_WTemplate_plots.root";
+                    break;
+            }
+        }
+        if (string(myMuonTree->fChain->GetName()) == string("WJets_2J_1T_noSyst")) {
+            switch (eventFlavor) {
+                case 0:
+                    plotFileName = "Signal_plots.root";
+                    break;
+                case 1:
+                    plotFileName = "Light_Signal_plots.root";
+                    break;
+                case 2:
+                    plotFileName = "C_Signal_plots.root";
+                    break;
+                case 3:
+                    plotFileName = "B_Signal_plots.root";
+                    break;
+            }
+        }
         for (int eventNumber = 0; eventNumber < myMuonTree->fChain->GetEntriesFast(); eventNumber++) {
             //            cout << "New event: " << eventNumber << "--------------------" << endl;
             myMuonTree->GetEntry(eventNumber);
-            HT->Fill(myMuonTree->secondJetPt, 1);
-            if(!(myMuonTree->secondJetPt > 60))
-                continue;
-            RMS->Fill(myMuonTree->fJetRMS, 1);
+            nFinal++;
+            if (eventFlavor != 0) {
+                if (eventFlavor == 1 && myMuonTree->eventFlavour != 1)
+                    continue;
+                if (eventFlavor == 2 && myMuonTree->eventFlavour != 2)
+                    continue;
+                if (eventFlavor == 3 && myMuonTree->eventFlavour != 3)
+                    continue;
+            }
             if (!myMuonTree->passExtraSelection())
                 continue;
-            //            cout << "I passed" << endl;
-            nFinal++;
-#if defined Wtemplate && defined ISDATA
-            //            if(!myMuonTree->jetsForWtemplate()){
-            //                continue;
-            //            }
-#endif /*Wtemplate*/
-            bool isLeptonicTop = false;
-            bool isHadronicTop = false;
-            std::vector<int> nonTopW;
-#if !defined ISDATA && !defined Wtemplate
-            if (myMuonTree->SampleRecognizer(sample) > 0) {
-                //                    cout << "I am a top-contained sample :-)" << endl;
-                genEvtMaker = new TRootGenEventMaker(myMuonTree, sample);
-                genSingleTop = new GenSingleTopMaker(&(genEvtMaker->output));
-                isLeptonicTop = genEvtMaker->output.tops()[0].isLeptonicMu();
-                isHadronicTop = genEvtMaker->output.tops()[0].isHadronic();
-                nonTopW = genEvtMaker->output.getNonTopWList();
-                delete genEvtMaker;
-            } else {
-                //                    cout << "I am not a top-contained sample :-(\t" << genEvtMaker << "\t" << genSingleTop << endl;
-            }
-#endif /*ISDATA*/
-
-            //            cout << "Number of tops at analysis level: " << genSingleTop->ntops << endl;
             Event myEvent_tmp = myEventPreparation(myMuonTree);
+
+
+
 
             double mt = myMuonTree->GetMTW();
             TLorentzVector fwdJet = myMuonTree->GetMostFwDJet();
             double eta = fabs(fwdJet.Eta());
             double ht = myMuonTree->GetHT();
-            if (string(myMuonTree->fChain->GetName()) == string("Data_2J_1T_QCD_noSyst")) {
-                //                cout << "QCD template" << endl;
-                DR<TLorentzVector> dr;
-                dr.SetVectors(myEvent_tmp.Dmuons[0], myEvent_tmp.BPFJets[0]);
-                if (dr.getValue() < 0.3)
-                    continue;
-                //                dr.SetVectors(myEvent_tmp.Dmuons[0], myEvent_tmp.GPFJets[1]);
-                //                if (dr.getValue() < 0.3)
-                //                    continue;
-            }
+
             double puOnlyW = 1;
             double btagpuW = 1;
             double lumiWeight3D = 1;
-            if (genSingleTop != 0) {
-                if (genSingleTop->isSemiMuSingleTop) {
-                    cout << genSingleTop->genSingleTop.MuCharge() << "\t" << myMuonTree->charge;
-                    if (isLeptonicTop) {
-                        cout << ": muonic top" << endl;
-                    } else if (isHadronicTop) {
-                        cout << ": hadronic top" << endl;
-                    } else {
-                        cout << endl;
-                    }
-                    cout << "Second W status: " << endl;
-                    for (int s = 0; s < nonTopW.size(); s++) {
-                        if (nonTopW[s] == 1)
-                            cout << "\tW decays to Electron" << endl;
-                        if (nonTopW[s] == 2)
-                            cout << "\tW decays to Muon" << endl;
-                        if (nonTopW[s] == 3)
-                            cout << "\tW decays to Tau" << endl;
-                        if (nonTopW[s] == 4)
-                            cout << "\tW decays to Hadron" << endl;
-                    }
-                }
-            }
             if (!isData) {
                 //                GetWeightsNoPu(myMuonTree, lumiWeight3D, puOnlyW, btagpuW);
-                GetWeights(myMuonTree, lumiWeight3D, puOnlyW, btagpuW);
+                //                GetWeights(myMuonTree, lumiWeight3D, puOnlyW, btagpuW);
             }
             //            if (!myMuonTree->jetsForWtemplate())
             //                continue;
@@ -442,110 +350,11 @@ int main(int argc, char** argv) {
             //                bjet = fjet;
             //                fjet = tmp;
             //            }
-            SemiLepTopQuark myLeptonicTop(myEvent_tmp.BPFJets[0], myEvent_tmp.mets[0], myEvent_tmp.Dmuons[0],
-                    myEvent_tmp.GPFJets[1], fwdJet, METResolutions);
-            myLeptonicTop.setMuCharge((int) myMuonTree->charge);
-            //            cout << "Before CosTheta Fill" << endl;
-            if (myMuonTree->charge > 0)
-                nWP++;
-            if (myMuonTree->charge < 0)
-                nWM++;
-            /*
-             * Filling CosTheta Histograms
-             */
-            if (ttDecayMode == "") {
-                if (myLeptonicTop.hasNeutrinoSolution()) {
-                    nGoodSolution++;
-                    //                    nVtx_cosTheta->Fill(myMuonTree->nGoodVertices, myLeptonicTop.cosThetaStar());
-                    DefaultTrue_Def.Fill(myLeptonicTop, 1, genSingleTop);
-                    DefaultTrue_PuW.Fill(myLeptonicTop, puOnlyW, genSingleTop);
-                    DefaultTrue_BtagPuW.Fill(myLeptonicTop, btagpuW, genSingleTop);
-                    DefaultTrue_allW.Fill(myLeptonicTop, lumiWeight3D, genSingleTop);
-
-                    if (ht >= 180)
-                        HtCutTrue_Def.Fill(myLeptonicTop, 1, genSingleTop);
-                    else
-                        AntiHtCutTrue_Def.Fill(myLeptonicTop, 1, genSingleTop);
-                    if (eta > 1.5) {
-                        EtaCutTrue_Def.Fill(myLeptonicTop, 1, genSingleTop);
-
-                        EtaCutTrue_PuW.Fill(myLeptonicTop, puOnlyW, genSingleTop);
-                        EtaCutTrue_BtagPuW.Fill(myLeptonicTop, btagpuW, genSingleTop);
-                        EtaCutTrue_allW.Fill(myLeptonicTop, lumiWeight3D, genSingleTop);
-                    } else
-                        AntiEtaCutTrue_Def.Fill(myLeptonicTop, 1, genSingleTop);
-                }
-                Default_Def.Fill(myLeptonicTop, 1, genSingleTop);
-                Default_PuW.Fill(myLeptonicTop, puOnlyW, genSingleTop);
-                Default_BtagPuW.Fill(myLeptonicTop, btagpuW, genSingleTop);
-                Default_allW.Fill(myLeptonicTop, lumiWeight3D, genSingleTop);
-                nVtx_cosTheta->Fill(myMuonTree->nGoodVertices, myLeptonicTop.cosThetaStar());
-
-
-                if (ht >= 180)
-                    HtCut_Def.Fill(myLeptonicTop, 1, genSingleTop);
-                else
-                    AntiHtCut_Def.Fill(myLeptonicTop, 1, genSingleTop);
-                if (eta > 1.5) {
-                    EtaCut_Def.Fill(myLeptonicTop, 1, genSingleTop);
-
-                    EtaCut_PuW.Fill(myLeptonicTop, puOnlyW, genSingleTop);
-                    EtaCut_BtagPuW.Fill(myLeptonicTop, btagpuW, genSingleTop);
-                    EtaCut_allW.Fill(myLeptonicTop, lumiWeight3D, genSingleTop);
-                } else
-                    AntiEtaCut_allW.Fill(myLeptonicTop, lumiWeight3D, genSingleTop);
-            } else {//Dimuon, muTau, muE TtBar
-                if (myLeptonicTop.hasNeutrinoSolution()) {
-                    nGoodSolution++;
-                    DiLep_DefaultTrue_Def.Fill(myLeptonicTop, 1, genSingleTop);
-
-                    DiLep_DefaultTrue_PuW.Fill(myLeptonicTop, puOnlyW, genSingleTop);
-                    DiLep_DefaultTrue_BtagPuW.Fill(myLeptonicTop, btagpuW, genSingleTop);
-                    DiLep_DefaultTrue_allW.Fill(myLeptonicTop, lumiWeight3D, genSingleTop);
-
-                    if (ht >= 180)
-                        DiLep_HtCutTrue_Def.Fill(myLeptonicTop, 1, genSingleTop);
-                    else
-                        DiLep_AntiHtCutTrue_Def.Fill(myLeptonicTop, 1, genSingleTop);
-                    if (eta > 1.5) {
-                        DiLep_EtaCutTrue_Def.Fill(myLeptonicTop, 1, genSingleTop);
-
-                        DiLep_EtaCutTrue_PuW.Fill(myLeptonicTop, puOnlyW, genSingleTop);
-                        DiLep_EtaCutTrue_BtagPuW.Fill(myLeptonicTop, btagpuW, genSingleTop);
-                        DiLep_EtaCutTrue_allW.Fill(myLeptonicTop, lumiWeight3D, genSingleTop);
-                    } else
-                        DiLep_AntiEtaCutTrue_Def.Fill(myLeptonicTop, 1, genSingleTop);
-                }
-                DiLep_Default_Def.Fill(myLeptonicTop, 1, genSingleTop);
-
-                DiLep_Default_PuW.Fill(myLeptonicTop, puOnlyW, genSingleTop);
-                DiLep_Default_BtagPuW.Fill(myLeptonicTop, btagpuW, genSingleTop);
-                DiLep_Default_allW.Fill(myLeptonicTop, lumiWeight3D, genSingleTop);
-
-                if (ht >= 180)
-                    DiLep_HtCut_Def.Fill(myLeptonicTop, 1, genSingleTop);
-                else
-                    DiLep_AntiHtCut_Def.Fill(myLeptonicTop, 1, genSingleTop);
-                if (eta > 1.5) {
-                    DiLep_EtaCut_Def.Fill(myLeptonicTop, 1, genSingleTop);
-
-                    DiLep_EtaCut_PuW.Fill(myLeptonicTop, puOnlyW, genSingleTop);
-                    DiLep_EtaCut_BtagPuW.Fill(myLeptonicTop, btagpuW, genSingleTop);
-                    DiLep_EtaCut_allW.Fill(myLeptonicTop, lumiWeight3D, genSingleTop);
-                } else
-                    DiLep_AntiEtaCut_allW.Fill(myLeptonicTop, lumiWeight3D, genSingleTop);
-            }
-            //            cout << "After CosTheta Fill" << endl;
-
-            if (genSingleTop != NULL) {
-                //                cout << "genSingleTop: " << genSingleTop << endl;
-                delete genSingleTop;
-            }
-
             /*
              * Filling Event Histograms
              */
-            //            cout << "Before Event Fill" << endl;
+
+            HT->Fill(ht, lumiWeight3D);
             TRootPFJet FWDJET(fwdJet);
             std::vector<TRootPFJet> sortedJetsbyEta;
             sortedJetsbyEta.push_back(FWDJET);
@@ -588,6 +397,82 @@ int main(int argc, char** argv) {
             FwDJet_allW.FillPFJets(sortedJetsbyEta, sortedJetsbyEta.size(), myEvent_tmp.BPFJets.size(), false, lumiWeight3D);
             MetHist_allW.Fill(&myEvent_tmp.mets.at(0), lumiWeight3D);
             allW_finalMT->Fill(mt, lumiWeight3D);
+
+
+            /*
+             * Filling CosTheta Histograms
+             */
+
+            SemiLepTopQuark myLeptonicTopFirst(myEvent_tmp.GPFJets[0], myEvent_tmp.mets[0], myEvent_tmp.Dmuons[0],
+                    myEvent_tmp.GPFJets[1], fwdJet, METResolutions);
+            SemiLepTopQuark myLeptonicTopSecond(myEvent_tmp.GPFJets[1], myEvent_tmp.mets[0], myEvent_tmp.Dmuons[0],
+                    myEvent_tmp.GPFJets[0], fwdJet, METResolutions);
+            TRandom myRand(tr.Integer(10000000));
+            int index = myRand.Integer(2);
+            double iso = myMuonTree->leptonDeltaCorrectedRelIso;
+            if (index == 0) {
+                RandomB.Fill(myLeptonicTopFirst, lumiWeight3D, iso);
+                if (myLeptonicTopFirst.hasNeutrinoSolution())
+                    RandomBTrue.Fill(myLeptonicTopFirst, lumiWeight3D, iso);
+            } else if (index == 1) {
+                RandomB.Fill(myLeptonicTopSecond, lumiWeight3D, iso);
+                if (myLeptonicTopSecond.hasNeutrinoSolution())
+                    RandomBTrue.Fill(myLeptonicTopSecond, lumiWeight3D, iso);
+            } else
+                cout << "BAD RANDOM NUMBER" << endl;
+
+
+            BtagOrderedB.Fill(myLeptonicTopFirst, lumiWeight3D, iso);
+            if (myLeptonicTopFirst.hasNeutrinoSolution())
+                BtagOrderedBTrue.Fill(myLeptonicTopFirst, lumiWeight3D, iso);
+
+            if (myEvent_tmp.GPFJets.at(0).Pt() > myEvent_tmp.GPFJets.at(1).Pt()) {
+                PtOrderedB.Fill(myLeptonicTopFirst, lumiWeight3D, iso);
+                if (myLeptonicTopFirst.hasNeutrinoSolution())
+                    PtOrderedBTrue.Fill(myLeptonicTopFirst, lumiWeight3D, iso);
+            } else {
+                PtOrderedB.Fill(myLeptonicTopSecond, lumiWeight3D, iso);
+                if (myLeptonicTopSecond.hasNeutrinoSolution())
+                    PtOrderedBTrue.Fill(myLeptonicTopSecond, lumiWeight3D, iso);
+            }
+
+            if (fabs(eta) <= 1.5)
+                continue;
+
+            if (index == 0) {
+                EtaCutRandomB.Fill(myLeptonicTopFirst, lumiWeight3D, iso);
+                if (myLeptonicTopFirst.hasNeutrinoSolution())
+                    EtaCutRandomBTrue.Fill(myLeptonicTopFirst, lumiWeight3D, iso);
+            } else if (index == 1) {
+                EtaCutRandomB.Fill(myLeptonicTopSecond, lumiWeight3D, iso);
+                if (myLeptonicTopSecond.hasNeutrinoSolution())
+                    EtaCutRandomBTrue.Fill(myLeptonicTopSecond, lumiWeight3D, iso);
+            } else
+                cout << "BAD RANDOM NUMBER" << endl;
+
+            EtaCutBtagOrderedB.Fill(myLeptonicTopFirst, lumiWeight3D, iso);
+            if (myLeptonicTopFirst.hasNeutrinoSolution())
+                EtaCutBtagOrderedBTrue.Fill(myLeptonicTopFirst, lumiWeight3D, iso);
+
+
+
+            if (myEvent_tmp.GPFJets.at(0).Pt() > myEvent_tmp.GPFJets.at(1).Pt()) {
+                EtaCutPtOrderedB.Fill(myLeptonicTopFirst, lumiWeight3D, iso);
+                if (myLeptonicTopFirst.hasNeutrinoSolution())
+                    EtaCutPtOrderedBTrue.Fill(myLeptonicTopFirst, lumiWeight3D, iso);
+            } else {
+                EtaCutPtOrderedB.Fill(myLeptonicTopSecond, lumiWeight3D, iso);
+                if (myLeptonicTopSecond.hasNeutrinoSolution())
+                    EtaCutPtOrderedBTrue.Fill(myLeptonicTopSecond, lumiWeight3D, iso);
+            }
+
+            if (genSingleTop != NULL) {
+                //                cout << "genSingleTop: " << genSingleTop << endl;
+                delete genSingleTop;
+            }
+
+            //            cout << "Before Event Fill" << endl;
+
             //            cout<<"End of event loop --------------------"<<endl;
         }
 
@@ -635,60 +520,25 @@ int main(int argc, char** argv) {
     FwDJet_allW.WriteAll(fout);
     MetHist_allW.WriteAll(fout);
     allW_finalMT->Write();
-    if (ttDecayMode == "") {
-        Default_Def.Write(fout);
 
-        Default_PuW.Write(fout);
-        Default_BtagPuW.Write(fout);
-        Default_allW.Write(fout);
+    RandomB.Write(fout);
+    PtOrderedB.Write(fout);
+    BtagOrderedB.Write(fout);
+    RandomBTrue.Write(fout);
+    PtOrderedBTrue.Write(fout);
+    BtagOrderedBTrue.Write(fout);
+    EtaCutRandomB.Write(fout);
+    EtaCutPtOrderedB.Write(fout);
+    EtaCutBtagOrderedB.Write(fout);
+    EtaCutRandomBTrue.Write(fout);
+    EtaCutPtOrderedBTrue.Write(fout);
+    EtaCutBtagOrderedBTrue.Write(fout);
 
-        EtaCut_Def.Write(fout);
-        EtaCut_PuW.Write(fout);
-        EtaCut_BtagPuW.Write(fout);
-        EtaCut_allW.Write(fout);
-
-        AntiEtaCut_allW.Write(fout);
-        HtCut_Def.Write(fout);
-        AntiHtCut_Def.Write(fout);
-        DefaultTrue_Def.Write(fout);
-        EtaCutTrue_Def.Write(fout);
-        DefaultTrue_allW.Write(fout);
-        EtaCutTrue_allW.Write(fout);
-        AntiEtaCutTrue_Def.Write(fout);
-        HtCutTrue_Def.Write(fout);
-        AntiHtCutTrue_Def.Write(fout);
-    } else {
-        DiLep_Default_Def.Write(fout);
-
-        DiLep_Default_PuW.Write(fout);
-        DiLep_Default_BtagPuW.Write(fout);
-        DiLep_Default_allW.Write(fout);
-
-        DiLep_EtaCut_Def.Write(fout);
-        DiLep_EtaCut_PuW.Write(fout);
-        DiLep_EtaCut_BtagPuW.Write(fout);
-        DiLep_EtaCut_allW.Write(fout);
-
-        DiLep_AntiEtaCut_allW.Write(fout);
-        DiLep_HtCut_Def.Write(fout);
-        DiLep_AntiHtCut_Def.Write(fout);
-        DiLep_DefaultTrue_Def.Write(fout);
-        DiLep_EtaCutTrue_Def.Write(fout);
-        DiLep_DefaultTrue_allW.Write(fout);
-        DiLep_EtaCutTrue_allW.Write(fout);
-        DiLep_AntiEtaCutTrue_Def.Write(fout);
-        DiLep_HtCutTrue_Def.Write(fout);
-        DiLep_AntiHtCutTrue_Def.Write(fout);
-    }
     HT->Write();
-    RMS->Write();
-    nVtx_cosTheta->Write();
-    
     fout->Write();
     fout->Close();
 
     cout << nInit << "\n" << nHLTrunB << "\n" << nMt << "\n" << nFinal << "\n" << nGoodSolution << endl;
-    cout << "nW+: " << nWP << "\tnW-: " << nWM << endl;
     return 0;
 }
 

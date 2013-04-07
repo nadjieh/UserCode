@@ -4,45 +4,45 @@
  *
  * Created on October 12, 2012, 12:34 PM
  */
-//#define ISDATA
-//#define QCD
+#define ISDATA
+#define QCD
 //#define Wtemplate
 #include "TDirectory.h"
 
-#include "../../AnalysisClasses/EventSelection/interface/ElectronSelector.h"
+#include "../../../../AnalysisClasses/EventSelection/interface/ElectronSelector.h"
 
-#include "../../AnalysisClasses/EventSelection/interface/Event.h"
+#include "../../../../AnalysisClasses/EventSelection/interface/Event.h"
 
-#include "../../AnalysisClasses/EventSelection/interface/ElectronHists.h"
-#include "../../AnalysisClasses/EventSelection/interface/MuonHists.h"
-#include "../../AnalysisClasses/EventSelection/interface/PVHists.h"
-#include "../../AnalysisClasses/EventSelection/interface/JetHists.h"
-#include "../../AnalysisClasses/EventSelection/interface/JetSelector.h"
-#include "../../AnalysisClasses/EventSelection/interface/MuonVetoSelector.h"
-#include "../../AnalysisClasses/EventSelection/interface/MetHists.h"
-#include "../../AnalysisClasses/EventSelection/interface/PrimaryVertexSelector.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootMuon.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootElectron.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootJet.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootPFJet.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootMET.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootGenEvent.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootNPGenEvent.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootEvent.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootRun.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootParticle.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootMCParticle.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootVertex.h"
-#include "../../TopBrussels/TopTreeProducer/interface/TRootHLTInfo.h"
-#include "../../AnalysisClasses/EventSelection/interface/PracticalEvent.h"
-#include "../../AnalysisClasses/ToyAnalysis/interface/GenSingleTopMaker.h"
-#include "../../AnalysisClasses/PhysicsObjects/interface/SemiLepTopQuark.h"
-#include "../../AnalysisClasses/ChiSquared/interface/DR.h"
-#include "../../AnalysisClasses/EventSelection/interface/DifferentHistogramsTwb.h"
-#include "../interface/MuonTree.h"
-#include "../interface/GenInfoMuonTree.h"
-#include "../interface/TRootGenEventMaker.h"
+#include "../../../../AnalysisClasses/EventSelection/interface/ElectronHists.h"
+#include "../../../../AnalysisClasses/EventSelection/interface/MuonHists.h"
+#include "../../../../AnalysisClasses/EventSelection/interface/PVHists.h"
+#include "../../../../AnalysisClasses/EventSelection/interface/JetHists.h"
+#include "../../../../AnalysisClasses/EventSelection/interface/JetSelector.h"
+#include "../../../../AnalysisClasses/EventSelection/interface/MuonVetoSelector.h"
+#include "../../../../AnalysisClasses/EventSelection/interface/MetHists.h"
+#include "../../../../AnalysisClasses/EventSelection/interface/PrimaryVertexSelector.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootMuon.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootElectron.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootJet.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootCaloJet.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootPFJet.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootMET.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootGenEvent.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootNPGenEvent.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootEvent.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootRun.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootParticle.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootMCParticle.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootVertex.h"
+#include "../../../../TopBrussels/TopTreeProducer/interface/TRootHLTInfo.h"
+#include "../../../../AnalysisClasses/EventSelection/interface/PracticalEvent.h"
+#include "../../../../AnalysisClasses/ToyAnalysis/interface/GenSingleTopMaker.h"
+#include "../../../../AnalysisClasses/PhysicsObjects/interface/SemiLepTopQuark.h"
+#include "../../../../AnalysisClasses/ChiSquared/interface/DR.h"
+#include "../../../../AnalysisClasses/EventSelection/interface/DifferentHistogramsTwb.h"
+#include "../../../interface/MuonTree.h"
+#include "../../../interface/GenInfoMuonTree.h"
+#include "../../../interface/TRootGenEventMaker.h"
 
 
 #include <sstream>
@@ -131,6 +131,19 @@ void GetWeightsNoPu(MuonTree* myMuonTree, double& allW, double& puOnly, double& 
     btagPu = allW;
 }
 
+bool TakeQCDEvent(MuonTree* myMuonTree, int isolation = 0) {
+    if (isolation == 1) {//central
+        return (myMuonTree->leptonDeltaCorrectedRelIso > 0.2 && myMuonTree->leptonDeltaCorrectedRelIso < 0.5);
+    } else if (isolation == 2) {//shrink
+        return (myMuonTree->leptonDeltaCorrectedRelIso > 0.2 && myMuonTree->leptonDeltaCorrectedRelIso < 0.4);
+    } else if (isolation == 3) {//enlarge
+        return (myMuonTree->leptonDeltaCorrectedRelIso > 0.2 && myMuonTree->leptonDeltaCorrectedRelIso < 0.6);
+    } else if (isolation == 4) {//shift
+        return (myMuonTree->leptonDeltaCorrectedRelIso > 0.3 && myMuonTree->leptonDeltaCorrectedRelIso < 0.6);
+    }
+    return true;
+}
+
 int main(int argc, char** argv) {
 
     PVHists atLeastOnGPV("DefW_PV", true);
@@ -138,7 +151,7 @@ int main(int argc, char** argv) {
     JetHists BJets("DefW_BJet", 2, true);
     JetHists nonBJets("DefW_nonBJet", 2, true);
     JetHists FwDJet("DefW_FwD", 2, true);
-    MuonHists GoldenFinalPUMuons("DefW_Muon", 3);
+    MuonHists GoldenFinalPUMuons("DefW_Muon", 3, true);
     MetHists MetHist("DefW_Met", true);
 
     PVHists atLeastOnGPV_PuW("PuW_PV", true);
@@ -146,7 +159,7 @@ int main(int argc, char** argv) {
     JetHists BJets_PuW("PuW_BJet", 2, true);
     JetHists nonBJets_PuW("PuW_nonBJet", 2, true);
     JetHists FwDJet_PuW("PuW_FwD", 2, true);
-    MuonHists GoldenFinalPUMuons_PuW("PuW_Muon", 3);
+    MuonHists GoldenFinalPUMuons_PuW("PuW_Muon", 3, true);
     MetHists MetHist_PuW("PuW_Met", true);
 
     PVHists atLeastOnGPV_BtagPuW("BtagPuW_PV", true);
@@ -154,7 +167,7 @@ int main(int argc, char** argv) {
     JetHists BJets_BtagPuW("BtagPuW_BJet", 2, true);
     JetHists nonBJets_BtagPuW("BtagPuW_nonBJet", 2, true);
     JetHists FwDJet_BtagPuW("BtagPuW_FwD", 2, true);
-    MuonHists GoldenFinalPUMuons_BtagPuW("BtagPuW_Muon", 3);
+    MuonHists GoldenFinalPUMuons_BtagPuW("BtagPuW_Muon", 3, true);
     MetHists MetHist_BtagPuW("BtagPuW_Met", true);
 
     PVHists atLeastOnGPV_allW("allW_PV", true);
@@ -162,13 +175,13 @@ int main(int argc, char** argv) {
     JetHists BJets_allW("allW_BJet", 2, true);
     JetHists nonBJets_allW("allW_nonBJet", 2, true);
     JetHists FwDJet_allW("allW_FwD", 2, true);
-    MuonHists GoldenFinalPUMuons_allW("allW_Muon", 3);
+    MuonHists GoldenFinalPUMuons_allW("allW_Muon", 3, true);
     MetHists MetHist_allW("allW_Met", true);
 
     SingleTopHistograms Default_Def("Default_Def", true);
     SingleTopHistograms EtaCut_Def("EtaFwD_Def", true);
     SingleTopHistograms HtCut_Def("HtCut_Def", true);
-    SingleTopHistograms AntiEtaCut_allW("antiEtaFwD_allW", true);
+    SingleTopHistograms AntiEtaCut_Def("antiEtaFwD_Def", true);
     SingleTopHistograms AntiHtCut_Def("antiHtCut_Def", true);
 
     SingleTopHistograms DefaultTrue_Def("DefaultTrue_Def", true);
@@ -196,7 +209,7 @@ int main(int argc, char** argv) {
     DiLeptonHistograms DiLep_Default_Def("Default_Def", true);
     DiLeptonHistograms DiLep_EtaCut_Def("EtaFwD_Def", true);
     DiLeptonHistograms DiLep_HtCut_Def("HtCut_Def", true);
-    DiLeptonHistograms DiLep_AntiEtaCut_allW("antiEtaFwD_allW", true);
+    DiLeptonHistograms DiLep_AntiEtaCut_Def("antiEtaFwD_Def", true);
     DiLeptonHistograms DiLep_AntiHtCut_Def("antiHtCut_Def", true);
 
     DiLeptonHistograms DiLep_DefaultTrue_Def("DefaultTrue_Def", true);
@@ -222,10 +235,8 @@ int main(int argc, char** argv) {
     DiLeptonHistograms DiLep_EtaCutTrue_allW("EtaFwDTrue_allW", true);
 
 
-    TH1D * HT = new TH1D("HT", " ;p_{T,jet}^{2nd}(second)", 500, 0., 500.);
+    TH1D * HT = new TH1D("HT", "H_{T};H_{T}(GeV)", 500, 0., 500.);
     HT->Sumw2();
-    TH1D * RMS = new TH1D("RMS", " ;f_{RMS}^{jet}(non-tagged)", 1000, 0., 1.);
-    RMS->Sumw2();
     TH1D * def_finalMT = new TH1D("def_finalMT", "final-W-neutrino transverse mass", 100, 0., 200.);
     def_finalMT->Sumw2();
     def_finalMT->GetXaxis()->SetTitle("M_{T}(W,#nu)");
@@ -251,6 +262,7 @@ int main(int argc, char** argv) {
     string prefix = "";
     int nWM = 0;
     int nWP = 0;
+    int isolation = 0;
     for (int f = 1; f < argc; f++) {
         std::string arg_fth(*(argv + f));
         if (arg_fth == "prefix") {
@@ -261,13 +273,16 @@ int main(int argc, char** argv) {
             f++;
             std::string in(*(argv + f));
             inputFileNames.push_back(string("~/work/samples/Orso8TeV/Nov_53X/" + prefix + in + ".root"));
-            //            inputFileNames.push_back(string("~/work/samples/Orso8TeV/Nov_53X/" + prefix + in + ".root"));
             sample = in;
             plotFileName = prefix + in + "_plots.root";
         } else if (arg_fth == "JES") {
             f++;
             std::string in(*(argv + f));
             doJES = atof(in.c_str());
+        } else if (arg_fth == "ISO") {
+            f++;
+            std::string in(*(argv + f));
+            isolation = atof(in.c_str());
         } else if (arg_fth == "isData") {
             f++;
             std::string in(*(argv + f));
@@ -299,10 +314,10 @@ int main(int argc, char** argv) {
     double nHLTrunB = 0;
     double nMt = 0;
     double nGoodSolution = 0;
-#if defined ISDATA || defined   Wtemplate     
+#ifdef ISDATA
     MuonTree * myMuonTree = 0;
 #endif
-#if !defined  ISDATA && !defined   Wtemplate 
+#ifndef ISDATA
     GenInfoMuonTree * myMuonTree = 0;
 #endif
     TTree * eventTree = 0;
@@ -325,41 +340,36 @@ int main(int argc, char** argv) {
         myMuonTree = new MuonTree(eventTree, f, sample + "_2J_0T_noSyst");
 #endif /*Wtemplate*/
 #endif /*ISDATA*/
-#if !defined ISDATA && !defined Wtemplate
+#ifndef ISDATA
         if (prefix != string("")) {
             cout << "sample name has _" << endl;
             myMuonTree = new GenInfoMuonTree(eventTree, f, sample + "_2J_1T_noSyst", true);
         } else {
-            //            cout << "sample name does not have _: " << string(sample + "_2J_0T_noSyst") << endl;
-            if (sample.find("Comphep") != 0 && fabs(sample.find("Comphep")) < sample.size())
-                myMuonTree = new GenInfoMuonTree(eventTree, f, "TChannel_2J_1T_noSyst");
-            else
-                myMuonTree = new GenInfoMuonTree(eventTree, f, sample + "_2J_1T_noSyst");
+            cout << "sample name does not have _" << endl;
+            myMuonTree = new GenInfoMuonTree(eventTree, f, sample + "_2J_1T_noSyst");
         }
 #endif /*ISDATA*/
-#ifdef Wtemplate
-        myMuonTree = new MuonTree(eventTree, f, sample + "_2J_0T_noSyst");
-        plotFileName = string("WTemp_") + plotFileName;
-#endif
 
         if (string(myMuonTree->fChain->GetName()) == string("Data_2J_1T_QCD_noSyst")) {
-            plotFileName = "QCD_plots.root";
+            if (isolation == 0)
+                plotFileName = "QCD_plots.root";
+            else {
+                stringstream isostr;
+                isostr<<"QCD"<<isolation<<"_plots.root"; 
+                plotFileName = isostr.str();
+            }
         }
         if (string(myMuonTree->fChain->GetName()) == string("Data_2J_0T_noSyst")) {
             plotFileName = "WTemplateDefFormat_plots.root";
         }
-        cout << "tree name: " << myMuonTree->fChain->GetName() << endl;
         for (int eventNumber = 0; eventNumber < myMuonTree->fChain->GetEntriesFast(); eventNumber++) {
             //            cout << "New event: " << eventNumber << "--------------------" << endl;
             myMuonTree->GetEntry(eventNumber);
-            HT->Fill(myMuonTree->secondJetPt, 1);
-            if(!(myMuonTree->secondJetPt > 60))
+            nFinal++;
+            if (!TakeQCDEvent(myMuonTree, isolation))
                 continue;
-            RMS->Fill(myMuonTree->fJetRMS, 1);
             if (!myMuonTree->passExtraSelection())
                 continue;
-            //            cout << "I passed" << endl;
-            nFinal++;
 #if defined Wtemplate && defined ISDATA
             //            if(!myMuonTree->jetsForWtemplate()){
             //                continue;
@@ -368,7 +378,7 @@ int main(int argc, char** argv) {
             bool isLeptonicTop = false;
             bool isHadronicTop = false;
             std::vector<int> nonTopW;
-#if !defined ISDATA && !defined Wtemplate
+#ifndef ISDATA
             if (myMuonTree->SampleRecognizer(sample) > 0) {
                 //                    cout << "I am a top-contained sample :-)" << endl;
                 genEvtMaker = new TRootGenEventMaker(myMuonTree, sample);
@@ -389,6 +399,7 @@ int main(int argc, char** argv) {
             TLorentzVector fwdJet = myMuonTree->GetMostFwDJet();
             double eta = fabs(fwdJet.Eta());
             double ht = myMuonTree->GetHT();
+
             if (string(myMuonTree->fChain->GetName()) == string("Data_2J_1T_QCD_noSyst")) {
                 //                cout << "QCD template" << endl;
                 DR<TLorentzVector> dr;
@@ -402,49 +413,15 @@ int main(int argc, char** argv) {
             double puOnlyW = 1;
             double btagpuW = 1;
             double lumiWeight3D = 1;
-            if (genSingleTop != 0) {
-                if (genSingleTop->isSemiMuSingleTop) {
-                    cout << genSingleTop->genSingleTop.MuCharge() << "\t" << myMuonTree->charge;
-                    if (isLeptonicTop) {
-                        cout << ": muonic top" << endl;
-                    } else if (isHadronicTop) {
-                        cout << ": hadronic top" << endl;
-                    } else {
-                        cout << endl;
-                    }
-                    cout << "Second W status: " << endl;
-                    for (int s = 0; s < nonTopW.size(); s++) {
-                        if (nonTopW[s] == 1)
-                            cout << "\tW decays to Electron" << endl;
-                        if (nonTopW[s] == 2)
-                            cout << "\tW decays to Muon" << endl;
-                        if (nonTopW[s] == 3)
-                            cout << "\tW decays to Tau" << endl;
-                        if (nonTopW[s] == 4)
-                            cout << "\tW decays to Hadron" << endl;
-                    }
-                }
-            }
             if (!isData) {
                 //                GetWeightsNoPu(myMuonTree, lumiWeight3D, puOnlyW, btagpuW);
                 GetWeights(myMuonTree, lumiWeight3D, puOnlyW, btagpuW);
             }
-            //            if (!myMuonTree->jetsForWtemplate())
-            //                continue;
-            //            double rnd = tr.Uniform(0., 1.);
-            //            if (rnd < 0.5) {
-            //                TLorentzVector tmp = bjet;
-            //                bjet = fjet;
-            //                fjet = tmp;
-            //            }
-            //            TLorentzVector tmp = bjet;
-            //            if (bjet.Pt() < fjet.Pt()) {
-            //                bjet = fjet;
-            //                fjet = tmp;
-            //            }
+
             SemiLepTopQuark myLeptonicTop(myEvent_tmp.BPFJets[0], myEvent_tmp.mets[0], myEvent_tmp.Dmuons[0],
                     myEvent_tmp.GPFJets[1], fwdJet, METResolutions);
             myLeptonicTop.setMuCharge((int) myMuonTree->charge);
+            HT->Fill(ht, lumiWeight3D);
             //            cout << "Before CosTheta Fill" << endl;
             if (myMuonTree->charge > 0)
                 nWP++;
@@ -456,7 +433,7 @@ int main(int argc, char** argv) {
             if (ttDecayMode == "") {
                 if (myLeptonicTop.hasNeutrinoSolution()) {
                     nGoodSolution++;
-                    //                    nVtx_cosTheta->Fill(myMuonTree->nGoodVertices, myLeptonicTop.cosThetaStar());
+                    nVtx_cosTheta->Fill(myMuonTree->nGoodVertices, myLeptonicTop.cosThetaStar());
                     DefaultTrue_Def.Fill(myLeptonicTop, 1, genSingleTop);
                     DefaultTrue_PuW.Fill(myLeptonicTop, puOnlyW, genSingleTop);
                     DefaultTrue_BtagPuW.Fill(myLeptonicTop, btagpuW, genSingleTop);
@@ -479,7 +456,6 @@ int main(int argc, char** argv) {
                 Default_PuW.Fill(myLeptonicTop, puOnlyW, genSingleTop);
                 Default_BtagPuW.Fill(myLeptonicTop, btagpuW, genSingleTop);
                 Default_allW.Fill(myLeptonicTop, lumiWeight3D, genSingleTop);
-                nVtx_cosTheta->Fill(myMuonTree->nGoodVertices, myLeptonicTop.cosThetaStar());
 
 
                 if (ht >= 180)
@@ -493,7 +469,7 @@ int main(int argc, char** argv) {
                     EtaCut_BtagPuW.Fill(myLeptonicTop, btagpuW, genSingleTop);
                     EtaCut_allW.Fill(myLeptonicTop, lumiWeight3D, genSingleTop);
                 } else
-                    AntiEtaCut_allW.Fill(myLeptonicTop, lumiWeight3D, genSingleTop);
+                    AntiEtaCut_Def.Fill(myLeptonicTop, 1, genSingleTop);
             } else {//Dimuon, muTau, muE TtBar
                 if (myLeptonicTop.hasNeutrinoSolution()) {
                     nGoodSolution++;
@@ -533,7 +509,7 @@ int main(int argc, char** argv) {
                     DiLep_EtaCut_BtagPuW.Fill(myLeptonicTop, btagpuW, genSingleTop);
                     DiLep_EtaCut_allW.Fill(myLeptonicTop, lumiWeight3D, genSingleTop);
                 } else
-                    DiLep_AntiEtaCut_allW.Fill(myLeptonicTop, lumiWeight3D, genSingleTop);
+                    DiLep_AntiEtaCut_Def.Fill(myLeptonicTop, 1, genSingleTop);
             }
             //            cout << "After CosTheta Fill" << endl;
 
@@ -647,7 +623,7 @@ int main(int argc, char** argv) {
         EtaCut_BtagPuW.Write(fout);
         EtaCut_allW.Write(fout);
 
-        AntiEtaCut_allW.Write(fout);
+        AntiEtaCut_Def.Write(fout);
         HtCut_Def.Write(fout);
         AntiHtCut_Def.Write(fout);
         DefaultTrue_Def.Write(fout);
@@ -669,7 +645,7 @@ int main(int argc, char** argv) {
         DiLep_EtaCut_BtagPuW.Write(fout);
         DiLep_EtaCut_allW.Write(fout);
 
-        DiLep_AntiEtaCut_allW.Write(fout);
+        DiLep_AntiEtaCut_Def.Write(fout);
         DiLep_HtCut_Def.Write(fout);
         DiLep_AntiHtCut_Def.Write(fout);
         DiLep_DefaultTrue_Def.Write(fout);
@@ -681,9 +657,7 @@ int main(int argc, char** argv) {
         DiLep_AntiHtCutTrue_Def.Write(fout);
     }
     HT->Write();
-    RMS->Write();
     nVtx_cosTheta->Write();
-    
     fout->Write();
     fout->Close();
 

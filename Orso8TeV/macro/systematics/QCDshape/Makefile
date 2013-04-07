@@ -30,32 +30,19 @@ HEADERS 	+= $(TOYINCLUDES)
 HEADERS 	+= $(MYHEADERS)
 
 
-all:  MC clean
-
-data:  DATA clean
-
-qcd:  QCD clean
-
-dw: DEFW clean
+all:  qcd clean
 
 gen: GEN clean
 
 w: W clean
 	
-w2: W2 clean	
-
 comb: Comb clean
 
-MC:
+qcd:
 	@echo "Compiling the SelectAndSave .... \n"
-	$(CXX) OrsoHistogramCreator.C -c -o OrsoHistogramCreator.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS) -g
+	$(CXX) QCDOrsoHistogramCreator.C -c -o QCDOrsoHistogramCreator.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS) -g
 	@echo "Linking ...... \n"
-	g++ OrsoHistogramCreator.o -o OrsoHistogramCreator $(ROOTGLIBS) $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
-W2:
-	@echo "Compiling the SelectAndSave .... \n"
-	$(CXX) OrsoHistogramCreator.C -c -o OrsoHistogramCreator.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS) -g
-	@echo "Linking ...... \n"
-	g++ OrsoHistogramCreator.o -o WTemplatePlots $(ROOTGLIBS) $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
+	g++ QCDOrsoHistogramCreator.o -o QCDOrsoHistogramCreator $(ROOTGLIBS) $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
 GEN:
 	@echo "Compiling the GenInfoStudies .... \n"
 	$(CXX) GenInfoStudies.C -c -o GenInfoStudies.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS) -g
@@ -73,25 +60,6 @@ Comb:
 	$(CXX) OrsoHistogramCreator_bkp.C -c -o OrsoHistogramCreator_bkp.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS) -g
 	@echo "Linking ...... \n"
 	g++ OrsoHistogramCreator_bkp.o -o CombinationStudy $(ROOTGLIBS) $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
-
-DATA:
-	@echo "Compiling the SelectAndSave .... \n"
-	$(CXX) OrsoHistogramCreator.C -c -o OrsoHistogramCreator.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS) -g
-	@echo "Linking ...... \n"
-	g++ OrsoHistogramCreator.o -o DataOrsoHistogramCreator $(ROOTGLIBS) $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
-
-
-QCD:
-	@echo "Compiling the SelectAndSave .... \n"
-	$(CXX) OrsoHistogramCreator.C -c -o OrsoHistogramCreator.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS) -g
-	@echo "Linking ...... \n"
-	g++ OrsoHistogramCreator.o -o QCDOrsoHistogramCreator $(ROOTGLIBS) $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
-
-DEFW:
-	@echo "Compiling the SelectAndSave .... \n"
-	$(CXX) OrsoHistogramCreator.C -c -o OrsoHistogramCreator.o -O0 $(ROOTCFLAGS) -fPIC $(HEADERS) -g
-	@echo "Linking ...... \n"
-	g++ OrsoHistogramCreator.o -o DefWOrsoHistogramCreator $(ROOTGLIBS) $(LIBS) -g -fPIC -O0 -I/opt/root/include -m64 -pthread $(HEADERS)
 
 clean:
 	@echo "Cleaning..."

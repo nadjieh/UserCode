@@ -13,6 +13,8 @@
 #include <TFile.h>
 #include <TString.h>
 #include <TLorentzVector.h>
+#include <TMath.h>
+
 // Header file for the classes stored in the TTree if any.
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
@@ -520,6 +522,7 @@ public:
         fChain->SetBranchAddress("PDFWeight_Alternate_Set_2", &PDFWeight_Alternate_Set_2, &b_PDFWeight_Alternate_Set_2);
         Notify();
     }
+
     virtual void Loop() {
         if (fChain == 0) return;
 
@@ -533,54 +536,91 @@ public:
             nbytes += nb;
         }
     }
-	bool passExtraSelection(){
-		bool passed = true;
-		passed = (passed && (this->GetMTW() > 50));
-		/*passed = (passed && (this->secondJetPt > 60));
-		passed = (passed && (this->fJetRMS < 0.025));*/
-		
-		return passed;
-	}
-	TLorentzVector GetBJet(){
-		TLorentzVector ret(-1,-1,-1,-1);
-		ret.SetPtEtaPhiE(this->bJetPt, this->bJetEta, this->bJetPhi, this->bJetE);
-		return ret;
-	}
-	TLorentzVector GetFJet(){
-		TLorentzVector ret(-1,-1,-1,-1);
-		ret.SetPtEtaPhiE(this->fJetPt, this->fJetEta, this->fJetPhi, this->fJetE);
-		return ret;
-	}
-	TLorentzVector GetMET(){
-		TLorentzVector ret(-1,-1,-1,-1);
-		ret.SetPtEtaPhiE(this->metPt, 0, this->metPhi, this->metPt);
-		return ret;
-	}
-	TLorentzVector GetLepton(){
-		TLorentzVector ret(-1,-1,-1,-1);
-		ret.SetPtEtaPhiE(this->leptonPt, this->leptonEta, this->leptonPhi, this->leptonPt);
-		return ret;
-	}
-	double GetMTW(){
-		double mt = 0;
-		TLorentzVector met = this->GetMET();
-		TLorentzVector muon = this->GetLepton();
+
+    bool passExtraSelection() {
+        double secJetPt = this->fJetPt;
+        if(secJetPt > this->bJetPt){
+            secJetPt = this->bJetPt;
+        }
+        bool passed = true;
+        passed = (passed && (this->GetMTW() > 50));
+//        passed = (passed && (this->secondJetPt > 60));
+        passed = (passed && (secJetPt > 60));
+        passed = (passed && (this->fJetRMS < 0.025));
+
+        return passed;
+    }
+
+    bool jetsForWtemplate() {
+        bool ret = (fabs(fJetEta) < 2.5 && fabs(bJetEta) < 2.5);
+        ret = (ret && (highBTag < 3.41 && lowBTag < 3.41));
+        ret = (ret && (highBTag > -99 && lowBTag > -99));
+        return ret;
+    }
+
+    TLorentzVector GetBJet() {
+        TLorentzVector ret(-1, -1, -1, -1);
+        ret.SetPtEtaPhiE(this->bJetPt, this->bJetEta, this->bJetPhi, this->bJetE);
+        return ret;
+    }
+
+    TLorentzVector GetFJet() {
+        TLorentzVector ret(-1, -1, -1, -1);
+        ret.SetPtEtaPhiE(this->fJetPt, this->fJetEta, this->fJetPhi, this->fJetE);
+        return ret;
+    }
+
+    TLorentzVector GetMET() {
+        TLorentzVector ret(-1, -1, -1, -1);
+        ret.SetPtEtaPhiE(this->metPt, 0, this->metPhi, this->metPt);
+        return ret;
+    }
+
+    /*
+     *	inline void TLorentzVector::SetPtEtaPhiE(Double_t pt, Double_t eta, Double_t phi, Double_t e) {
+     *		pt = TMath::Abs(pt);
+     *		SetXYZT(pt*TMath::Cos(phi), pt*TMath::Sin(phi), pt*sinh(eta) ,e);
+     *	}
+     *  E = pt*cosh(eta)
+     */
+
+    TLorentzVector GetLepton() {
+        TLorentzVector ret(-1, -1, -1, -1);
+        ret.SetXYZT(this->leptonPt * TMath::Cos(this->leptonPhi),
+                this->leptonPt * TMath::Sin(this->leptonPhi),
+                this->leptonPt * sinh(this->leptonEta),
+                this->leptonPt * cosh(this->leptonEta));
+        return ret;
+    }
+
+    double GetMTW() {
+        double mt = 0;
+        TLorentzVector met = this->GetMET();
+        TLorentzVector muon = this->GetLepton();
         double metT = sqrt((met.Px() * met.Px())+(met.Py() * met.Py()));
         double muT = sqrt((muon.Px() * muon.Px())+(muon.Py() * muon.Py()));
         mt = sqrt(pow(muT + metT, 2) - pow(met.Px() + muon.Px(), 2) - pow(met.Py() + muon.Py(), 2));
-		return mt;
-	}
-	TLorentzVector GetMostFwDJet(){
-		if(fabs(this->bJetEta) > fabs(this->fJetEta))
-			return this->GetBJet();
-		return this->GetFJet();
-	}
-	double GetHT(){
-		return (this->bJetPt + this->fJetPt + this->leptonPt + this->metPt);
-	}
-    double GetTotalWeightNoPU(){
-		return (this->weight*this->bWeight*(this->leptonEff*699+this->leptonEffB*4342));
-	}
+        return mt;
+    }
+
+    TLorentzVector GetMostFwDJet() {
+        if (fabs(this->bJetEta) > fabs(this->fJetEta))
+            return this->GetBJet();
+        return this->GetFJet();
+    }
+
+    inline double GetHT() {
+        return (this->bJetPt + this->fJetPt + this->leptonPt + this->metPt);
+    }
+
+    inline double GetTotalWeightNoPU() {
+        //		return (this->weight*this->bWeight*(this->leptonEff*699+this->leptonEffB*4342));
+        return (this->weight * this->bWeight * (this->leptonEff * 890 + this->leptonEffB * 4428));
+    }
+
+    inline double GetTotalWeight() {
+        return (this->GetTotalWeightNoPU() * this->PUWeight);
+    }
 };
 #endif
 

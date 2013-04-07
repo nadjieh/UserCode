@@ -1,0 +1,36 @@
+{	
+	TH1D* F0 = new TH1D("F0_Odd","F0 Odd", 2000, 0.69,0.71);
+	TH1D* FNeg = new TH1D("FNeg_Odd","FNeg Odd", 2000, 0.29,0.31);
+	F0->Fill(0.707682);	FNeg->Fill(0.299163);
+	F0->Fill(0.707377);	FNeg->Fill(0.299427);
+	F0->Fill(0.706968);	FNeg->Fill(0.299744);
+	F0->Fill(0.707832);	FNeg->Fill(0.299382);
+	F0->Fill(0.707122);	FNeg->Fill(0.299649);
+	F0->Fill(0.70758);	FNeg->Fill(0.299153);
+	F0->Fill(0.708462);	FNeg->Fill(0.298469);
+	F0->Fill(0.707546);	FNeg->Fill(0.299102);
+	F0->Fill(0.708076);	FNeg->Fill(0.29862);
+	F0->Fill(0.706382);	FNeg->Fill(0.300176);
+	F0->Fill(0.706814);	FNeg->Fill(0.299727);
+	F0->Fill(0.704403);	FNeg->Fill(0.302358);
+	F0->Fill(0.70755);	FNeg->Fill(0.299175);
+	F0->Fill(0.707059);	FNeg->Fill(0.299683);
+	F0->Fill(0.70759);	FNeg->Fill(0.299265);
+	F0->Fill(0.706876);	FNeg->Fill(0.299682);
+	F0->Fill(0.707089);	FNeg->Fill(0.300227);
+	F0->Fill(0.707918);	FNeg->Fill(0.298918);
+	F0->Fill(0.707355);	FNeg->Fill(0.299416);
+	F0->Fill(0.70739);	FNeg->Fill(0.299266);
+	F0->Fill(0.708107);	FNeg->Fill(0.298739);
+	F0->Fill(0.707516);	FNeg->Fill(0.299323);
+	F0->Fill(0.707318);	FNeg->Fill(0.299363);
+	F0->Fill(0.707291);	FNeg->Fill(0.299376);
+	F0->Fill(0.707405);	FNeg->Fill(0.299349);
+	F0->Fill(0.707141);	FNeg->Fill(0.299692);
+	TFile* f = new TFile("PDFOdd.root","recreate");
+	f->cd();
+	F0->Write();
+	FNeg->Write();
+	f->Write();
+	f->Close();
+}
