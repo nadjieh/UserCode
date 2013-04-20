@@ -1,6 +1,0 @@
-#include "../interface/EtaOnPtWeightJetEffHandler.h"
-#include "../interface/PtWeightJetEffHandler.h"
-#include "../interface/TwoDWeightJetEffHandler.h"
-#include "../interface/ChiSquaredAnalysisHandler.h"
-#include "../interface/TopEvent.h"
-#include "../interface/LightStudyAnalysisHandler.h"
