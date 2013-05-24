@@ -14,32 +14,14 @@ Supported cross triggers:
 How to use?
 
 	- Befor starting:
-		- copy the dataset folder ("Nov2011AOD" here) to your current directory
+		- Copy the dataset folder ("Nov2011AOD" here) to your current directory
+		- Change the "GetInfoDirectory" method in the main classes approporiately if you DO NOT run the code in macro directory.
 	- Assumptions:
 		- We are in a loop over MC events and we want to extract the weight for ONE event.
 		- We take *IsoMu17_CerntralJet30_BTagIP* as an example.
-		- We want to analyze 2Jet1Tag region
+		- We want to analyze "all" category which is inclusive in N Jets and M B's
 
-		- Lepton part:
-			LeptonTriggerComponent myleptonpart("IsoMu17", "pt", "Nov2011AOD");
-		- Hadron Part:
-			HadronTriggerComponent myhadronpart("CerntralJet30_BTagIP", "Nov2011AOD");
-			- We now want to loop over jets, assuming we can read the jet flavor:
-				double dataMCSF = 1;
-				JetInfo myJetInfoMC;
-				JetInfo myJetInfoData;
-				myJetInfoMC.category = myhadronpart.GetRegion(2,1); // 2J1T region
-				for(int i = 0; i < selectedJets.size(); i++ ){
-					myJetInfoMC.type = myhadronpart.GetMCJetFlavor(selectedJets[i].flavor);
-					pair<double, double> btagRange = myhadronpart.GetBTagInterval(selectedJets[i].btagIP);
-					myJetInfoMC.btagLow = btagRange.first;
-					myJetInfoMC.btagLow = btagRange.second;
-					myJetInfoMC.jetPt = selectedJets[i].pt;
-					myJetInfoData = myJetInfoMC;
-					myJetInfoData.type = "data";
-					dataMCSF *= (myhadronpart.GetGetPerJetEfficiency(myJetInfoData)/myhadronpart.GetGetPerJetEfficiency(myJetInfoMC));
-				}
-		- Total weight:
-			Weight = myleptonpart.GetLeptonTriggerSF(muon.pt) * dataMCSF;
+		- Total event weight:
+			Weight = myleptonpart.GetLeptonTriggerSF(muon.pt) * totalEff;
 		
 

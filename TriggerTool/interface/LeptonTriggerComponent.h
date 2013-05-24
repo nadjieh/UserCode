@@ -10,6 +10,7 @@
 #include "TString.h"
 #include "TH1.h"
 #include "TFile.h"
+#include <iostream>
 using namespace std;
 
 class LeptonTriggerComponent {
@@ -19,11 +20,14 @@ public:
     name(trigName), variable(var), dataset(dataRun) {
         verbosity = 0;
         TString fileName = this->GetFileName("data");
+        cout<<fileName<<endl;
         TFile * f = TFile::Open(fileName);
-        dataEff = (TH1*)f->Get(var+"_data_eff");
+        dataEff = (TH1*) f->Get(var + "_data_eff");
         fileName = this->GetFileName("mc");
+        cout<<fileName<<endl;
         f = TFile::Open(fileName);
-        mcEff = (TH1*)f->Get(var+"_mc_eff");
+        mcEff = (TH1*) f->Get(var + "_MC_eff");
+        cout<<dataEff<<"\t"<<mcEff<<endl;
     }
 
     virtual ~LeptonTriggerComponent() {
@@ -48,7 +52,7 @@ public:
      * We consider only the triggers available in both data and MC. This can change in future
      */
     TString GetInfoDirectory() {
-        return dataset + "/HLT_" + name;
+        return "../files/" + dataset + "/HLT_" + name;
     }
 
     TString GetFileName(TString Data) {
@@ -59,12 +63,14 @@ public:
         int bin = dataEff->GetXaxis()->FindBin(varValue);
         return dataEff->GetBinContent(bin);
     }
+
     double GetMCEfficiency(double varValue) {
         int bin = mcEff->GetXaxis()->FindBin(varValue);
         return mcEff->GetBinContent(bin);
     }
-    double GetLeptonTriggerSF(double varValue){
-        return (this->GetDataEfficiency(varValue)/this->GetMCEfficiency(varValue));
+
+    double GetLeptonTriggerSF(double varValue) {
+        return (this->GetDataEfficiency(varValue) / this->GetMCEfficiency(varValue));
     }
 
 private:
