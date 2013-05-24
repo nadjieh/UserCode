@@ -13,14 +13,13 @@
 //
 // Original Author:  Abideh Jafari
 //         Created:  Thu Jun 19 17:34:54 CEST 2008
-// $Id: SingleTop.cc,v 1.4 2010/03/30 21:32:19 ajafari Exp $
+// $Id: SingleTop.cc,v 1.3 2008/08/11 18:00:11 ajafari Exp $
 //
 //
 
-//
+
 // system include files
 #include <memory>
-
 #include <vector>
 
 // user include files

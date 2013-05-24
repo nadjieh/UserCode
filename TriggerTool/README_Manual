@@ -1,0 +1,27 @@
+Available datasets:
+	See files/ directory
+
+Supported triggers (currently):
+    See files/Nov2011AOD/ directory
+
+Supported cross triggers:
+	1- IsoMu17_CerntralJet30_BTagIP
+    2- IsoMu17_eta2p1_ CerntralJet30_BTagIP 
+
+	IMPORTANT NOTE: We provide the numbers for lepton and hadron part separately. It is your job to cross them properly based on the given example.
+		  			Please respect the naming convention and upper/lower case rules.
+
+How to use?
+
+	- Befor starting:
+		- Copy the dataset folder ("Nov2011AOD" here) to your current directory
+		- Change the "GetInfoDirectory" method in the main classes approporiately if you DO NOT run the code in macro directory.
+	- Assumptions:
+		- We are in a loop over MC events and we want to extract the weight for ONE event.
+		- We take *IsoMu17_CerntralJet30_BTagIP* as an example.
+		- We want to analyze "all" category which is inclusive in N Jets and M B's
+
+		- Total event weight:
+			Weight = myleptonpart.GetLeptonTriggerSF(muon.pt) * totalEff;
+		
+
